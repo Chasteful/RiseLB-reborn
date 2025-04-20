@@ -17,8 +17,7 @@ listen("key", (e: KeyEvent) => {
   } else {
     active = false;
     actived = true;
-    // 延迟清除 actived 状态，防止 class 一直留着
-    setTimeout(() => (actived = false), 200);
+         setTimeout(() => (actived = false), 200);
   }
 });
   listen("key", (e: KeyEvent) => {

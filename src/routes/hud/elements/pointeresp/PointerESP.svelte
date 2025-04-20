@@ -7,10 +7,7 @@
     listen("pointerInfo", (e: PointerInfoEvent) => {
         pointers = e.pointers;
     });    // svelte-ignore export_let_unused
-// svelte-ignore export_let_unused
-export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+
 </script>
 
 <div class="container">

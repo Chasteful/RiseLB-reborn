@@ -5,10 +5,7 @@
     import type { HUDComponentSettings, PlayerData } from "../../../integration/types";
     import { expoInOut } from "svelte/easing";
     import { elasticOut, quintOut } from "svelte/easing";
-        // svelte-ignore export_let_unused
-export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+         
     let count: number | undefined;
     let playerData: PlayerData | null = null;
 
@@ -45,15 +42,10 @@ function popOut(node: Element, { delay = 0, duration = 500 }) {
     css: (t: number) => {
       const progress = 1 - t;
             
-            // 缩放曲线：先平滑放大再平滑缩小
-            const scaleProgress = progress < 0.5 
-                ? easeOutQuad(progress * 2)       // 前半段：加速放大 (0 → 0.5)
-                : easeInQuad(1 - (progress - 0.5) * 2); // 后半段：减速缩小 (0.5 → 1)
-            
-            const scale = 1 + scaleProgress * 0.1; // 缩放范围：1.0 → 1.2 → 1.0
-            
-            // 淡出曲线：后半段开始加速淡出
-            const opacityEased = progress < 0.5 
+                         const scaleProgress = progress < 0.5 
+                ? easeOutQuad(progress * 2)                        : easeInQuad(1 - (progress - 0.5) * 2);              
+            const scale = 1 + scaleProgress * 0.1;              
+                         const opacityEased = progress < 0.5 
                 ? 1 
                 : easeInQuad(1 - (progress - 0.5) * 2);
 

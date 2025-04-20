@@ -1,10 +1,5 @@
 <script lang="ts">
     import type { HUDComponentSettings } from "../../../../integration/types";
-
-
-    // svelte-ignore export_let_unused
-    export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
   let text = "LBNG HUD";
   let pos = { x: 50, y: 50 };
   let dragging = false;

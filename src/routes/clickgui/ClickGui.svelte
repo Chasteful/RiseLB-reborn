@@ -10,7 +10,6 @@
   import { cubicOut } from "svelte/easing";
   import Search from './Search.svelte';
   import { derived } from 'svelte/store';
-  import HudLayoutEditor from "../../components/HudLayoutEditor.svelte";
   import { getComponents } from "../../integration/rest";
   let components: Component[] = [];
   import {
@@ -151,10 +150,6 @@
 
   $: showTip = !$showSearch && isHoveringTip && !tipCooldown;
 </script>
-{#if $isEditingHud}
-
-  <HudLayoutEditor {components} />
-{:else}
 
 <div class={`clickgui ${$showGrid ? 'grid' : ''}`}
      style="transform: scale({clickGuiScaleFactor * $resolutionScale}); transform-origin: top left; background-size: {$gridSize}px {$gridSize}px; position: relative; width: 1920px; height: 1080px;">
@@ -187,7 +182,8 @@
     <Panel {category} {modules} {panelIndex} />
   {/each}
 </div>
-{/if}
+
+
 <Description />
 
 <style lang="scss">

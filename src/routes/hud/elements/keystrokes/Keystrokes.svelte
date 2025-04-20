@@ -4,10 +4,7 @@
     import {getMinecraftKeybinds} from "../../../../integration/rest";
     import type {HUDComponentSettings, MinecraftKeybind} from "../../../../integration/types";
     import {listen} from "../../../../integration/ws";
-    // svelte-ignore export_let_unused
-    export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+
     let keyForward: MinecraftKeybind | undefined;
     let keyBack: MinecraftKeybind | undefined;
     let keyLeft: MinecraftKeybind | undefined;

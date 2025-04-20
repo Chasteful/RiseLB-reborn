@@ -77,31 +77,27 @@
       {#if c.settings.enabled}
         <div style={c.settings.alignment}>
           {#if c.name === "Watermark"}
-            <Watermark editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "ArrayList"}
-            <ArrayList editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "TabGui"}
-            <TabGui editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "Notifications"}
-            <Notifications editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "TargetHud"}
-            <TargetHud editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "BlockCounter"}
-            <BlockCounter editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "PointerESP"}
-            <PointerESP editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "HotBar"}
-            <HotBar editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "Scoreboard"}
-            <Scoreboard editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "Taco"}
-            <Taco editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "Keystrokes"}
-            <Keystrokes editing={$isEditingHud} settings={c.settings} />
-          {:else if c.name === "Effects"}
-            <Effects editing={$isEditingHud} settings={c.settings} />
+          <Watermark/>
+      {:else if c.name === "ArrayList"}
+          <ArrayList/>
+      {:else if c.name === "TabGui"}
+          <TabGui/>
+      {:else if c.name === "Notifications"}
+          <Notifications/>
+      {:else if c.name === "TargetHud"}
+          <TargetHud/>
+      {:else if c.name === "Hotbar"}
+          <HotBar/>
+      {:else if c.name === "Scoreboard"}
+          <Scoreboard/>
+      {:else if c.name === "Taco"}
+          <Taco/>
+      {:else if c.name === "Keystrokes"}
+          <Keystrokes/>
+      {:else if c.name === "Effects"}
+          <Effects />
           {:else if c.name === "Text"}
-            <Text editing={$isEditingHud} settings={c.settings} />
+          <p>{c.settings.text}</p>
           {:else if c.name === "Image"}
             <img alt="" src={c.settings.src} style="scale: {c.settings.scale};" />
           {/if}

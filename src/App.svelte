@@ -1,9 +1,8 @@
-
 <script lang="ts">
     import Router, {push} from "svelte-spa-router";
     import ClickGui from "./routes/clickgui/ClickGui.svelte";
     import Hud from "./routes/hud/Hud.svelte";
-    import {getVirtualScreen, getComponents } from "./integration/rest";
+    import {getVirtualScreen} from "./integration/rest";
     import {cleanupListeners, listenAlways} from "./integration/ws";
     import {onMount} from "svelte";
     import {insertPersistentData} from "./integration/persistent_storage";
@@ -16,10 +15,6 @@
     import ProxyManager from "./routes/menu/proxymanager/ProxyManager.svelte";
     import Disconnected from "./routes/menu/disconnected/Disconnected.svelte";
     import Browser from "./routes/browser/Browser.svelte";
-    import { isClickGuiOpen,} from "./routes/clickgui/clickgui_store";
-    import HudLayoutEditor from "./components/HudLayoutEditor.svelte";
-    import type { Component } from "./integration/types"
-    import { isEditingHud } from "./integration/hudEdit";
 
     const routes = {
         "/clickgui": ClickGui,
@@ -32,8 +27,7 @@
         "/singleplayer": Singleplayer,
         "/proxymanager": ProxyManager,
         "/disconnected": Disconnected,
-        "/browser": Browser,
-        "/hudlayout": HudLayoutEditor,
+        "/browser": Browser
     };
 
     const url = window.location.href;
@@ -41,17 +35,7 @@
     const isStatic = staticTag === "static";
     let showSplash = false;
 
-    let components: Component[] = [];
-    $: if ($isEditingHud) {
-  getComponents().then((result) => {
-    components = result;
-    // 确保跳转到正确的路由
-    if (window.location.hash !== "#/hudlayout") {
-      push("/hudlayout");
-    }
-  });
-}
-  // HACK: Just in case
+    // HACK: Just in case
     setTimeout(() => {
        showSplash = false;
     }, 10 * 1000);
@@ -63,57 +47,39 @@
     }
 
     onMount(async () => {
-        if ('paintWorklet' in CSS) {
-  // 类型断言
-  (CSS as any).paintWorklet.addModule('/worklets/animated-gradient-border.js');
-}
         await insertPersistentData();
 
         if (isStatic) {
             return;
         }
+
         listenAlways("socketReady", async () => {
             const virtualScreen = await getVirtualScreen();
             showSplash = virtualScreen.showingSplash;
             await changeRoute(virtualScreen.name || "none");
-        });listenAlways("virtualScreen", async (event: any) => {
-    console.log(`[Router] Virtual screen change to ${event.screenName}`);
-    const action = event.action;
+        });
 
-    switch (action) {
-        case "close":
-            isClickGuiOpen.set(false);
-            isEditingHud.set(false);
-            await changeRoute("none");
-            break;
-        case "open":
-            await changeRoute(event.screenName || "none");
-            break;
-    }
-})
-
-
-listenAlways("virtualScreen", async (event: any) => {
-    console.log(`[Router] Virtual screen change to ${event.screenName}`);
-    const action = event.action;
-
-    switch (action) {
-        case "close":
-            isClickGuiOpen.set(false);
-            isEditingHud.set(false);
-            await changeRoute("none");
-            break;
-        case "open":
-            // 添加对hudlayout的特殊处理
-            if (event.screenName === "hudlayout") {
-                isEditingHud.set(true);
-            } else {
-                isEditingHud.set(false);
+        listenAlways("splashOverlay", async (event: any) => {
+            showSplash = event.showingSplash;
+            if (!showSplash) {
+                // Dirty fix to patch lagging browser after launch.
+                window.location.replace(window.location.href.split("#").shift()!);
             }
-            await changeRoute(event.screenName || "none");
-            break;
-    }
-});
+        });
+
+        listenAlways("virtualScreen", async (event: any) => {
+            console.log(`[Router] Virtual screen change to ${event.screenName}`);
+            const action = event.action;
+
+            switch (action) {
+                case "close":
+                    await changeRoute("none");
+                    break;
+                case "open":
+                    await changeRoute(event.screenName || "none");
+                    break;
+            }
+        });
 
         const virtualScreen = await getVirtualScreen();
         showSplash = virtualScreen.showingSplash;
@@ -123,8 +89,8 @@ listenAlways("virtualScreen", async (event: any) => {
 
 <main>
     {#if showSplash}
-      <SplashScreen/>
+        <SplashScreen/>
     {:else}
-      <Router {routes}/>
+        <Router {routes}/>
     {/if}
-  </main>
+</main>

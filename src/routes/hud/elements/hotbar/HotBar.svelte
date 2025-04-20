@@ -4,10 +4,7 @@
   import { getPlayerData } from "../../../../integration/rest";
   import type { ClientPlayerDataEvent, OverlayMessageEvent } from "../../../../integration/events";
   import type { HUDComponentSettings, PlayerData, TextComponent as TTextComponent } from "../../../../integration/types";
-    // svelte-ignore export_let_unused
-    export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+
   import Status from "./Status.svelte";
   import Layer from "./Layer.svelte";
     import TextComponent from "../../../menu/common/TextComponent.svelte";
@@ -22,7 +19,7 @@ export let editing: boolean;
   let slotsElement: HTMLElement;
 
   let showItemStackName = false;
-  const timeouts = new Map<string, number>();
+  const timeouts = new Map<string | number ,NodeJS.Timeout>();
   let experienceChange:{ from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
  let airChange: { from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
   let foodChange:{ from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
@@ -32,7 +29,7 @@ export let editing: boolean;
   let armorChange: { from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
   let maxAbsorption = 0;
 
-  function resetTimeout(type: 'itemName' | 'overlay') {
+  function resetTimeout(type: 'itemName' | 'overlay',) {
     clearTimeout(timeouts.get(type));
     timeouts.set(type, setTimeout(() => {
       if (type === 'itemName') showItemStackName = false;
@@ -81,8 +78,7 @@ export let editing: boolean;
       };
     }
     
-    // 更新氧气值的过渡
-    if (newData.air < prev.air) {
+         if (newData.air < prev.air) {
       airChange = {
         from: prev.air,
         to: newData.air,
@@ -92,8 +88,7 @@ export let editing: boolean;
       };
     }
 
-    // 更新饱食度的过渡
-    if (newData.food < prev.food) {
+         if (newData.food < prev.food) {
       foodChange = {
         from: prev.food,
         to: newData.food,
@@ -298,8 +293,9 @@ export let editing: boolean;
 
 <style lang="scss">
   @import "../../../../colors.scss";
+  .hotbar {
 
-  .hotbar {}
+}
 
   .pair {
     display: grid;

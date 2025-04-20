@@ -9,10 +9,7 @@
     import {fly} from "svelte/transition";
     import Module from "./Module.svelte";
     import type {KeyEvent, ModuleToggleEvent} from "../../../../integration/events";
-    // svelte-ignore export_let_unused
-    export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+
     let modules: TModule[] = [];
     let groupedModules: GroupedModules = {};
     let categories: string[] = [];

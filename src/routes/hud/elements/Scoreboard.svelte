@@ -3,10 +3,7 @@
     import type {HUDComponentSettings, PlayerData, Scoreboard} from "../../../integration/types";
     import TextComponent from "../../menu/common/TextComponent.svelte";
     import type {ClientPlayerDataEvent} from "../../../integration/events";
-    // svelte-ignore export_let_unused
-    export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+
     let scoreboard: Scoreboard | null = null;
 
     listen("clientPlayerData", (e: ClientPlayerDataEvent) => {

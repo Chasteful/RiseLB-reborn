@@ -5,10 +5,7 @@
     import { elasticOut, quintOut } from "svelte/easing";
     import { onMount, onDestroy } from "svelte";
     import ArmorStatus from "./ArmorStatus.svelte";
-    // svelte-ignore export_let_unused
-    export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+
     let displayHealth = 0;
     let animationFrameId: number | null = null;
     let target: PlayerData | null = null;
@@ -219,19 +216,16 @@ onDestroy(() => {
     visible = true;
 
     if (newTarget) {
-        // 1. 处理攻击动画 (不受伤害也触发)
-        if (now - lastAttackTime >= ATTACK_COOLDOWN) {
+                 if (now - lastAttackTime >= ATTACK_COOLDOWN) {
             attacked = true;
-            setTimeout(() => attacked = false, 400);
+            setTimeout(() => attacked = false, 450);
             lastAttackTime = now;
         }
 
-        // 2. 处理受伤效果 (仅在掉血时触发)
-        if (lastHealth !== null && newTarget.actualHealth < lastHealth) {
+                 if (lastHealth !== null && newTarget.actualHealth < lastHealth) {
             simulatedHurtTime = Math.max(simulatedHurtTime, 10);
             
-            // 强制重启hurt动画
-            const avatar = document.querySelector('.avatar') as HTMLElement | null;
+                         const avatar = document.querySelector('.avatar') as HTMLElement | null;
             if (avatar) {
                 avatar.classList.remove('hurt');
                 void avatar.offsetWidth;

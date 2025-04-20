@@ -4,10 +4,7 @@
     import { onMount } from "svelte";
     import { listen } from "../../../integration/ws";
     import {getModules} from "../../../integration/rest";
-    // svelte-ignore export_let_unused
-export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+
     async function canShowUsername() {
         const modules = await getModules();
         return modules.some(module => module.name === "NameProtect" && !module.enabled)

@@ -9,10 +9,7 @@
     import { convertToSpacedString, spaceSeperatedNames } from "../../../theme/theme_config";
     import { getPrefixAsync } from "../../../theme/arraylist";
     import { expoInOut } from "svelte/easing"; 
-    // svelte-ignore export_let_unused
-    export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-    export let editing: boolean;
+
     let enabledModules: (Module & { prefix: string; formattedName: string; width: number })[] = [];
 
     let prefixs = new Map(); 
@@ -39,7 +36,7 @@
         }));
 
   
-enabledModules = modulesWithWidths.sort((a, b) => b.width - a.width);
+    enabledModules = modulesWithWidths.sort((a, b) => b.width - a.width);
     
         await tick();  
     }
@@ -59,8 +56,7 @@ enabledModules = modulesWithWidths.sort((a, b) => b.width - a.width);
         await updateEnabledModules();
     });
 
-    // 监听刷新事件
-    listen("refreshArrayList", async () => {
+         listen("refreshArrayList", async () => {
         await updateEnabledModules();
     });
 </script>
@@ -97,9 +93,7 @@ enabledModules = modulesWithWidths.sort((a, b) => b.width - a.width);
         position: relative;
         display: flex;
   align-items: center;
-  padding-right: 24px; // 给右边留出 side-bar 空间
-  background-color: rgba(0, 0, 0, 0.2); // 可选
-  border-radius: 3px;
+  padding-right: 24px;    background-color: rgba(0, 0, 0, 0.2);    border-radius: 3px;
         box-shadow: 
   -10px 0px 20px rgba(0, 0, 0, 0.15),
    10px 0px 20px rgba(0, 0, 0, 0.15); 
@@ -149,12 +143,10 @@ enabledModules = modulesWithWidths.sort((a, b) => b.width - a.width);
     }
     .side-bar {
         position: absolute;
-  right: -3px; // 空隙3px
-  top: 50%;
+  right: -3px;    top: 50%;
   transform: translateY(-50%);
   width: 4px;
-  height: calc(100% - 6px); // 比字体高2px
-  background-color: currentColor;
+  height: calc(100% - 6px);    background-color: currentColor;
   border-radius: 2px;
   box-shadow: 0 0 5px currentColor;
   pointer-events: none;

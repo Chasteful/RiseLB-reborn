@@ -4,10 +4,7 @@
   import type { HUDComponentSettings, StatusEffect } from "../../../integration/types";
   import { fly } from "svelte/transition";
   import { expoOut } from "svelte/easing";
-    // svelte-ignore export_let_unused
-    export let settings: HUDComponentSettings;
-    // svelte-ignore export_let_unused
-export let editing: boolean;
+
   let effects: StatusEffect[] = [];
 
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {

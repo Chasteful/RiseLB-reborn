@@ -11,27 +11,22 @@
   let mouseX = 0;
   let mouseY = 0;
   
-  // 动画控制
-  const opacity = tweened(0, { duration: 200, easing: quintOut });
+     const opacity = tweened(0, { duration: 200, easing: quintOut });
   const scale = tweened(0.9, { duration: 200, easing: quintOut });
   const slide = tweened(-10, { duration: 200, easing: quintOut });
 
   description.subscribe((v) => {
     if (v) {
-      // 显示动画
-      data = v;
+             data = v;
       opacity.set(1);
       scale.set(1);
       slide.set(0);
       startRevealText(v.description);
-    } else if (data) { // 只在有数据时才执行消失动画
-      // 隐藏动画
-      opacity.set(0);
+    } else if (data) {               opacity.set(0);
       scale.set(0.9);
       slide.set(-10);
       startHideText().then(() => {
-        data = null; // 动画完成后再清空数据
-      });
+        data = null;        });
     }
   });
 
