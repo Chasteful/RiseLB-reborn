@@ -156,7 +156,7 @@
     border-radius: 12px;
     padding: 16px 8px;
     width: min(90%, 500px);
-    max-height: 70vh;
+    max-height: 500px;
     overflow-y: auto;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba($text, 0.1);

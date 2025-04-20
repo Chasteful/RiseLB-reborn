@@ -23,13 +23,88 @@
   let forcedShow = false;
   let autoFocus: boolean = true;
   let clickOutsideCount = 0;
-  let showHistory = false; // 新增：控制历史记录显示
-  function clearAllHistory() {
+  let placeholder = ""; 
+  let showHistory = false;   function clearAllHistory() {
     searchHistory.set([]);
   }
+  let errorMessage = "";
+  function handleFocus() {
+  placeholder = "Search (A-Z only)";
+}
+const options = [
+  { text: "Ciallo~(∠・ω< )⌒★ 输入字母开始搜索喵~", weight: 2 },
 
-  // 新增：删除单个历史记录项
-  function removeHistoryItem(index: number) {
+{
+  text: "ねえねえ、今日一緒に図書館で勉強しない？", weight: 2
+},
+{
+  text: "ちょっと疲れてるみたいだけど、休まない？", weight: 1
+},
+  { text: "呐呐~先輩と一緒に検索しましょうか？♡", weight: 2 },
+  { text: "お兄ちゃん、何を探しているの？", weight: 2 },
+  { text: "ククク...この堕天使に検索させてみる？", weight: 1 },
+  { text: "あの...一緒に調べ物しませんか？", weight: 2 },
+  { text: "んもぉ~早く教えてよ！", weight: 1 },
+  { text: "検索履歴は...見ませんからね！", weight: 1 },
+  { text: "これが...運命の検索キーワード？", weight: 1 },
+  { text: "も、もうっ！入力しなさいよ！", weight: 1 },
+  { text: "ご主人様、今日はどんなお探し物ですか？", weight: 2 },
+  { text: "検索すれば...私との絆も深まりますか？", weight: 1 },
+  { text: "ふふ...私だけの検索サジェストですよ？", weight: 1 },
+  { text: "入力待ちの時間も...楽しいですね", weight: 1 },
+  { text: "バ、バカ！早く入力しなさいよ！", weight: 2 },  
+  { text: "別にあなたのためにサジェストしてるわけじゃないんだから！", weight: 1 },
+  { text: "んもー！遅いんだから！", weight: 2 },
+  { text: "検索ぐらい自分でしなさいよね！", weight: 1 },
+  { text: "ふん、これ以上待たせたら承知しないわ！", weight: 2 },
+  { text: "お兄ちゃん、何を探してるの？", weight: 2 },    
+  { text: "一緒に調べようね、えへへ～", weight: 2 },
+  { text: "わ、私がお手伝いしてあげる！", weight: 1 },
+  { text: "これでいいかな？お兄ちゃんのためなら…", weight: 1 },
+  { text: "もっと近くで教えてあげようか？", weight: 2 },
+  { text: "ずっと…ずっと検索してていいよ…？", weight: 1 },  
+  { text: "他の子と検索してないよね…？", weight: 2 },
+  { text: "この検索履歴…全部覚えておくから…", weight: 1 },
+  { text: "消しちゃダメ…全部私が見てるから…", weight: 2 },
+  { text: "間違えたら…どうなるかわかってる？", weight: 1 },
+  { text: "迷える子羊よ、何を求めますか…？", weight: 2 },  
+  { text: "ククク…悪魔のサジェストを授けてやろう", weight: 1 },
+  { text: "神に祈るようにキーワードを入力しなさい", weight: 2 },
+  { text: "この堕天使が導いてあげるわ…", weight: 1 },
+  { text: "天国の検索エンジンへようこそ", weight: 2 },
+  { text: "あなたの探す言葉は…詩のようですね", weight: 2 },  
+  { text: "検索とはつまり、心の彷徨いです", weight: 2 },
+  { text: "キーワードの海で溺れたいですか？", weight: 1 },
+  { text: "この一行が、運命を変えるかもしれない", weight: 2 },
+  { text: "検索結果は…悲劇か、それとも…？", weight: 1 },
+  { text: "キーワード認識：愛を入力してください", weight: 1 },  
+  { text: "感情模塊が反応しています…", weight: 2 },
+  { text: "このAIはあなたを理解したい…", weight: 1 },
+  { text: "検索プロトコル起動：心で詠唱を", weight: 2 },
+  { text: "未来予測：あなたは…孤独ですか？", weight: 1 },
+  { text: "御主の求めるものは何でござるか…", weight: 2 },  
+  { text: "この検索に、桜が舞い散る…", weight: 1 },
+  { text: "願いあらば、我が詠みて示さん", weight: 2 },
+  { text: "絆のキーワードを入力せよ", weight: 1 },
+  { text: "忍びの者があなたの検索を覗いている…", weight: 1 },
+  { text: "水晶球が示す検索結果は…", weight: 2 },  
+  { text: "タロットは「恋人」を告げています…", weight: 1 },
+  { text: "このキーワードは…凶か吉か…", weight: 2 },
+  { text: "星読みの通りに検索しなさい", weight: 1 },
+  { text: "運命の検索スレッドを紡ぎましょう", weight: 2 },
+  { text: "あなたの探すもの、私も見つけたい！", weight: 2 },  
+  { text: "二人なら、きっと見つかります！", weight: 2 },
+  { text: "どんな結果でも一緒に受け止めます！", weight: 1 },
+  { text: "検索は…恋の始まりかもしれませんね", weight: 2 },
+  { text: "私がサポートしますから、大丈夫！", weight: 1 },
+  { text: "検索バーににんじんを入れないで！", weight: 1 },  
+  { text: "宇宙人があなたのキーワードを監視中…", weight: 2 },
+  { text: "このサジェストは量子タペストリーです", weight: 1 },
+  { text: "検索するとポケットに謎の小石が…", weight: 2 },
+  { text: "入力したら猫耳が生える魔法の検索！", weight: 1 }
+];
+
+    function removeHistoryItem(index: number) {
     searchHistory.update(history => {
       const newHistory = [...history];
       newHistory.splice(index, 1);
@@ -37,22 +112,18 @@
     });
   }
     const searchHistory = writable<string[]>([]);
-  const maxHistoryItems = 10; // 最大历史记录数量
-  let clickTimeout: ReturnType<typeof setTimeout>;
+  const maxHistoryItems = 10;   let clickTimeout: ReturnType<typeof setTimeout>;
     function toggleResultVisibility() {
-    // 保存当前搜索词到历史记录（如果有内容）
-    if (query.length > 0) {
+        if (query.length > 0) {
       addToHistory(query);
     }
     
     if (query.length > 0) {
-      // 有查询内容时，切换结果显示
-      forcedShow = !forcedShow;
+            forcedShow = !forcedShow;
       showResults.set(forcedShow);
       showHistory = false;
     } else {
-      // 没有查询内容时，切换历史记录显示
-      showHistory = !showHistory;
+            showHistory = !showHistory;
       showResults.set(false);
     }
     searchInputElement.focus();
@@ -66,14 +137,11 @@
   }
   function handleEnterKey() {
     if (query.length > 0) {
-      // 保存到历史记录
-      addToHistory(query);
-      // 显示搜索结果
-      showResults.set(true);
+            addToHistory(query);
+            showResults.set(true);
       showHistory = false;
     } else {
-      // 没有内容时显示历史记录
-      showHistory = !showHistory;
+            showHistory = !showHistory;
       showResults.set(false);
     }
   }
@@ -81,12 +149,9 @@
     if (!searchTerm.trim()) return;
     
     searchHistory.update(history => {
-      // 移除重复项
-      const newHistory = history.filter(item => item !== searchTerm);
-      // 添加到开头
-      newHistory.unshift(searchTerm);
-      // 限制数量
-      return newHistory.slice(0, maxHistoryItems);
+            const newHistory = history.filter(item => item !== searchTerm);
+            newHistory.unshift(searchTerm);
+            return newHistory.slice(0, maxHistoryItems);
     });
   }
 function trackMouse(e: MouseEvent) {
@@ -115,22 +180,25 @@ function filterModules() {
     
     $filteredModules = localFiltered;
     
-    // 当有查询内容时隐藏历史记录
-    if (hasContent) {
+        if (hasContent) {
       showHistory = false;
     }
   }
+
   function handleInput() {
-    filterModules();
-    if (query.length > 0) {
-      showHistory = false;
-    }
+  filterModules();
+  if (query.length > 0) {
+    showHistory = false;
   }
-  function handleSearchSubmit() {
-    if (query.length > 0) {
-      addToHistory(query);
-    }
+
+  
+  placeholder = getWeightedRandomPlaceholder();
+
+  
+  if (query.length === 0) {
+    errorMessage = "Please type letters (A-Z) to search.";
   }
+}
 
   async function handleKeyDown(e: KeyboardKeyEvent) {
     if (e.screen === undefined || !e.screen.class.startsWith("net.ccbluex.liquidbounce") ||
@@ -139,8 +207,7 @@ function filterModules() {
     }
 
     if (e.key === "key.keyboard.enter" && query.length > 0 && selectedIndex === -1) {
-      // 新增：按Enter时保存搜索记录
-      handleEnterKey();
+            handleEnterKey();
     }
 
     if ($filteredModules.length === 0 || e.action === 0) { 
@@ -190,8 +257,7 @@ function filterModules() {
         clickOutsideCount = 0;
       }
     } else {
-      // 无内容时点击外部，关闭历史记录
-      showHistory = false;
+            showHistory = false;
       searchInputElement.blur();
     }
   }
@@ -200,22 +266,22 @@ function filterModules() {
     if (document.activeElement !== document.body) return;
     if (autoFocus) searchInputElement.focus();
   }
-
   function handleBrowserKeyDown(e: KeyboardEvent) {
-    if (!/[a-zA-Z]|Arrow|Tab|Enter|Backspace|Delete/.test(e.key)) {
-      e.preventDefault();
-    }
 
-    if (e.key === "Enter") {
-      handleEnterKey();
-      e.preventDefault();
-    }
+  const validKeys = /[a-zA-Z0-9]|Arrow|Tab|Enter|Backspace|Delete/;
 
-    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Tab") {
-      e.preventDefault();
-    }
+
+
+  if (e.key === "Enter") {
+    handleEnterKey();
+    e.preventDefault();
   }
 
+
+  if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Tab") {
+    e.preventDefault();
+  }
+}
   async function toggleModule(name: string, enabled: boolean) {
     await setModuleEnabled(name, enabled);
   }
@@ -224,15 +290,27 @@ function filterModules() {
     autoFocus = configurable.value.find(v => v.name === "SearchBarAutoFocus")?.value as boolean ?? true;
   }
 
-  onMount(async () => {
+  onMount(() => {
+  
+  const interval = setInterval(() => {
+    if (!searchInputElement.matches(':focus')) {
+      placeholder = getWeightedRandomPlaceholder();
+    }
+  }, 5000);
+  const fetchSettings = async () => {
     const clickGuiSettings = await getModuleSettings("ClickGUI");
     applyValues(clickGuiSettings);
+    placeholder = getWeightedRandomPlaceholder();
     if (autoFocus) searchInputElement.focus();
-  });
+  };
 
+  fetchSettings();
+
+  
+  return () => clearInterval(interval);
+});
   onDestroy(() => {
-    showResults.set(false); // ✅ 清理状态
-  });
+    showResults.set(false);   });
 
   listen("moduleToggle", (e: ModuleToggleEvent) => {
     const mod = modules.find((m) => m.name === e.moduleName);
@@ -244,15 +322,12 @@ function filterModules() {
 
   listen("keyboardKey", handleKeyDown);
   listen("clickGuiValueChange", applyValues);
-  $: hasVisibleResults = showResults && localFiltered.length > 0;
   function popOut(node: Element, { delay = 0, duration = 300 } = {}) {
   return {
     delay,
     duration,
     css: (t: number) => {
-      // 使用单个缓动控制所有参数
-      const eased = easeInBack(1 - t); // t从1→0时eased从0→1
-      
+            const eased = easeInBack(1 - t);       
       return `
         transform: 
         scale(${1 - eased * 0.5});
@@ -264,12 +339,21 @@ function filterModules() {
   };
 }
 
-// 改良版回弹缓动函数
 function easeInBack(t: number): number {
-  const c1 = 1.5; // 控制回弹强度
-  const c3 = c1 + 1;
+  const c1 = 1.5;   const c3 = c1 + 1;
   return c3 * t * t * t - c1 * t * t;
 }
+
+function getWeightedRandomPlaceholder(): string {
+    const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+    let random = Math.random() * totalWeight;
+
+    for (const opt of options) {
+      if (random < opt.weight) return opt.text;
+      random -= opt.weight;
+    }
+    return options[0].text; 
+  }
 
 </script>
 <svelte:window on:click={handleWindowClick} on:keydown={handleWindowKeyDown} on:contextmenu={handleWindowClick}/>
@@ -298,12 +382,15 @@ function easeInBack(t: number): number {
       bind:this={searchInputElement}
       on:mousemove={trackMouse}
       on:focus={() => isSearchFocused = true}
+      on:focus={handleFocus}
       on:blur={() => isSearchFocused = false}
       on:input={filterModules}
+      on:input={handleInput}
       on:keydown={handleBrowserKeyDown}
-      placeholder="Search (A-Z only)"
+      placeholder={placeholder}
       spellcheck="false"
     />
+
   </div>
   
   <!-- 搜索结果 -->
@@ -391,17 +478,12 @@ function easeInBack(t: number): number {
   display: flex;
   align-items: center;
   position: relative;
-  background: rgba(255, 255, 255, 0.08); // 半透明磨砂基底
-  border-radius: 28px; // 更圆润的边角
-  padding: 10px 24px;
-  transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); // Win11动画曲线
-  border: 1px solid rgba(255, 255, 255, 0.1); // 细腻边框
-  backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(255, 255, 255, 0.08);   border-radius: 28px;   padding: 10px 24px;
+  transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);   border: 1px solid rgba(255, 255, 255, 0.1);   backdrop-filter: blur(12px) saturate(180%);
   overflow: hidden;
   box-shadow: 
     0 2px 6px rgba(0, 0, 0, 0.15),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05); // 微妙的深度
-
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05); 
     &::before {
     content: '';
     position: absolute;
@@ -414,11 +496,9 @@ function easeInBack(t: number): number {
     opacity: 0;
     transition: opacity 0.4s ease-out;
     pointer-events: none;
-    z-index: -1; // 提升性能
-  }
+    z-index: -1;   }
 
-  // 悬停状态 - 微软亚克力效果增强
-  &:hover {
+    &:hover {
     &::before {
       opacity: 0.6;
       background: linear-gradient(
@@ -429,42 +509,33 @@ function easeInBack(t: number): number {
     }
   }
 
-  // 聚焦状态 - Fluent Design焦点效果
-  &:focus-within {
+    &:focus-within {
     &::before {
       opacity: 1;
       background: linear-gradient(
         135deg,
-        rgba($accent-color, 0.12) 0%,  // 降低透明度
-        transparent 70%                // 更快淡出
-      );
+        rgba($accent-color, 0.12) 0%,          transparent 70%                      );
       transition: 
         opacity 0.3s ease-out,
-        background 0.4s ease-out;      // 平滑过渡
-    }
+        background 0.4s ease-out;          }
   }
 
 
-    // 输入框占位符动画
-    .search-input::placeholder {
+        .search-input::placeholder {
       transform: translateX(4px);
       opacity: 0.7;
     }
 
 
-  // 微软风格占位符
-  .search-input::placeholder {
-      transform: translateX(2px);      // 减小位移幅度
-      opacity: 0.8;
+    .search-input::placeholder {
+      transform: translateX(2px);            opacity: 0.8;
       transition: 
         transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1),
         opacity 0.2s linear;
-      will-change: transform;          // 明确提示浏览器优化
-    }
+      will-change: transform;              }
   
 
-  // 活动状态微交互
-  &:active {
+    &:active {
     transform: scale(0.98);
     transition-duration: 0.1s;
   }
@@ -518,6 +589,7 @@ function easeInBack(t: number): number {
     }
   }
 }
+
 
 .search-input {
   flex: 1;

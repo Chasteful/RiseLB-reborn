@@ -16,30 +16,39 @@
 
 
     async function updateEnabledModules() {
-        const modules = await getModules();
-        const visibleModules = modules.filter(m => m.enabled && !m.hidden);
+    await document.fonts.load("500 16px 'Product Sans'");
 
-        const modulesWithWidths = await Promise.all(visibleModules.map(async module => {
-            const formattedName = $spaceSeperatedNames ? convertToSpacedString(module.name) : module.name;
-            const prefix = await getPrefixAsync(module.name);
-            prefixs.set(module.name, prefix);
-            const font = "500 16px 'Product Sans'";
-            const fullNameWithPrefix = `${formattedName} ${prefix}`;
-            const width = getTextWidth(fullNameWithPrefix, font);
+    const modules = await getModules();
+    const visibleModules = modules.filter(m => m.enabled && !m.hidden);
 
-            return {
-                ...module,
-                formattedName,
-                width,
-                prefix
-            };
-        }));
+    // 先异步并发获取所有 prefix
+    const prefixMap = new Map<string, string>();
+    await Promise.all(visibleModules.map(async module => {
+        const prefix = await getPrefixAsync(module.name);
+        prefixMap.set(module.name, prefix);
+    }));
 
-  
-    enabledModules = modulesWithWidths.sort((a, b) => b.width - a.width);
-    
-        await tick();  
-    }
+ 
+    const modulesWithWidths = visibleModules.map(module => {
+        const formattedName = $spaceSeperatedNames ? convertToSpacedString(module.name) : module.name;
+        const prefix = prefixMap.get(module.name) || "";
+        const fullName = `${formattedName} ${prefix}`;
+        const font = "500 16px 'Product Sans', system-ui, sans-serif";
+        const width = getTextWidth(fullName, font);
+
+        return {
+            ...module,
+            formattedName,
+            prefix,
+            width
+        };
+    });
+
+    modulesWithWidths.sort((a, b) => b.width - a.width);
+    enabledModules = modulesWithWidths;
+
+    await tick();
+}
 
     
     spaceSeperatedNames.subscribe(async () => {
@@ -49,6 +58,7 @@
 
     onMount(async () => {
         await updateEnabledModules();
+        setTimeout(() => updateEnabledModules(), 50);
     });
 
    
@@ -139,7 +149,6 @@
     .prefix {
         color: #AAAAAA;
         text-shadow: 0 0 3px rgba(#AAAAAA,0.9);
-        margin-left: 6px; 
     }
     .side-bar {
         position: absolute;
