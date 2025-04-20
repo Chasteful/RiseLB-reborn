@@ -44,9 +44,11 @@
   .checkbox {
   display: block;
   position: relative;
-  width: 20px;     height: 20px;
+  width: 20px;  // Slightly larger for better interaction
+  height: 20px;
   background-color: rgba($mantle, 0.6);
-  border-radius: 6px;     border: 1px solid rgba(white, 0.15);
+  border-radius: 6px;  // More rounded corners
+  border: 1px solid rgba(white, 0.15);
   box-shadow: 
     0 2px 6px rgba(0, 0, 0, 0.3),
     inset 0 1px 2px rgba(255, 255, 255, 0.05);
@@ -55,7 +57,8 @@
   cursor: pointer;
 
 
-     &:hover {
+  // Hover state
+  &:hover {
     background-color: rgba($mantle, 0.8);
     border-color: rgba(white, 0.25);
     box-shadow: 
@@ -63,7 +66,8 @@
       inset 0 1px 2px rgba(255, 255, 255, 0.1);
   }
 
-     &:active {
+  // Active/pressed state
+  &:active {
     transform: translateY(1px);
     box-shadow: 
       0 1px 3px rgba(0, 0, 0, 0.3),
@@ -99,7 +103,8 @@ input:checked + .checkbox {
   outline-offset: 2px;
 }
 
- 
+// Optional: Add a subtle pulse animation when checked
+
 @keyframes pulse {
   0% { 
     box-shadow: 

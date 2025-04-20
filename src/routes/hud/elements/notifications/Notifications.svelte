@@ -5,8 +5,10 @@
   import { Howl } from "howler";
   import { elasticOut, bounceOut } from "svelte/easing";
     import type { HUDComponentSettings } from "../../../../integration/types";
-       export let settings: HUDComponentSettings;
-     export let editing: boolean;
+      // svelte-ignore export_let_unused
+export let settings: HUDComponentSettings;
+    // svelte-ignore export_let_unused
+export let editing: boolean;
   interface TNotification {
     animationKey: number;
     id: number;
@@ -100,7 +102,9 @@
     delay,
     duration,
     css: (t: number) => {
-             const eased = easeInBack(1 - t);        
+      // 使用单个缓动控制所有参数
+      const eased = easeInBack(1 - t); // t从1→0时eased从0→1
+      
       return `
         transform: 
           translateY(${eased * 100}px) 
@@ -113,8 +117,10 @@
   };
 }
 
- function easeInBack(t: number): number {
-  const c1 = 1.5;    const c3 = c1 + 1;
+// 改良版回弹缓动函数
+function easeInBack(t: number): number {
+  const c1 = 1.5; // 控制回弹强度
+  const c3 = c1 + 1;
   return c3 * t * t * t - c1 * t * t;
 }
 

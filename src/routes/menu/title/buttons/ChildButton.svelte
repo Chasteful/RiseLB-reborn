@@ -51,7 +51,7 @@
     margin-left: 10px;
   }
 
-  .icon {  
+  .icon { /* necessary because svelte's transition system sucks */
     width: 28px;
     height: 28px;
     position: relative;

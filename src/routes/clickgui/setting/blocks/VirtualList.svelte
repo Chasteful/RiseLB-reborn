@@ -4,52 +4,26 @@
     // props
     export let items;
     export let height = '100%';
-    /**
-     * @type {undefined}
-     */
-     export let itemHeight = undefined;
+    export let itemHeight = undefined;
     // read-only, but visible to consumers via bind:start
     export let start = 0;
     export let end = 0;
     // local state
-    /**
-     * @type {string | any[]}
-     */
     let height_map = [];
-    /**
-     * @type {string | any[]}
-     */
     let rows;
-    /**
-     * @type {{ scrollTop: any; scrollTo?: any; }}
-     */
     let viewport;
-    /**
-     * @type {{ getElementsByTagName: (arg0: string) => string | any[]; }}
-     */
     let contents;
     let viewport_height = 0;
     let visible;
-    /**
-     * @type {boolean}
-     */
     let mounted;
     let top = 0;
     let bottom = 0;
-    /**
-     * @type {number}
-     */
     let average_height;
-    $: visible = items.slice(start, end).map((/** @type {any} */ data, /** @type {number} */ i) => {
+    $: visible = items.slice(start, end).map((data, i) => {
         return { index: i + start, data };
     });
     // whenever `items` changes, invalidate the current heightmap
     $: if (mounted) refresh(items, viewport_height, itemHeight);
-    /**
-     * @param {string | any[]} items
-     * @param {number} viewport_height
-     * @param {undefined} itemHeight
-     */
     async function refresh(items, viewport_height, itemHeight) {
         const { scrollTop } = viewport;
         await tick(); // wait until the DOM is up to date
@@ -62,7 +36,6 @@
                 await tick(); // render the newly visible row
                 row = rows[i - start];
             }
-            // @ts-ignore
             const row_height = height_map[i] = itemHeight || row.offsetHeight;
             content_height += row_height;
             i += 1;
@@ -71,7 +44,6 @@
         const remaining = items.length - end;
         average_height = (top + content_height) / end;
         bottom = remaining * average_height;
-        // @ts-ignore
         height_map.length = items.length;
 
         setTimeout(() => {
@@ -82,7 +54,6 @@
         const { scrollTop } = viewport;
         const old_start = start;
         for (let v = 0; v < rows.length; v += 1) {
-            // @ts-ignore
             height_map[start + v] = itemHeight || rows[v].offsetHeight;
         }
         let i = 0;
@@ -105,7 +76,6 @@
         end = i;
         const remaining = items.length - end;
         average_height = y / end;
-        // @ts-ignore
         while (i < items.length) height_map[i++] = average_height;
         bottom = remaining * average_height;
         // prevent jumping if we scrolled up into unknown territory

@@ -16,10 +16,12 @@ export function updateScaleFactors(minecraftScaleFactor: number, clickGuiScaleFa
 }
 
 export function useResolutionScale(minecraftScaleFactor: number, clickGuiScaleFactor: number) {
-     updateScaleFactors(minecraftScaleFactor, clickGuiScaleFactor);
+  // Initial scale update on mount
+  updateScaleFactors(minecraftScaleFactor, clickGuiScaleFactor);
 
   window.addEventListener("resize", () => {
-    updateScaleFactors(minecraftScaleFactor, clickGuiScaleFactor);    });
+    updateScaleFactors(minecraftScaleFactor, clickGuiScaleFactor); // Update on resize
+  });
 
   return {
     resolutionScale,

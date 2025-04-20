@@ -80,7 +80,9 @@
 
     .head {
       border-radius: 3px 3px 0 0;
-      border: 4px solid rgba($text, 0.3);        box-shadow: 0 4px 16px rgba($text, 0.4);      }
+      border: 4px solid rgba($text, 0.3); // 高亮边框
+      box-shadow: 0 4px 16px rgba($text, 0.4); // 高亮阴影
+    }
   }
 }
 

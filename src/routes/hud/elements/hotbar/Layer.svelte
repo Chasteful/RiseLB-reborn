@@ -4,7 +4,8 @@
   export let max: number;
   export let color: string;
   export let alignRight: boolean = false;
-  export let duration: number = 450;    export let onDone: () => void = () => {};
+  export let duration: number = 450; // 渐隐时间
+  export let onDone: () => void = () => {};
 
   let progress = from;
   let opacity = 1;

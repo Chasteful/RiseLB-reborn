@@ -4,8 +4,10 @@
   import { getPlayerData } from "../../../../integration/rest";
   import type { ClientPlayerDataEvent, OverlayMessageEvent } from "../../../../integration/events";
   import type { HUDComponentSettings, PlayerData, TextComponent as TTextComponent } from "../../../../integration/types";
-         export let settings: HUDComponentSettings;
-     export let editing: boolean;
+    // svelte-ignore export_let_unused
+    export let settings: HUDComponentSettings;
+    // svelte-ignore export_let_unused
+export let editing: boolean;
   import Status from "./Status.svelte";
   import Layer from "./Layer.svelte";
     import TextComponent from "../../../menu/common/TextComponent.svelte";
@@ -20,7 +22,7 @@
   let slotsElement: HTMLElement;
 
   let showItemStackName = false;
-
+  const timeouts = new Map<string, number>();
   let experienceChange:{ from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
  let airChange: { from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
   let foodChange:{ from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
@@ -30,19 +32,14 @@
   let armorChange: { from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
   let maxAbsorption = 0;
 
-
-const timeouts = new Map<'itemName' | 'overlay', NodeJS.Timeout>();
-
-function resetTimeout(type: 'itemName' | 'overlay') {
-    const existingTimeout = timeouts.get(type);
-    if (existingTimeout) {
-        clearTimeout(existingTimeout);
-    }
+  function resetTimeout(type: 'itemName' | 'overlay') {
+    clearTimeout(timeouts.get(type));
     timeouts.set(type, setTimeout(() => {
-        if (type === 'itemName') showItemStackName = false;
-        if (type === 'overlay') overlayMessage = null;
+      if (type === 'itemName') showItemStackName = false;
+      if (type === 'overlay') overlayMessage = null;
     }, type === 'itemName' ? 2000 : 3000));
-}
+  }
+
   function updatePlayerData(newData: PlayerData) {
     const prev = playerData;
     playerData = newData;
@@ -84,7 +81,8 @@ function resetTimeout(type: 'itemName' | 'overlay') {
       };
     }
     
-         if (newData.air < prev.air) {
+    // 更新氧气值的过渡
+    if (newData.air < prev.air) {
       airChange = {
         from: prev.air,
         to: newData.air,
@@ -94,7 +92,8 @@ function resetTimeout(type: 'itemName' | 'overlay') {
       };
     }
 
-         if (newData.food < prev.food) {
+    // 更新饱食度的过渡
+    if (newData.food < prev.food) {
       foodChange = {
         from: prev.food,
         to: newData.food,

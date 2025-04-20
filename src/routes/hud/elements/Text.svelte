@@ -9,7 +9,8 @@
     let processedText: string = '';
 
 
-     export let editing: boolean;
+    // svelte-ignore export_let_unused
+export let editing: boolean;
     export let settings: { [name: string]: any };
 
     listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
@@ -27,24 +28,30 @@
             const keys = p1.split(".");
             let value: any = playerData;
 
-                         for (const key of keys) {
+            // Traverse playerData to get the correct value
+            for (const key of keys) {
                 value = value ? value[key] : null;
             }
 
-                         if (value !== null && value !== undefined) {
+            // Format the value based on type
+            if (value !== null && value !== undefined) {
                 switch (typeof value) {
-                    case 'number':                          return value.toFixed(2);
-                    case 'object':                          return JSON.stringify(value);
+                    case 'number': // Round numbers to two decimal places
+                        return value.toFixed(2);
+                    case 'object': // Convert objects to JSON strings
+                        return JSON.stringify(value);
                     default:
                         return value.toString();
                 }
             }
 
-                         return match;
+            // Return original tag if value is null or undefined
+            return match;
         });
     }
 
-         $: processText();
+    // Process text on mount
+    $: processText();
 </script>
 
 <div class="text" style="

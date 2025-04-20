@@ -5,7 +5,10 @@
   export let alignRight: boolean;
   export let label: string | null = null;
   export let icon: string | null = null;
-  export let prevValue: number | null = null;    export let enableAnimation: boolean = false;     export let onDone: (() => void) | undefined;
+  export let prevValue: number | null = null; // 传入上一次的值
+  export let enableAnimation: boolean = false; // 是否启用动画
+  // svelte-ignore export_let_unused
+export let onDone: (() => void) | undefined;
 
   let showAnimation = false;
 

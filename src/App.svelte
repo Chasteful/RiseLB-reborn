@@ -45,12 +45,14 @@
     $: if ($isEditingHud) {
   getComponents().then((result) => {
     components = result;
-         if (window.location.hash !== "#/hudlayout") {
+    // 确保跳转到正确的路由
+    if (window.location.hash !== "#/hudlayout") {
       push("/hudlayout");
     }
   });
 }
-       setTimeout(() => {
+  // HACK: Just in case
+    setTimeout(() => {
        showSplash = false;
     }, 10 * 1000);
 
@@ -62,7 +64,8 @@
 
     onMount(async () => {
         if ('paintWorklet' in CSS) {
-     (CSS as any).paintWorklet.addModule('/worklets/animated-gradient-border.js');
+  // 类型断言
+  (CSS as any).paintWorklet.addModule('/worklets/animated-gradient-border.js');
 }
         await insertPersistentData();
 
@@ -101,7 +104,8 @@ listenAlways("virtualScreen", async (event: any) => {
             await changeRoute("none");
             break;
         case "open":
-                         if (event.screenName === "hudlayout") {
+            // 添加对hudlayout的特殊处理
+            if (event.screenName === "hudlayout") {
                 isEditingHud.set(true);
             } else {
                 isEditingHud.set(false);

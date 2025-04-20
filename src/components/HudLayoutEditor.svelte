@@ -10,7 +10,8 @@
     let offsetX = 0;
     let offsetY = 0;
   
-         $: if ($isEditingHud) {
+    // 订阅 `isEditingHud` 状态
+    $: if ($isEditingHud) {
       console.log("Editing mode is ON");
     } else {
       console.log("Editing mode is OFF");
@@ -49,7 +50,8 @@
   
     onDestroy(() => {
   if (isDragging) {
-         window.removeEventListener('mousemove', onMouseMove);
+    // 强制结束拖动状态
+    window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('mouseup', onMouseUp);
   }
 });

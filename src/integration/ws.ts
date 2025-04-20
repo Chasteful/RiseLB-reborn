@@ -70,7 +70,8 @@ export function deleteListener(eventName: string, cb: Function) {
     listeners[eventName] = listeners[eventName].filter(handler => handler !== cb);
 }
 
- setInterval(() => {
+// Send ping to server every 5 seconds
+setInterval(() => {
     if (!ws) return;
     if (ws.readyState !== 1) return;
 

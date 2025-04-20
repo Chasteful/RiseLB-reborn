@@ -35,9 +35,12 @@
   if (!modulesElement || !name) return;
 
   const el = modulesElement.querySelector(`[data-module-name="${name}"]`);
-  console.log('Found element to scroll:', el);    if (el instanceof HTMLElement) {
-    console.log('scrolling to:', el.offsetTop);      modulesElement.scrollTo({
-      top: el.offsetTop - 40,        behavior: "smooth",
+  console.log('Found element to scroll:', el); // 确认元素是否正确找到
+  if (el instanceof HTMLElement) {
+    console.log('scrolling to:', el.offsetTop); // 输出目标位置
+    modulesElement.scrollTo({
+      top: el.offsetTop - 40, // 自动滚动，调整偏移量
+      behavior: "smooth",
     });
   }
 });
@@ -122,15 +125,19 @@
         padding: 10px;
         font-family: "Product Sans";
         color: rgba(150, 150, 150);
-        transition: all 0.3s ease-out;          position: relative;
+        transition: all 0.3s ease-out; // 统一过渡效果
+        position: relative;
         overflow: hidden;
         
-                 &:hover {
+        // 基础 hover 效果
+        &:hover {
             background: rgba($base, 0.2);
             color: gray;
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.4, 1);          }
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.4, 1); // 更平滑的进入效果
+        }
         
-                 &.enabled {
+        // 启用状态
+        &.enabled {
             position: relative;
             overflow: hidden;
             background: linear-gradient(135deg, rgba($accent, 0.3), rgba($accent-mix, 0.3));
@@ -144,7 +151,8 @@
             &:hover {
                 background: linear-gradient(135deg, rgba($accent, 0.4), rgba($accent-mix, 0.4));
                 text-shadow: 0 0 16px rgba($accent, 0.9);
-                transition: all 0.3s ease-out;              }
+                transition: all 0.3s ease-out; // 保持一致的退出效果
+            }
 
             &:active {
                 background: linear-gradient(135deg, rgba($accent-mix, 0.5), rgba($accent, 0.5));
@@ -153,7 +161,8 @@
             }
         }
 
-                 &.highlight {
+        // 高亮状态
+        &.highlight {
             background: linear-gradient(135deg, rgba($accent-color-2, 0.2), rgba($accent-color, 0.2));
             transition: all 0.3s ease-out;
 
@@ -167,13 +176,15 @@
                 background: radial-gradient(circle, rgba($accent-color, 0.3), transparent 70%);
                 transform: translate(-50%, -50%) scale(0);
                 border-radius: 50%;
-                transition: transform 0.4s ease-out, opacity 0.4s ease-out;                  opacity: 0.6;
+                transition: transform 0.4s ease-out, opacity 0.4s ease-out; // 平滑退出
+                opacity: 0.6;
             }
 
             &:hover::after {
                 transform: translate(-50%, -50%) scale(1.2);
                 opacity: 0.2;
-                transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.4, 1), opacity 0.3s ease;              }
+                transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.4, 1), opacity 0.3s ease; // 更快的进入
+            }
         }
     }
 
@@ -204,7 +215,8 @@
     }
 
 
- @keyframes subtle-pulse {
+// 添加全局动画
+@keyframes subtle-pulse {
     0%, 100% { box-shadow: 0 0 8px rgba($accent, 0.3); }
     50% { box-shadow: 0 0 12px rgba($accent, 0.5); }
 }

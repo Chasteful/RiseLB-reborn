@@ -84,11 +84,13 @@
 
     setupGlobalShortcuts();
     window.addEventListener("keydown", (e) => {
-                 if ((e.ctrlKey && e.key.toLowerCase() === 'r') || e.key === 'F5') {
+        // 拦截 Ctrl+R 或 F5 刷新
+        if ((e.ctrlKey && e.key.toLowerCase() === 'r') || e.key === 'F5') {
             e.preventDefault();
             console.log("阻止了刷新行为");
         }
-    }, true);  
+    }, true); // true 表示捕获阶段
+
     $: renderedModules = $filteredModules.length > 0
         ? modules.filter(module => 
             $filteredModules.some(fm => fm.name === module.name)
@@ -182,7 +184,8 @@
         } else {
             const config: PanelConfig = JSON.parse(localStorageItem);
 
-                         if (!config.zIndex) {
+            // Migration
+            if (!config.zIndex) {
                 config.zIndex = 0;
             }
 
@@ -244,7 +247,8 @@
     function toggleExpanded() {
         if ($filteredModules.length > 0) return;
         
-        pushUndoState();          panelConfig.expanded = !panelConfig.expanded;
+        pushUndoState(); // 先保存状态
+        panelConfig.expanded = !panelConfig.expanded;
         
         setTimeout(() => {
             fixPosition();
@@ -259,7 +263,8 @@
         }
         scrollPositionSaveTimeout = setTimeout(() => {
             savePanelConfig();
-            pushUndoState();          }, 500)
+            pushUndoState(); // 保存状态到撤销栈
+        }, 500)
     }
 
     highlightModuleName.subscribe((name) => {
@@ -269,13 +274,15 @@
             panelConfig.expanded = true;
             renderedModules = modules;
 
-                         tick().then(() => {
+            // 异步展开完毕后滚动
+            tick().then(() => {
                 const moduleEls = modulesElement.querySelectorAll('.module');
                 const targetEl = moduleEls[index] as HTMLElement;
 
                 if (targetEl) {
                     modulesElement.scrollTo({
-                        top: targetEl.offsetTop - 20,                          behavior: 'smooth'
+                        top: targetEl.offsetTop - 20, // 预留一点距离
+                        behavior: 'smooth'
                     });
                 }
             });
@@ -291,7 +298,8 @@
         const mod = modules.find((m) => m.name === moduleName);
         if (!mod) return;
 
-        pushUndoState();          mod.enabled = moduleEnabled;
+        pushUndoState(); // 保存前一状态
+        mod.enabled = moduleEnabled;
         modules = modules;
         if (panelConfig.expanded) {
             renderedModules = modules;
@@ -301,15 +309,18 @@
     onMount(() => {
         fixPosition();
         const keydownHandler = (e: KeyboardEvent) => {
-            handleKeydown(e);          };
+            handleKeydown(e); // 你已有的函数
+        };
         const keyupHandler = (e: KeyboardEvent) => {
-            handleKeyup(e);          };
+            handleKeyup(e); // 你已有的函数
+        };
         window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('wheel', handleWheel, { passive: false });
 
-        window.addEventListener("keydown", keydownHandler, true);          window.addEventListener("keyup", keyupHandler, true);
+        window.addEventListener("keydown", keydownHandler, true); // 第三个参数 true 表示 capture 阶段
+        window.addEventListener("keyup", keyupHandler, true);
         window.addEventListener('keydown', handleKeydown);
         return () => {
             window.removeEventListener("keydown", keydownHandler, true);
@@ -653,9 +664,10 @@
   cursor: grab;
   text-align: center;
   text-shadow: 0 0 10px rgba($accent-color, 0.3);
-  backdrop-filter: blur(2px);    border-radius: 8px 8px 0 0;
+  backdrop-filter: blur(2px); // 简化模糊效果
+  border-radius: 8px 8px 0 0;
   transition: all 0.3s ease;
-  position: relative;  
+  position: relative; /* 为绝对定位的指示器提供参考 */
   padding-right: 80px;
   .panel:not(.expanded) & {
     background: rgba($base, 0.8);

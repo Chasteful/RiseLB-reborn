@@ -21,7 +21,7 @@
   border-radius: 50%;
   position: absolute;
   background: linear-gradient(45deg, rgba($accent, 0.75), rgba($blue, 0.6));
-   
+  /* Creating a gradient shadow effect by layering multiple shadows */
 
 }
 </style>

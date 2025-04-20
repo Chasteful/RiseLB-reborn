@@ -4,8 +4,10 @@
   import type { HUDComponentSettings, StatusEffect } from "../../../integration/types";
   import { fly } from "svelte/transition";
   import { expoOut } from "svelte/easing";
-         export let settings: HUDComponentSettings;
-     export let editing: boolean;
+    // svelte-ignore export_let_unused
+    export let settings: HUDComponentSettings;
+    // svelte-ignore export_let_unused
+export let editing: boolean;
   let effects: StatusEffect[] = [];
 
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
@@ -45,7 +47,8 @@
     box-shadow:0px 0px 16px $base;
     text-shadow: 0px 0px 16px $base;
 
-     
+    //border: $border-thing;
+
     .duration {
       color: white;
     }

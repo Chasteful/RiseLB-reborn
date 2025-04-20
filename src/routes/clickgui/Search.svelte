@@ -23,11 +23,13 @@
   let forcedShow = false;
   let autoFocus: boolean = true;
   let clickOutsideCount = 0;
-  let showHistory = false;    function clearAllHistory() {
+  let showHistory = false; // 新增：控制历史记录显示
+  function clearAllHistory() {
     searchHistory.set([]);
   }
 
-     function removeHistoryItem(index: number) {
+  // 新增：删除单个历史记录项
+  function removeHistoryItem(index: number) {
     searchHistory.update(history => {
       const newHistory = [...history];
       newHistory.splice(index, 1);
@@ -35,18 +37,22 @@
     });
   }
     const searchHistory = writable<string[]>([]);
-  const maxHistoryItems = 10;    let clickTimeout: ReturnType<typeof setTimeout>;
+  const maxHistoryItems = 10; // 最大历史记录数量
+  let clickTimeout: ReturnType<typeof setTimeout>;
     function toggleResultVisibility() {
-         if (query.length > 0) {
+    // 保存当前搜索词到历史记录（如果有内容）
+    if (query.length > 0) {
       addToHistory(query);
     }
     
     if (query.length > 0) {
-             forcedShow = !forcedShow;
+      // 有查询内容时，切换结果显示
+      forcedShow = !forcedShow;
       showResults.set(forcedShow);
       showHistory = false;
     } else {
-             showHistory = !showHistory;
+      // 没有查询内容时，切换历史记录显示
+      showHistory = !showHistory;
       showResults.set(false);
     }
     searchInputElement.focus();
@@ -60,11 +66,14 @@
   }
   function handleEnterKey() {
     if (query.length > 0) {
-             addToHistory(query);
-             showResults.set(true);
+      // 保存到历史记录
+      addToHistory(query);
+      // 显示搜索结果
+      showResults.set(true);
       showHistory = false;
     } else {
-             showHistory = !showHistory;
+      // 没有内容时显示历史记录
+      showHistory = !showHistory;
       showResults.set(false);
     }
   }
@@ -72,9 +81,12 @@
     if (!searchTerm.trim()) return;
     
     searchHistory.update(history => {
-             const newHistory = history.filter(item => item !== searchTerm);
-             newHistory.unshift(searchTerm);
-             return newHistory.slice(0, maxHistoryItems);
+      // 移除重复项
+      const newHistory = history.filter(item => item !== searchTerm);
+      // 添加到开头
+      newHistory.unshift(searchTerm);
+      // 限制数量
+      return newHistory.slice(0, maxHistoryItems);
     });
   }
 function trackMouse(e: MouseEvent) {
@@ -103,7 +115,8 @@ function filterModules() {
     
     $filteredModules = localFiltered;
     
-         if (hasContent) {
+    // 当有查询内容时隐藏历史记录
+    if (hasContent) {
       showHistory = false;
     }
   }
@@ -126,7 +139,8 @@ function filterModules() {
     }
 
     if (e.key === "key.keyboard.enter" && query.length > 0 && selectedIndex === -1) {
-             handleEnterKey();
+      // 新增：按Enter时保存搜索记录
+      handleEnterKey();
     }
 
     if ($filteredModules.length === 0 || e.action === 0) { 
@@ -176,7 +190,8 @@ function filterModules() {
         clickOutsideCount = 0;
       }
     } else {
-             showHistory = false;
+      // 无内容时点击外部，关闭历史记录
+      showHistory = false;
       searchInputElement.blur();
     }
   }
@@ -216,7 +231,8 @@ function filterModules() {
   });
 
   onDestroy(() => {
-    showResults.set(false);    });
+    showResults.set(false); // ✅ 清理状态
+  });
 
   listen("moduleToggle", (e: ModuleToggleEvent) => {
     const mod = modules.find((m) => m.name === e.moduleName);
@@ -234,7 +250,9 @@ function filterModules() {
     delay,
     duration,
     css: (t: number) => {
-             const eased = easeInBack(1 - t);        
+      // 使用单个缓动控制所有参数
+      const eased = easeInBack(1 - t); // t从1→0时eased从0→1
+      
       return `
         transform: 
         scale(${1 - eased * 0.5});
@@ -246,8 +264,10 @@ function filterModules() {
   };
 }
 
- function easeInBack(t: number): number {
-  const c1 = 1.5;    const c3 = c1 + 1;
+// 改良版回弹缓动函数
+function easeInBack(t: number): number {
+  const c1 = 1.5; // 控制回弹强度
+  const c3 = c1 + 1;
   return c3 * t * t * t - c1 * t * t;
 }
 
@@ -361,7 +381,7 @@ function filterModules() {
 }
 .search {
   position: fixed;
-  top: 60px;  
+  top: 60px; /* Moved down slightly */
   left: 50%;
   transform: translateX(-50%);
   width: 600px;
@@ -371,12 +391,17 @@ function filterModules() {
   display: flex;
   align-items: center;
   position: relative;
-  background: rgba(255, 255, 255, 0.08);    border-radius: 28px;    padding: 10px 24px;
-  transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);    border: 1px solid rgba(255, 255, 255, 0.1);    backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(255, 255, 255, 0.08); // 半透明磨砂基底
+  border-radius: 28px; // 更圆润的边角
+  padding: 10px 24px;
+  transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); // Win11动画曲线
+  border: 1px solid rgba(255, 255, 255, 0.1); // 细腻边框
+  backdrop-filter: blur(12px) saturate(180%);
   overflow: hidden;
   box-shadow: 
     0 2px 6px rgba(0, 0, 0, 0.15),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05);  
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05); // 微妙的深度
+
     &::before {
     content: '';
     position: absolute;
@@ -389,9 +414,11 @@ function filterModules() {
     opacity: 0;
     transition: opacity 0.4s ease-out;
     pointer-events: none;
-    z-index: -1;    }
+    z-index: -1; // 提升性能
+  }
 
-     &:hover {
+  // 悬停状态 - 微软亚克力效果增强
+  &:hover {
     &::before {
       opacity: 0.6;
       background: linear-gradient(
@@ -402,33 +429,42 @@ function filterModules() {
     }
   }
 
-     &:focus-within {
+  // 聚焦状态 - Fluent Design焦点效果
+  &:focus-within {
     &::before {
       opacity: 1;
       background: linear-gradient(
         135deg,
-        rgba($accent-color, 0.12) 0%,           transparent 70%                       );
+        rgba($accent-color, 0.12) 0%,  // 降低透明度
+        transparent 70%                // 更快淡出
+      );
       transition: 
         opacity 0.3s ease-out,
-        background 0.4s ease-out;           }
+        background 0.4s ease-out;      // 平滑过渡
+    }
   }
 
 
-         .search-input::placeholder {
+    // 输入框占位符动画
+    .search-input::placeholder {
       transform: translateX(4px);
       opacity: 0.7;
     }
 
 
-     .search-input::placeholder {
-      transform: translateX(2px);             opacity: 0.8;
+  // 微软风格占位符
+  .search-input::placeholder {
+      transform: translateX(2px);      // 减小位移幅度
+      opacity: 0.8;
       transition: 
         transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1),
         opacity 0.2s linear;
-      will-change: transform;               }
+      will-change: transform;          // 明确提示浏览器优化
+    }
   
 
-     &:active {
+  // 活动状态微交互
+  &:active {
     transform: scale(0.98);
     transition-duration: 0.1s;
   }
@@ -497,7 +533,7 @@ function filterModules() {
   }
 }
 
- 
+/* 共用结果容器样式 */
 .results, .history-results {
   border-top: 2px solid rgba($accent, 0.2);
   padding: 0;
@@ -506,14 +542,14 @@ function filterModules() {
   margin-top: 8px;
   overflow: overlay; 
   padding-right: 8px; 
-  border-radius: 24px;  
+  border-radius: 24px; /* Unified border radius */
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba($accent, 0.2);
   background: linear-gradient(
     to bottom,
     rgba(#1a1a1a, 0.95) 0%,
     rgba(#0d0d0d, 0.98) 100%
-  );  
+  ); /* Bing-like dark background */
 
   &::before {
     content: '';
@@ -712,7 +748,7 @@ function filterModules() {
   }
 }
 
- 
+/* 搜索结果样式 */
 .result {
   font-size: 16px;
   padding: 14px 20px;

@@ -3,8 +3,10 @@
     import type {HUDComponentSettings, PlayerData, Scoreboard} from "../../../integration/types";
     import TextComponent from "../../menu/common/TextComponent.svelte";
     import type {ClientPlayerDataEvent} from "../../../integration/events";
-         export let settings: HUDComponentSettings;
-     export let editing: boolean;
+    // svelte-ignore export_let_unused
+    export let settings: HUDComponentSettings;
+    // svelte-ignore export_let_unused
+export let editing: boolean;
     let scoreboard: Scoreboard | null = null;
 
     listen("clientPlayerData", (e: ClientPlayerDataEvent) => {
@@ -35,7 +37,10 @@
 
   .scoreboard {
     min-width: 200px;
-                   border-radius: 16px;
+    //position: fixed;
+    //left: 15px;
+    //top: 550px;
+    border-radius: 16px;
     overflow: hidden;
     z-index: -1;
     font-size: 14px;

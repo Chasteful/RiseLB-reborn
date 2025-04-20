@@ -11,7 +11,9 @@
 
   const cSetting = setting as MultiChooseSetting;
   const thisPath = `${path}.${cSetting.name}`;
-  const accentColor1 = "#cdd6f4";    const accentColor2 = "#AD5389";    const dispatch = createEventDispatcher();
+  const accentColor1 = "#cdd6f4"; // 浅蓝色
+  const accentColor2 = "#AD5389"; // 玫红紫色
+  const dispatch = createEventDispatcher();
 
   let errorValue: string | null = null;
   let timeoutId: ReturnType<typeof setTimeout>;
@@ -41,7 +43,8 @@
       dispatch("change");
   }
 
-     $: borderWidth = 2 + (cSetting.value.length / cSetting.choices.length) * 2;
+  // --- Glow and border computation ---
+  $: borderWidth = 2 + (cSetting.value.length / cSetting.choices.length) * 2;
   $: glowIntensity = Math.pow(cSetting.value.length / cSetting.choices.length, 1.8) * 0.6;
   $: borderProgress = cSetting.choices.length === 0
       ? 0
@@ -49,25 +52,30 @@
 
 
 
-     function mixColors(a: string, b: string, amount: number, alpha: number): string {
-         const hexToRGB = (hex: string): [number, number, number] => {
+  // --- 混合颜色函数 ---  
+  function mixColors(a: string, b: string, amount: number, alpha: number): string {
+    // 简单解析Hex颜色
+    const hexToRGB = (hex: string): [number, number, number] => {
         const bigint = parseInt(hex.slice(1), 16);
         return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
     };
 
-         const rgbToHex = (r: number, g: number, b: number, a: number): string => {
+    // 转回HEX带透明度
+    const rgbToHex = (r: number, g: number, b: number, a: number): string => {
         const alphaHex = Math.round(a * 255).toString(16).padStart(2, "0");
         return `#${(1 << 24 | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}${alphaHex}`;
     };
 
-         const aRGB = hexToRGB(a);
+    // 混合颜色
+    const aRGB = hexToRGB(a);
     const bRGB = hexToRGB(b);
     const mixedRGB = aRGB.map((c, i) => Math.round(c + (bRGB[i] - c) * amount)) as [number, number, number];
 
     return rgbToHex(mixedRGB[0], mixedRGB[1], mixedRGB[2], alpha);
   }
 
-     $: mixedBorderColor = mixColors(accentColor1, accentColor2, borderProgress, 0.1 + 0.9 * borderProgress);
+  // 混合计算颜色和透明度
+  $: mixedBorderColor = mixColors(accentColor1, accentColor2, borderProgress, 0.1 + 0.9 * borderProgress);
 
 </script>
 
@@ -127,7 +135,8 @@
     --border-opacity: 0.5;
 
     &:hover {
-      --border-opacity: 0.6;      }
+      --border-opacity: 0.6; // 更亮一点
+    }
   }
 
   &::before {

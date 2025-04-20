@@ -7,7 +7,9 @@
     </div>
 </div>
 <style lang="scss">
-   
+  /*
+    Taken from https://loading.io/css/
+   */
   @import "../../../colors";
   .loader-wrapper {
     position: absolute;

@@ -192,7 +192,7 @@
   white-space: pre-wrap;
 }
 
- 
+/* 淡入淡出动画 */
 .fade {
   opacity: 0;
   transition: opacity 0.3s ease;
