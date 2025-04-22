@@ -268,15 +268,17 @@ function filterModules() {
   }
   function handleBrowserKeyDown(e: KeyboardEvent) {
 
-  const validKeys = /[a-zA-Z0-9]|Arrow|Tab|Enter|Backspace|Delete/;
+  const allowedKeys = /^[a-z0-9]$|^Arrow(Down|Up|Left|Right)$|^Tab$|^Enter$|^Backspace$|^Delete$/i;
 
 
-
+  if (!allowedKeys.test(e.key)) {
+    e.preventDefault();
+    return;
+  }
   if (e.key === "Enter") {
     handleEnterKey();
     e.preventDefault();
   }
-
 
   if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Tab") {
     e.preventDefault();
@@ -598,14 +600,12 @@ function getWeightedRandomPlaceholder(): string {
   background: transparent;
   font-size: 16px;
   color: $text;
-  font-family: 'Product Sans', sans-serif;
 
   &::placeholder {
     color: rgba($text, 0.5);
   }
 }
 
-/* 共用结果容器样式 */
 .results, .history-results {
   border-top: 2px solid rgba($accent, 0.2);
   padding: 0;

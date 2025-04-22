@@ -3,7 +3,7 @@
   import { listen } from "../../../../integration/ws";
   import { getPlayerData } from "../../../../integration/rest";
   import type { ClientPlayerDataEvent, OverlayMessageEvent } from "../../../../integration/events";
-  import type { HUDComponentSettings, PlayerData, TextComponent as TTextComponent } from "../../../../integration/types";
+  import type {  PlayerData, TextComponent as TTextComponent } from "../../../../integration/types";
 
   import Status from "./Status.svelte";
   import Layer from "./Layer.svelte";

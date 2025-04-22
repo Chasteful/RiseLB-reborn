@@ -34,8 +34,8 @@ export let index: number;
   padding: 25px 35px;
   display: grid;
   grid-template-columns: max-content 1fr max-content;
-  justify-items: center;  // 水平居中
-  align-items: center;    // 垂直居中
+  justify-items: center;  
+  align-items: center;  
   cursor: pointer;
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);

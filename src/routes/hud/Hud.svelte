@@ -70,41 +70,44 @@
   
   <div
     class="hud"
-    class:editing-mode={$isEditingHud}
     style="transform: scale({baseScale * manualZoom}); transform-origin: 0 0;"
   >
-    {#each components as c}
-      {#if c.settings.enabled}
-        <div style={c.settings.alignment}>
+  {#each components as c}
+  {#if c.settings.enabled}
+      <div style="{c.settings.alignment}">
           {#if c.name === "Watermark"}
-          <Watermark/>
-      {:else if c.name === "ArrayList"}
-          <ArrayList/>
-      {:else if c.name === "TabGui"}
-          <TabGui/>
-      {:else if c.name === "Notifications"}
-          <Notifications/>
-      {:else if c.name === "TargetHud"}
-          <TargetHud/>
-      {:else if c.name === "Hotbar"}
-          <HotBar/>
-      {:else if c.name === "Scoreboard"}
-          <Scoreboard/>
-      {:else if c.name === "Taco"}
-          <Taco/>
-      {:else if c.name === "Keystrokes"}
-          <Keystrokes/>
-      {:else if c.name === "Effects"}
-          <Effects />
+              <Watermark/>
+          {:else if c.name === "ArrayList"}
+              <ArrayList/>
+          {:else if c.name === "TabGui"}
+              <TabGui/>
+          {:else if c.name === "Notifications"}
+              <Notifications/>
+          {:else if c.name === "TargetHud"}
+              <TargetHud/>
+          {:else if c.name === "BlockCounter"}
+              <BlockCounter/>
+          {:else if c.name === "PointerESP"}
+              <PointerESP/>
+          {:else if c.name === "Hotbar"}
+              <HotBar/>
+          {:else if c.name === "Scoreboard"}
+              <Scoreboard/>
+          {:else if c.name === "Taco"}
+              <Taco/>
+          {:else if c.name === "Keystrokes"}
+              <Keystrokes/>
+          {:else if c.name === "Effects"}
+              <Effects />
           {:else if c.name === "Text"}
-          <p>{c.settings.text}</p>
+              <Text settings={c.settings} />
           {:else if c.name === "Image"}
-            <img alt="" src={c.settings.src} style="scale: {c.settings.scale};" />
+              <img alt="" src="{c.settings.src}" style="scale: {c.settings.scale};">
           {/if}
-        </div>
-      {/if}
-    {/each}
-  </div>
+      </div>
+  {/if}
+{/each}
+</div>
   
   <style lang="scss">
     @import "../../colors.scss";
@@ -117,19 +120,6 @@
       height: 1080px;
       will-change: transform;
       pointer-events: none;
-  
-      > * {
-        pointer-events: auto;
-      }
-  
-      &.editing-mode {
-        filter: brightness(0.7);
-        pointer-events: none;
-  
-        > * {
-          pointer-events: none;
-        }
-      }
     }
   </style>
   

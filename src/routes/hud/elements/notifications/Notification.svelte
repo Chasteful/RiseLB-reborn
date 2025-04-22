@@ -46,31 +46,41 @@
   --error-color: #{mix($red, $text, 70%)};
   --info-color: #{mix($blue, $text, 70%)};
   
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba($base, 0.28);
-  backdrop-filter: blur(8px);
-  border-radius: 14px;
-  width: 320px;
-  padding: 16px;
-  margin-bottom: 12px;
-  border-left: 4px solid var(--accent-color);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+ display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(
+      135deg,
+      rgba($base, 0.6) 0%,
+      rgba(darken($base, 5%), 0.5) 100%
+    );
+    backdrop-filter: blur(12px) brightness(1.1);
+    -webkit-backdrop-filter: blur(12px) brightness(1.1);
+    border-radius: 14px;
+    width: 320px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-left: 4px solid var(--accent-color);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    position: relative;
+    overflow: hidden;
+    color: rgba($text, 0.9);
+  
   .notification::before {
-  content: "";
-  position: relative;
-  overflow: hidden; // 确保粒子不溢出
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-  animation: float-particles 8s infinite ease-in-out;
-  opacity: 0.3;
-  mix-blend-mode: overlay;
-  z-index: 0;
-  border-radius: inherit;
-
+    content: "";
+    position: absolute;
+    overflow: hidden; 
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    animation: float-particles 8s infinite ease-in-out;
+    opacity: 0.3;
+    mix-blend-mode: overlay;
+    z-index: 0;
+    border-radius: inherit;
 
 }
 

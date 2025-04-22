@@ -7,10 +7,6 @@
 
     let playerData: PlayerData | null = null;
     let processedText: string = '';
-
-
-    // svelte-ignore export_let_unused
-export let editing: boolean;
     export let settings: { [name: string]: any };
 
     listen("clientPlayerData", (event: ClientPlayerDataEvent) => {

@@ -1,9 +1,7 @@
 <script lang="ts">
     import { listen } from "../../../integration/ws";
-    import { scale } from "svelte/transition";
     import type { BlockCountChangeEvent, ClientPlayerDataEvent } from "../../../integration/events";
-    import type { HUDComponentSettings, PlayerData } from "../../../integration/types";
-    import { expoInOut } from "svelte/easing";
+    import type { PlayerData } from "../../../integration/types";
     import { elasticOut, quintOut } from "svelte/easing";
          
     let count: number | undefined;
@@ -101,10 +99,11 @@ function easeInQuad(t: number): number {
     }
 </script>
 
+
 {#if count !== undefined}
   <div class="notification" in:pop|global={{ duration: 400 }} out:popOut|global={{ duration: 500 }}>
     <div class="header">
-      <span class="accent">Scaffold</span>
+      <span class="accent">BlockCounter</span>
     </div>
     <div class="info">
       {count} blocks left
@@ -113,83 +112,190 @@ function easeInQuad(t: number): number {
       {/if}
     </div>
     <div class="progress-bar">
-      <div class="progress" style="width: {getProgressPercentage(count)}%"></div>
+      <div class="progress" style="width: {getProgressPercentage(count)}%">
+        <div class="progress-shadow"></div>
+      </div>
     </div>
   </div>
 {/if}
-
 
 <style lang="scss">
   @use "../../../colors.scss" as *;
 
   .notification {
-    background-color: rgba($base, 0.4);
-    border-radius: 16px;
-    padding: 12px;
-    min-width: 200px;
-    color: rgba($text, 0.7);
-    box-shadow: 0px 0px 16px rgba($base, 0.4);
-  
+    background: linear-gradient(
+      135deg,
+      rgba($base, 0.6) 0%,
+      rgba(darken($base, 5%), 0.5) 100%
+    );
+    backdrop-filter: blur(12px) brightness(1.2);
+    -webkit-backdrop-filter: blur(12px) brightness(1.2);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 240px;
+    color: rgba($text, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .notification::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      circle at 50% 0%,
+      rgba($accent-color, 0.15) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .notification:hover::before {
+    opacity: 1;
   }
 
   .header {
     display: flex;
     align-items: center;
     font-size: 16px;
-    font-weight: 900;
-    text-shadow: 0px 0px 10px $accent-color;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
   }
 
   .accent {
     color: $accent-color;
+    text-shadow: 0 0 12px rgba($accent-color, 0.4);
   }
 
   .info {
     font-size: 14px;
-    margin-top: 5px;
+    margin-top: 6px;
+    opacity: 0.9;
+    font-weight: 400;
   }
 
   .progress-bar {
-    margin-top: 10px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    height: 10px;
+    margin-top: 14px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 100px;
+    height: 6px;
     overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
   }
 
   .progress {
-  height: 100%;
-  border-radius: 100px;
+    height: 100%;
+    border-radius: 100px;
+    position: relative;
+    transition: width 0.5s cubic-bezier(0.2, 0.8, 0.4, 1);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        135deg,
+        rgba($accent-color, 0.8) 10%,
+        rgba($accent-color-2, 0.8) 90%
+      );
+      z-index: 1;
+      transition: opacity 0.3s ease;
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 100%
+      );
+      animation: shine 2.5s infinite;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
 
-  box-shadow: 0 0 36px rgba($accent-color, 0.6);
+    &:hover::after {
+      opacity: 1;
+    }
+  }
 
+  .progress-shadow {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 100%;
+    transform: translateY(-50%);
+    border-radius: inherit;
+    box-shadow: 0 0 10px 2px rgba($accent-color, 0.4);
+    opacity: 0;
+    transition: opacity 0.3s ease, box-shadow 0.3s ease;
+    animation: pulseShadow 2s infinite alternate;
+  }
 
-  background: linear-gradient(
-      120deg,
-      rgba($accent-color, 0.5) 25%,
-      rgba($accent-color-2, 0.5) 50%,
-      rgba($accent-color, 0.5) 75%
-    );
-    background-size: 200% 200%;
- animation: flowBorder 6s linear infinite, shadowFlow 6s linear infinite; /* 同步两个动画 */
-}
-@keyframes flowBorder {
-  0% {
-    background-position: 0% 0%;
+  .progress:hover .progress-shadow {
+    opacity: 1;
+    box-shadow: 0 0 15px 3px rgba($accent-color, 0.6);
   }
-  100% {
-    background-position: 200% 200%; /* 延续背景流动，使其无缝循环 */
+
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
   }
-}
-@keyframes shadowFlow {
-  0% {
-    box-shadow: 0 0 36px rgba($accent-color, 0.6); /* 初始阴影 */
+
+  @keyframes pulseShadow {
+    0% {
+      box-shadow: 0 0 10px 2px rgba($accent-color, 0.3);
+    }
+    100% {
+      box-shadow: 0 0 15px 4px rgba($accent-color, 0.5);
+    }
   }
-  50% {
-    box-shadow: 0 0 36px rgba($accent-color-2, 0.6); /* 改变阴影颜色 */
+
+  @keyframes flowBorder {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
-  100% {
-    box-shadow: 0 0 36px rgba($accent-color, 0.6); /* 恢复初始阴影 */
-  }
-}
 </style>
