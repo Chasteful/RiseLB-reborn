@@ -2,7 +2,7 @@
     import Key from "./Key.svelte";
     import {onMount} from "svelte";
     import {getMinecraftKeybinds} from "../../../../integration/rest";
-    import type {HUDComponentSettings, MinecraftKeybind} from "../../../../integration/types";
+    import type { MinecraftKeybind} from "../../../../integration/types";
     import {listen} from "../../../../integration/ws";
 
     let keyForward: MinecraftKeybind | undefined;

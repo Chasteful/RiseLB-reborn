@@ -1,6 +1,6 @@
 <script lang="ts">
     import {listen} from "../../../integration/ws";
-    import type {HUDComponentSettings, PlayerData, Scoreboard} from "../../../integration/types";
+    import type {PlayerData, Scoreboard} from "../../../integration/types";
     import TextComponent from "../../menu/common/TextComponent.svelte";
     import type {ClientPlayerDataEvent} from "../../../integration/events";
 
@@ -34,12 +34,9 @@
 
   .scoreboard {
     min-width: 200px;
-    //position: fixed;
-    //left: 15px;
-    //top: 550px;
+    position: relative;
     border-radius: 16px;
     overflow: hidden;
-    z-index: -1;
     font-size: 14px;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.4);
   }

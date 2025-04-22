@@ -36,7 +36,7 @@
     Module,
     TogglableSetting
   } from "../../integration/types";
-    import { isEditingHud } from "../../integration/hudEdit";
+
   let showOverlay = false;
   let categories: GroupedModules = {};
   let modules: Module[] = [];

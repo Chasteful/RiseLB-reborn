@@ -1,4 +1,13 @@
-import type {Component, ConfigurableSetting, Pointer, PlayerData, Proxy, Screen, Server, TextComponent} from "./types";
+import type {
+    Component,
+    ConfigurableSetting,
+    ItemStack,
+    PlayerData,
+    Proxy,
+    Screen,
+    Server,
+    TextComponent
+} from "./types";
 
 export interface ClickGuiValueChangeEvent {
     configurable: ConfigurableSetting;
@@ -19,8 +28,15 @@ export interface KeyboardKeyEvent {
     screen: Screen | undefined;
 }
 
+export interface MouseButtonEvent {
+    key: string;
+    button: number;
+    action: number;
+    mods: number;
+    screen: Screen | undefined;
+}
+
 export interface ScaleFactorChangeEvent {
-    width(width: any, height: any): number;
     scaleFactor: number;
 }
 
@@ -40,7 +56,7 @@ export interface OverlayMessageEvent {
 export interface NotificationEvent {
     title: string;
     message: string;
-    severity: "INFO" | "SUCCESS" | "ERROR" | "ENABLED" | "DISABLED"|"DOUBLE";
+    severity: "INFO" | "SUCCESS" | "ERROR" | "ENABLED" | "DISABLED";
 }
 
 export interface KeyEvent {
@@ -55,10 +71,6 @@ export interface TargetChangeEvent {
 
 export interface BlockCountChangeEvent {
     count?: number;
-}
-
-export interface PointerInfoEvent {
-    pointers?: Pointer[];
 }
 
 export interface AccountManagerAdditionEvent {
@@ -77,6 +89,16 @@ export interface AccountManagerLoginEvent {
 
 export interface ServerPingedEvent {
     server: Server;
+}
+
+export interface PlayerInventoryEvent {
+    inventory: PlayerInventory;
+}
+
+export interface PlayerInventory {
+    armor: ItemStack[];
+    main: ItemStack[];
+    crafting: ItemStack[];
 }
 
 export interface ProxyAdditionResultEvent {

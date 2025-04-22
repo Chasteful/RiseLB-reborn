@@ -1,63 +1,150 @@
 <script lang="ts">
   import { listen } from "../../../integration/ws";
   import type { ClientPlayerDataEvent } from "../../../integration/events";
-  import type { HUDComponentSettings, StatusEffect } from "../../../integration/types";
-  import { fly } from "svelte/transition";
-  import { expoOut } from "svelte/easing";
+  import type { StatusEffect } from "../../../integration/types";
+  import { fade, fly } from 'svelte/transition';
+  import { expoInOut } from "svelte/easing";
+
 
   let effects: StatusEffect[] = [];
 
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
-    effects = event.playerData.effects;
+  effects = [...event.playerData.effects].sort((a, b) => {
+
+    const lengthDiff = b.localizedName.length - a.localizedName.length;
+    if (lengthDiff !== 0) return lengthDiff;
+
+
+    return b.amplifier - a.amplifier;
   });
+});
 
   function formatTime(duration: number): string {
     return new Date(((duration / 20) | 0) * 1000)
       .toISOString()
       .substring(14, 19);
   }
+
+  function getWarnClass(ticks: number): string {
+    const seconds = ticks / 20;
+    if (seconds < 3) return "warn-1";
+    if (seconds < 10) return "warn-2";
+    if (seconds < 30) return "warn-3";
+    return "";
+  }
 </script>
 
 <div class="effects">
   {#each effects as e}
     <div
-      class="effect"
-      transition:fly={{ duration: 700, y: 50, easing: expoOut }}
+      class="effect {getWarnClass(e.duration)}"
+      transition:fly={{duration: 700, y: 50, easing: expoInOut}}
     >
-      <span class="name" style="color: {'#' + e.color.toString(16)}"
-        >{e.localizedName} {e.amplifier + 1}</span
+    <span 
+        class="name" 
+        style="color: {'#' + e.color.toString(16).padStart(6, '0')}"
+        in:fade={{ delay: 100 }}
       >
-      <span class="duration">{formatTime(e.duration)}</span>
+        {e.localizedName} {e.amplifier + 1}
+      </span>
+      <span 
+        class="duration"
+        in:fade={{ delay: 200 }}
+      >
+        {formatTime(e.duration)}
+      </span>
     </div>
   {/each}
 </div>
-
 <style lang="scss">
   @use "../../../colors.scss" as *;
 
+  .effects {
+    position: relative;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    perspective: 1000px; 
+    gap: -8px;
+    
+  }
+
   .effect {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 18px;
     text-align: left;
-    background-color: rgba($scoreboard-base-color,0.4);
-    padding: 5px 8px;
-    box-shadow:0px 0px 16px $base;
-    text-shadow: 0px 0px 16px $base;
+    border-radius: 8px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    display: flex; 
+    align-items: center;
+    gap: 4px; 
+    transform-origin: right center; /* 从右侧开始变换 */
+    will-change: transform, opacity; /* 优化动画性能 */
+    filter: drop-shadow(4px 4px 16px $mantle);
 
-    //border: $border-thing;
+  
+  &.warn-1 {
+      color: #ff0000; 
+      animation: pulse 0.5s infinite alternate;
+      .duration {
+        background: linear-gradient(135deg, #ff0000, #ff6666);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
 
-    .duration {
-      color: white;
+    &.warn-2 {
+      color: #ff5555; 
+      .duration {
+        background: linear-gradient(135deg, #ff5555, #ff9999);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+
+    &.warn-3 {
+      color: #ff8c00; 
+      .duration {
+        background: linear-gradient(135deg, #ff8c00, #ffbb66);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+
+
+    &:not(.warn-1):not(.warn-2):not(.warn-3) .duration {
+      background: linear-gradient(135deg, $text, $blue);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200% auto;
+      background-position: 0% center;
+      animation: gradientShift 3s ease infinite;
     }
   }
 
-  .effect:first-child {
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% center;
+    }
+    50% {
+      background-position: 100% center;
+    }
+    100% {
+      background-position: 0% center;
+    }
   }
 
-  .effect:last-child {
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+
+  @keyframes pulse {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.7;
+    }
   }
 </style>

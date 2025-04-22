@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, tick } from "svelte";
-    import type { HUDComponentSettings, Module } from "../../../integration/types";
+    import type {  Module } from "../../../integration/types";
     import { getModules } from "../../../integration/rest";
     import { listen } from "../../../integration/ws";
     import { getTextWidth } from "../../../integration/text_measurement";
@@ -11,8 +11,6 @@
     import { expoInOut } from "svelte/easing"; 
 
     let enabledModules: (Module & { prefix: string; formattedName: string; width: number })[] = [];
-
-    let prefixs = new Map(); 
 
 
     async function updateEnabledModules() {

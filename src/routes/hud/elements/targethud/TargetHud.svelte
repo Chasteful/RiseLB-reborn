@@ -1,6 +1,6 @@
 <script lang="ts">
     import { listen } from "../../../../integration/ws.js";
-    import type { HUDComponentSettings, PlayerData } from "../../../../integration/types";
+    import type {  PlayerData } from "../../../../integration/types";
     import { REST_BASE } from "../../../../integration/host";
     import { elasticOut, quintOut } from "svelte/easing";
     import { onMount, onDestroy } from "svelte";

@@ -1,181 +1,132 @@
 <script lang="ts">
     import { listen } from "../../../../integration/ws";
-    import { getClientInfo, getSession } from "../../../../integration/rest";
-    import type { ClientPlayerDataEvent } from "../../../../integration/events";
-    import type { ClientInfo, PlayerData, Session, Server } from "../../../../integration/types";
-    import { onMount } from "svelte";
-    import { tweened } from 'svelte/motion';
-    import { cubicOut } from 'svelte/easing';
-    import { writable } from 'svelte/store';
-    let playerData: PlayerData | null = {
-        position: { x: 0, y: 0, z: 0 },
-    } as PlayerData;
-    let clientInfo: ClientInfo | null = null;
-    let lastX = 0;
-    let lastZ = 0;
-    let session: Session | null = null;
-    const fpsAnimated = tweened(0, { duration: 500, easing: cubicOut });
-
-
-    const fps = writable(0);
-    const bps = tweened(0, { duration: 500, easing: cubicOut });
-    const xPos = tweened(0, { duration: 500, easing: cubicOut });
-    const yPos = tweened(0, { duration: 500, easing: cubicOut });
-    const zPos = tweened(0, { duration: 500, easing: cubicOut });
-
-    function roundToDecimal(value: number, decimal: number) {
-    const rounded = Math.round(value * Math.pow(10, decimal)) / Math.pow(10, decimal);
-    return rounded.toFixed(decimal);
-}
-    
-    function formatCoordinate(value: number): string {
-        return value.toFixed(1);
+    import Notification from "./Notification.svelte";
+    import type { NotificationEvent } from "../../../../integration/events";
+    import { Howl } from "howler";
+    import { elasticOut, bounceOut } from "svelte/easing";
+  
+  
+    interface TNotification {
+      animationKey: number;
+      id: number;
+      title: string;
+      severity: string;
+      message: string;
+      leaving?: boolean;
+      remaining?: number;
     }
-    
-    function getBPS(
-        lastX: number,
-        currentX: number,
-        lastZ: number,
-        currentZ: number,
-        tickrate: number
-    ): number {
-        const deltaX = currentX - lastX;
-        const deltaZ = currentZ - lastZ;
-        const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-        return distanceMoved * tickrate;
-    }
-    async function updateClientInfo() {
-    clientInfo = await getClientInfo();
-    if (clientInfo) {
-        // 使用 Math.floor 确保 FPS 是整数
-        if (clientInfo) {
-        const floored = Math.floor(clientInfo.fps);
-        fps.set(floored);
-        fpsAnimated.set(floored);
-    }
-    }}
-
-    async function updateSession() {
-        session = await getSession();
-    }
-
-
-
-    onMount(async () => {
-        updateClientInfo();
-
-        updateSession();
-
-        setInterval(async () => {
-            updateClientInfo();
-
-            updateSession();
-        }, 1000);
-    });
-
-    listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
-        if (playerData) {
-            lastX = playerData.position.x;
-            lastZ = playerData.position.z;
+  
+    let notifications: TNotification[] = [];
+  
+    const notification = new Howl({ src: ['audio/notifications/notification.mp3'], preload: true });
+    const error = new Howl({ src: ['audio/notifications/error.mp3'], preload: true });
+    const info = new Howl({ src: ['audio/notifications/info.mp3'], preload: true });
+    const success = new Howl({ src: ['audio/notifications/success.ogg'], preload: true });
+  
+    function addNotification(title: string, message: string, severity: string) {
+      let animationKey = Date.now();
+      const id = animationKey;
+  
+      if (severity === "ENABLED" || severity === "DISABLED") {
+        const index = notifications.findIndex(
+          (n) => n.message === message && (n.severity === "ENABLED" || n.severity === "DISABLED")
+        );
+        if (index !== -1) {
+          animationKey = notifications[index].animationKey;
+          notifications.splice(index, 1);
         }
-        playerData = event.playerData;
-        
-        if (playerData) {
-            xPos.set(playerData.position.x);
-            yPos.set(playerData.position.y);
-            zPos.set(playerData.position.z);
-            bps.set(getBPS(lastX, playerData.position.x, lastZ, playerData.position.z, 20));
-        }
+      }
+  
+      notifications = [
+        { animationKey, id, title, message, severity },
+        ...notifications,
+      ];
+      let remaining = 3.0;
+      const newNote: TNotification = {
+        animationKey,
+        id,
+        title,
+        message,
+        severity,
+        remaining,
+      };
+      const interval = setInterval(() => {
+        remaining = +(remaining - 0.1).toFixed(1);
+        notifications = notifications.map(n =>
+          n.id === id ? { ...n, remaining } : n
+        );
+      }, 100);
+  
+      setTimeout(() => {
+        clearInterval(interval);
+        notifications = notifications.map(n =>
+          n.id === id ? { ...n, leaving: true } : n
+        );
+        setTimeout(() => {
+          notifications = notifications.filter(n => n.id !== id);
+        }, 300);
+      }, 3000);
+    }
+  
+    listen("notification", (e: NotificationEvent) => {
+      addNotification(e.title, e.message, e.severity);
+  
+      switch (e.severity) {
+        case "ERROR": error.play(); break;
+        case "INFO": info.play(); break;
+        case "SUCCESS": success.play(); break;
+        default: notification.play(); break;
+      }
     });
-
-    listen("session", async () => {
-        await updateSession();
-    });
-</script>
-
-<style lang="scss">
-    @use "../../../../colors.scss" as *;
-
-    .stats-container {
-        display: flex;
-        flex-direction: column;
-        font-family: monospace;
-        align-items: baseline;
+  
+    function notificationFly(node: Element, { delay = 0, duration = 600 } = {}) {
+      return {
+        delay,
+        duration,
+        easing: elasticOut,
+        css: (t: number, u: number) => `
+          transform: 
+            scale(${0.5 + 0.5 * t * t}) 
+            translateY(${Math.sin(u * Math.PI) * 30}px)
+            rotate(${(1 - t) * 8}deg);
+          opacity: ${t * t};
+          filter: drop-shadow(0 ${u * 10}px ${u * 20}px rgba(0,0,0,0.2));
+        `
+      };
     }
-
-    .stat {
-        display: flex;
-        
-        align-items: center;
-    }
-
-    .label {
-        font-size: 26px;
-        font-weight: bold;
-        text-align: right;
-        background: linear-gradient(135deg, $text, $blue);
-        -webkit-background-clip: text;
-        background-clip: text;
-        font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
-        -webkit-text-fill-color: transparent;
-        background-size: 200% auto;
-        background-position: 0% center;
-        filter: drop-shadow(4px 4px 16px $mantle);
-        animation: gradientShift 3s ease infinite;
-    }
-
-    .value {
-        font-size: 26px;
-        font-weight: bold;
-        display: inline-block;
-        text-align: left;
-        background: linear-gradient(135deg, $text, $blue);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(4px 4px 16px $mantle);
-        font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
-
-        background-size: 200% auto;
-        background-position: 0% center;
-        animation: gradientShift 3s ease infinite;
-    }
-
-    @keyframes gradientShift {
-        0% { background-position: 0% center; }
-        50% { background-position: 100% center; }
-        100% { background-position: 0% center; }
-    }
-</style>
-
-<div class="stats-container">
-
-    {#if clientInfo}
-        <div class="stat">
-            <span class="label">FPS: </span> 
-            <span class="value">{$fps.toString().padStart(3, " ")}</span>
-        </div>
-    {/if}
-
-
-    {#if playerData}
-        <div class="stat">
-            <span class="label">BPS: </span> 
-            <span class="value">
-                {roundToDecimal($bps, 2).toString().padStart(6, " ")}
-            </span>
-        </div>
-    {/if}
-
-
-    {#if playerData}
-    <div class="stat">
-        <span class="label">XYZ: </span>
-        <span class="value">
-            {formatCoordinate($xPos)},
-            {formatCoordinate($yPos)},
-            {formatCoordinate($zPos)}
-        </span>
-    </div>
-    {/if}
-</div>
+    function notificationOut(node: Element, { delay = 0, duration = 300 } = {}) {
+    return {
+      delay,
+      duration,
+      css: (t: number) => {
+               const eased = easeInBack(1 - t);        
+        return `
+          transform: 
+            translateY(${eased * 100}px) 
+            scale(${1 - eased * 0.5});
+          opacity: ${1 - eased};
+          transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+          transform-origin: top center;
+        `;
+      }
+    };
+  }
+  
+   function easeInBack(t: number): number {
+    const c1 = 1.5;    const c3 = c1 + 1;
+    return c3 * t * t * t - c1 * t * t;
+  }
+  
+  </script>
+  
+  <div class="notifications">
+    {#each notifications as { title, message, severity, animationKey, leaving, remaining } (animationKey)}
+      <div
+        in:notificationFly
+        out:notificationOut
+      >
+        <Notification {title} {message} {severity} {remaining} />
+      </div>
+    {/each}
+  </div>
+  

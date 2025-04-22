@@ -46,7 +46,7 @@
   --error-color: #{mix($red, $text, 70%)};
   --info-color: #{mix($blue, $text, 70%)};
   
- display: flex;
+    display: flex;
     align-items: center;
     gap: 12px;
     background: linear-gradient(
@@ -68,7 +68,6 @@
     position: relative;
     overflow: hidden;
     color: rgba($text, 0.9);
-  
   .notification::before {
     content: "";
     position: absolute;
