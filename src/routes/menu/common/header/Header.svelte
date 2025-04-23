@@ -53,7 +53,9 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="logo-container" on:click={handleClick}>
-    <img class="logo" src="img/lb-logo.svg" alt="logo" />
+    <!-- 主图层只是透明，仍然占位 -->
+    <img class="logo {glitchActive ? 'transparent' : ''}" src="img/lb-logo.svg" alt="logo" />
+    
     {#if glitchActive}
       <img bind:this={redLayer} class="logo glitch-layer red" src="img/lb-logo.svg" alt="logo" />
       <img bind:this={blueLayer} class="logo glitch-layer blue" src="img/lb-logo.svg" alt="logo" />
@@ -77,17 +79,17 @@
   .logo-container {
     position: relative;
     cursor: pointer;
-    border: 0;
-    outline: 0;
-    -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background: transparent !important;
   }
 
   .logo {
     height: 125px;
     user-select: none;
+    display: block;
+    transition: opacity 0.2s ease;
+  }
+
+  .logo.transparent {
+    opacity: 0; 
   }
 
   .glitch-layer {
@@ -95,8 +97,8 @@
     top: 0;
     left: 0;
     height: 125px;
-    mix-blend-mode: lighten;
     pointer-events: none;
+    mix-blend-mode: lighten;
   }
 
   .glitch-layer.red {

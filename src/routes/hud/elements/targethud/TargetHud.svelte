@@ -117,7 +117,7 @@ function getRandomThemeColor() {
     return `rgb(${r}, ${g}, ${b})`;
 }
 const themeColor1 = { r: 173, g: 83, b: 137 };   const themeColor2 = { r: 60, g: 16, b: 83 };     const startColor = { r: 173, g: 83, b: 137 };   const endColor = { r: 60, g: 16, b: 83 };      
-function spawnParticles(hurtFactor = 1) {
+function spawnParticles(hurtTimeTick = 1) {
     const now = Date.now();
     if (now - lastParticleSpawnTime < PARTICLE_SPAWN_COOLDOWN) return;
     lastParticleSpawnTime = now;
@@ -130,7 +130,7 @@ function spawnParticles(hurtFactor = 1) {
     const availableSlots = MAX_PARTICLES - particles.length;
     if (availableSlots <= 0) return;
 
-    const count = Math.min(Math.floor(PARTICLE_COUNT * hurtFactor), availableSlots);
+    const count = Math.min(Math.floor(PARTICLE_COUNT * hurtTimeTick), availableSlots);
     const avatarRect = avatar.getBoundingClientRect();
     const hudRect = hud.getBoundingClientRect();
     const globalOffset = 16;  
@@ -139,7 +139,7 @@ function spawnParticles(hurtFactor = 1) {
 
     for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = 0.5 + Math.random() * 2 * hurtFactor;
+        const speed = 0.5 + Math.random() * 2 * hurtTimeTick;
         const size = 3 + Math.random() * 7;
         const lifetimeOffset = Math.random() * 500;
         const particleColor = getRandomThemeColor();
@@ -254,7 +254,7 @@ onDestroy(() => {
   >
     <div class="main-wrapper">
       <!-- Avatar -->
-      <div class="avatar {attacked ? 'attacked' : ''} {simulatedHurtTime > 0 ? 'hurt' : ''}">
+      <div class="avatar {attacked || simulatedHurtTime > 0 ? 'attacked' : ''}">
         <img
           src="{REST_BASE}/api/v1/client/resource/skin?uuid={target.uuid}"
           alt="avatar"
@@ -420,7 +420,7 @@ onDestroy(() => {
     animation: hitScale 0.4s ease-out;
   }
 
-  &.hurt {
+  &.attacked {
     &::after {
       content: "";
       position: absolute;

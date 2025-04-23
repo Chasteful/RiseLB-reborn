@@ -5,7 +5,47 @@
   export let accentColor1 = 'rgb(173, 83, 137)';
   export let accentColor2 = 'rgb(60, 16, 83)';
   export let baseColor = '#ffffff';
+  let redLayer: HTMLImageElement;
+  let blueLayer: HTMLImageElement;
+  let intervalId: ReturnType<typeof setInterval>;
+  let timeoutId: ReturnType<typeof setTimeout>;
 
+  import { onMount, onDestroy } from 'svelte';
+
+  function startGlitchLoop() {
+    const layers = [redLayer, blueLayer].filter(Boolean) as HTMLImageElement[];
+
+    intervalId = setInterval(() => {
+      layers.forEach((layer) => {
+        const tx = Math.random() * 20 - 10;
+        const ty = Math.random() * 20 - 10;
+        layer.style.transform = `translate(${tx}px, ${ty}px)`;
+
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const w = Math.random() * 20 + 20;
+        const h = Math.random() * 20 + 20;
+        layer.style.clipPath = `polygon(${x}% ${y}%, ${x + w}% ${y}%, ${x + w}% ${y + h}%, ${x}% ${y + h}%)`;
+      });
+
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        layers.forEach((layer) => {
+          layer.style.transform = '';
+          layer.style.clipPath = '';
+        });
+      }, 300); // 每次 glitch 的持续时间
+    }, 1000); // glitch 循环频率
+  }
+
+  onMount(() => {
+    startGlitchLoop();
+  });
+
+  onDestroy(() => {
+    clearInterval(intervalId);
+    clearTimeout(timeoutId);
+  });
   // Generate random delays and durations
   const delays = Array(8).fill(0).map(() => Math.random() * 100);
   const durations = Array(8).fill(0).map(() => 100 + Math.random() * 300);
@@ -46,6 +86,10 @@
   
   <div class="holographic-effect" 
        style={`animation-delay: ${delays[6]}ms; animation-duration: ${durations[6]}ms`}></div>
+
+  <img bind:this={redLayer} class="layer glitch-dynamic red" src={src} alt="glitch-red" />
+  <img bind:this={blueLayer} class="layer glitch-dynamic blue" src={src} alt="glitch-blue" />
+
 </div>
 
 <style>
@@ -87,7 +131,15 @@
     animation: glitch-effect 0.1s infinite, zoom-blur 1s infinite;
     clip-path: polygon(0 0, 100% 0, 100% 60%, 0 60%);
   }
+  .glitch-dynamic.red {
+    filter: drop-shadow(-2px 0 0 var(--accent1));
+    mix-blend-mode: lighten;
+  }
 
+  .glitch-dynamic.blue {
+    filter: drop-shadow(2px 0 0 var(--accent2));
+    mix-blend-mode: lighten;
+  }
   .glitch-partial {
     z-index: 5;
     opacity: 0;
