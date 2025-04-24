@@ -80,8 +80,7 @@
         <TargetHud/>
     {:else if c.name === "BlockCounter"}
         <BlockCounter/>
-    {:else if c.name === "Hotbar"}
-        <HotBar/>
+
     {:else if c.name === "Scoreboard"}
         <Scoreboard/>
     {:else if c.name === "ArmorItems"}
@@ -119,7 +118,10 @@
         {/if}
     {/each}
 </div>
-  
+<div style="position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);">
+  <HotBar/>
+</div>
+
   <style lang="scss">
     @import "../../colors.scss";
   
