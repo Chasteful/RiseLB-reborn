@@ -59,6 +59,7 @@
         settings: (c.settings)
       }));
     });
+    $: hotbarEnabled = components.find(c => c.name === "Hotbar")?.settings.enabled ?? false;
   </script>
   
   <div
@@ -117,10 +118,12 @@
             </div>
         {/if}
     {/each}
-</div>
-<div style="position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);">
-  <HotBar/>
-</div>
+</div >
+{#if hotbarEnabled}
+  <div style="position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);">
+    <HotBar/>
+  </div>
+{/if}
 
   <style lang="scss">
     @import "../../colors.scss";
