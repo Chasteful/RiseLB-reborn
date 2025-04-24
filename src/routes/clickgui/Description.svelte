@@ -1,125 +1,76 @@
 <script lang="ts">
-  import { description, type TDescription } from "./clickgui_store";
-  import { onMount, onDestroy } from "svelte";
-  import { cubicOut, quintOut } from "svelte/easing";
-  import { tweened } from "svelte/motion";
-    import { fade, fly } from "svelte/transition";
+  import {fly} from "svelte/transition";
+  import {description, resolutionScale, type TDescription} from "./clickgui_store";
 
   let data: TDescription | null = null;
-  let visibleText = '';
-  let timer: ReturnType<typeof setInterval> | null = null;
-  let mouseX = 0;
-  let mouseY = 0;
-  
-     const opacity = tweened(0, { duration: 200, easing: quintOut });
-  const scale = tweened(0.9, { duration: 200, easing: quintOut });
-  const slide = tweened(-10, { duration: 200, easing: quintOut });
+  let scale: number = 1;
 
   description.subscribe((v) => {
-    if (v) {
-             data = v;
-      opacity.set(1);
-      scale.set(1);
-      slide.set(0);
-      startRevealText(v.description);
-    } else if (data) {               opacity.set(0);
-      scale.set(0.9);
-      slide.set(-10);
-      startHideText().then(() => {
-        data = null;        });
-    }
+      data = v;
   });
-
-  function updateMouse(e: MouseEvent) {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  }
-
-  function startRevealText(text: string) {
-    if (timer) clearInterval(timer);
-    visibleText = '';
-    let i = 0;
-    timer = setInterval(() => {
-      if (i < text.length) {
-        visibleText += text.charAt(i);
-        i++;
-      } else {
-        clearInterval(timer!);
-      }
-    }, 15);
-  }
-
-  function startHideText(): Promise<void> {
-    return new Promise(resolve => {
-      if (timer) clearInterval(timer);
-      let i = visibleText.length;
-      timer = setInterval(() => {
-        if (i > 0) {
-          visibleText = visibleText.slice(0, i - 1);
-          i--;
+  
+  resolutionScale.subscribe((v) => {
+      scale = v;
+  });
+  let element: HTMLElement | null = null;
+  let anchor: "right" | "left" = "right";
+  let left = 0;
+$: {
+    if (data?.x !== undefined && element !== null) {
+        anchor = data.anchor;
+        if (data.anchor === "left") {
+            left = data.x - element.clientWidth - 20;
         } else {
-          clearInterval(timer!);
-          resolve();
+            left = data.x + 20;
         }
-      }, 15);
-    });
-  }
-
-  onMount(() => {
-    window.addEventListener("mousemove", updateMouse);
-  });
-
-  onDestroy(() => {
-    window.removeEventListener("mousemove", updateMouse);
-    if (timer) clearInterval(timer);
-  });
+    }
+}
 </script>
 
-{#if data}
-  <div
-    class="description-wrapper"
-    style="top: {mouseY + 20}px; left: {mouseX + 10}px;"
-
-    out:fade={{ duration: 300, easing: cubicOut }}>
-    <div 
-      class="description"
-      style="opacity: {$opacity}; transform: scale({$scale}) translateX({$slide}px);"
-    >
-      <div class="text">{visibleText}</div>
-    </div>
-  </div>
-{/if}
+{#key data}
+  {#if data !== null}
+      <div transition:fly|global={{duration: 200,  x: anchor === "right" ? -15 : 15}} class="description-wrapper"
+           style="top: {data.y}px; left: {data.x + 20}px; transform: translateY(-50%) scale({scale})"bind:this={element}>
+           <div class="description" class:right={anchor === "left"}>
+              <div class="text">{data.description}</div>
+          </div>
+      </div>
+  {/if}
+{/key}
 
 <style lang="scss">
-  @import "../../colors.scss";
-  .description-wrapper {
-    position: fixed;
-    z-index: 9999999;
-    pointer-events: none;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    transform: scale(0.6);
-    transform-origin: top left;
-  }
+@use "../../colors.scss" as *;
 
-  .description {
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    background-color: rgba(30, 30, 30, 0.3);
-    border-radius: 10px;
-    padding: 6px 10px;
-    font-size: 14px;
-    color: white;
-    box-shadow: 
-      0 0 8px rgba($accent-color, 0.4), 
-      inset 0 0 6px rgba($accent-color-2, 0.2);
-    max-width: 300px;
-    will-change: transform, opacity;
-    transform-origin: top left;
-  }
+.description-wrapper {
+  position: fixed;
+  z-index: 999999999999;
+  transform-origin: left center; 
+}
 
-  .text {
-    contain: content;
+.description {
+  position: relative;
+  border-radius: 5px;
+  background-color: rgba($base, .9);
+  filter: drop-shadow(0 0 10px rgba($base, 0.5));
+
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid rgba($base, .9);
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
   }
+}
+
+.text {
+  font-size: 12px;
+  padding: 10px;
+  color: $text;
+}
 </style>

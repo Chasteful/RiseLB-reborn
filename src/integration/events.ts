@@ -63,6 +63,7 @@ export interface KeyEvent {
     key: string;
     action: number;
     mods: number;
+    
 }
 
 export interface TargetChangeEvent {

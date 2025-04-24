@@ -109,11 +109,8 @@
       });
     }
   };
-  function enterHudEditor() {
-  isClickGuiOpen.set(false);
-  isEditingHud.set(true);
-  openScreen("hud"); 
-}
+
+
   onMount(async () => {
   const gameWindow = await getGameWindow();
   minecraftScaleFactor = gameWindow.scaleFactor;
@@ -183,7 +180,12 @@
   {/each}
 </div>
 
-
+  <!-- 搜索框 -->
+  {#if $showSearch}
+    <div transition:fade={{ duration: 300, easing: cubicOut }}>
+      <Search modules={structuredClone(modules)} />
+    </div>
+  {/if}
 <Description />
 
 <style lang="scss">

@@ -56,10 +56,9 @@
     <!-- 主图层只是透明，仍然占位 -->
     <img class="logo {glitchActive ? 'transparent' : ''}" src="img/lb-logo.svg" alt="logo" />
     
-    {#if glitchActive}
-      <img bind:this={redLayer} class="logo glitch-layer red" src="img/lb-logo.svg" alt="logo" />
-      <img bind:this={blueLayer} class="logo glitch-layer blue" src="img/lb-logo.svg" alt="logo" />
-    {/if}
+
+    <img bind:this={redLayer} class="logo glitch-layer red {glitchActive ? 'visible' : ''}" src="img/lb-logo.svg" alt="logo" />
+    <img bind:this={blueLayer} class="logo glitch-layer blue {glitchActive ? 'visible' : ''}" src="img/lb-logo.svg" alt="logo" />
   </div>
 
   <Notifications />
@@ -91,16 +90,19 @@
   .logo.transparent {
     opacity: 0; 
   }
-
   .glitch-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 125px;
-    pointer-events: none;
-    mix-blend-mode: lighten;
-  }
-
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 125px;
+  pointer-events: none;
+  mix-blend-mode: lighten;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+.glitch-layer.visible {
+  opacity: 1;
+}
   .glitch-layer.red {
     filter: drop-shadow(-2px 0 0 $accent-color);
   }

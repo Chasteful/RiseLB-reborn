@@ -9,6 +9,7 @@
   import { quintOut } from 'svelte/easing';
   import { onMount, onDestroy } from "svelte";
   import { showResults } from "./clickgui_store";
+  import { RevealEffects } from '../../Js/revealDirect.js';
   import { writable } from 'svelte/store';
   export let modules: Module[];
   let wrapperRect: DOMRect;
@@ -16,6 +17,7 @@
   let resultElements: HTMLElement[] = [];
   let searchContainerElement: HTMLElement;
   let searchInputElement: HTMLElement;
+  let searchWrapperElement : HTMLElement;
   let query: string = "";
   let localFiltered: Module[] = [];
   let selectedIndex = -1;
@@ -24,6 +26,7 @@
   let autoFocus: boolean = true;
   let clickOutsideCount = 0;
   let placeholder = ""; 
+  
   let showHistory = false;   function clearAllHistory() {
     searchHistory.set([]);
   }
@@ -293,7 +296,11 @@ function filterModules() {
   }
 
   onMount(() => {
-  
+    const FRDirect = new RevealEffects("#search", {
+    selector: searchWrapperElement,  // This will apply effects to the search container
+    borderGradientSize: 60,
+    borderLightColor: "rgba(173, 83, 137, 0.5)",
+  });
   const interval = setInterval(() => {
     if (!searchInputElement.matches(':focus')) {
       placeholder = getWeightedRandomPlaceholder();
@@ -305,7 +312,15 @@ function filterModules() {
     placeholder = getWeightedRandomPlaceholder();
     if (autoFocus) searchInputElement.focus();
   };
+  // Optional: Example to trigger the effect on focus
+  searchInputElement.addEventListener('focus', () => {
+    FRDirect.applyEffect(); // Assuming `applyEffect` is a method in RevealEffects
+  });
 
+  // Optional: Example to reset the effect when the search container loses focus
+  searchInputElement.addEventListener('blur', () => {
+    FRDirect.removeEffect(); // Assuming `removeEffect` is a method to reset the effect
+  });
   fetchSettings();
 
   
@@ -368,8 +383,11 @@ function getWeightedRandomPlaceholder(): string {
   on:mouseenter={() => isSearchFocused = true}
   on:mouseleave={() => isSearchFocused = false}
   bind:this={searchContainerElement}
+  
 >
-  <div class="input-wrapper" class:focus-visible={isSearchFocused}>
+  <div class="input-wrapper"
+   class:focus-visible={isSearchFocused}
+   bind:this={searchWrapperElement}>
     <!-- svelte-ignore element_invalid_self_closing_tag -->
     <button
       class="search-icon"
@@ -479,48 +497,41 @@ function getWeightedRandomPlaceholder(): string {
 .input-wrapper {
   display: flex;
   align-items: center;
-  position: relative;
-  background: rgba(255, 255, 255, 0.08);   border-radius: 28px;   padding: 10px 24px;
-  transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);   border: 1px solid rgba(255, 255, 255, 0.1);   backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  padding: 10px 24px;
+  transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+  border: 1px solid transparent;
+  backdrop-filter: blur(12px) saturate(180%);
   overflow: hidden;
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.15),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05); 
-    &::before {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+
+  &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      transparent 30%
-    );
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 30%);
     opacity: 0;
     transition: opacity 0.4s ease-out;
     pointer-events: none;
-    z-index: -1;   }
+    z-index: -1;
+  }
 
-    &:hover {
+  &:hover {
     &::before {
       opacity: 0.6;
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.12) 0%,
-        transparent 50%
-      );
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 50%);
     }
   }
 
-    &:focus-within {
+  &:focus-within {
     &::before {
       opacity: 1;
-      background: linear-gradient(
-        135deg,
-        rgba($accent-color, 0.12) 0%,          transparent 70%                      );
-      transition: 
-        opacity 0.3s ease-out,
-        background 0.4s ease-out;          }
+      background: linear-gradient(135deg, rgba($accent-color, 0.12) 0%, transparent 70%);
+      transition: opacity 0.3s ease-out, background 0.4s ease-out;
+    }
   }
+
 
 
         .search-input::placeholder {

@@ -1,95 +1,118 @@
 <script lang="ts">
-    import {notification, type TNotification} from "./notification_store";
-    import {onMount} from "svelte";
+  import { notification, type TNotification } from "./notification_store";
+  import { tweened } from "svelte/motion";
+  import { cubicOut } from "svelte/easing";
 
-    interface NotificationWithId {
-        notification: TNotification;
-        id: number;
-    }
+  let activeNotification: TNotification | null = null;
+  let visible = false;
+  let timeoutId: ReturnType<typeof setTimeout>;
+  let progress = tweened(100, { duration: 0, easing: cubicOut });
 
-    let notifications: NotificationWithId[] = [];
+  notification.subscribe((v) => {
+      if (!v) {
+          visible = false;
+          return;
+      }
 
-    onMount(() => {
-       notifications = [];
-    });
+      activeNotification = v;
+      visible = true;
 
-    notification.subscribe((v) => {
-        if (!v) {
-            return;
-        }
-        const id = Date.now();
-        const n = {
-            notification: v,
-            id
-        };
-        notifications = [...notifications, n];
-        setTimeout(() => {
-            notifications = notifications.filter(n => n.id !== id);
-        }, (v?.delay ?? 3) * 1000);
-    });
+      progress.set(100, { duration: 0 });
+      progress.set(0, {
+          duration: (v?.delay ?? 3) * 1000,
+          easing: cubicOut,
+      });
+
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+          visible = false;
+      }, (v?.delay ?? 3) * 1000);
+  });
 </script>
 
-<div class="notifications">
-    {#each notifications as n (n.id)}
-        <div class="notification">
-            <div class="icon" class:error={n.notification.error}>
-                <img src="img/hud/notification/icon-info.svg" alt="info">
-            </div>
-            <div class="title">{n.notification.title}</div>
-            <div class="message">{n.notification.message}</div>
-        </div>
-    {/each}
+<div class="dynamic-island">
+  <div class="notification" class:error={activeNotification?.error}>
+      <div class="icon">
+          <img src="img/hud/notification/icon-info.svg" alt="info" />
+      </div>
+      <div class="text">
+          {#if visible && activeNotification}
+              <div class="title">{activeNotification.title}</div>
+              <div class="message">{activeNotification.message}</div>
+          {/if}
+      </div>
+      <div class="progress" style="width: {$progress}%;"></div>
+  </div>
 </div>
 
 <style lang="scss">
-  @use "../../../../colors.scss" as *;
+@use "../../../../colors.scss" as *;
 
-  .notifications {
-    display: grid;
-    grid-template-columns: 1fr;
+.dynamic-island {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.notification {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: rgba($base, 0.68);
+  border-radius: 9999px;
+  padding: 10px 20px;
+  min-width: 350px;
+  max-width: 90vw;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+
+  &.error {
+      background-color: rgba($menu-error-color, 0.9);
   }
 
-  .notification {
-    grid-row-start: 1;
-    grid-column-start: 1;
-    background-color: rgba($base, 0.68);
-    border-radius: 5px;
-    display: grid;
-    grid-template-areas:
-        "a b"
-        "a c";
-    grid-template-columns: max-content 1fr;
-    overflow: hidden;
-    padding-right: 10px;
-    min-width: 350px;
-
-    .title {
-      color: $text;
-      font-weight: 600;
-      font-size: 18px;
-      grid-area: b;
-      align-self: flex-end;
-    }
-
-    .message {
-      color: $overlay0;
-      font-weight: 500;
-      grid-area: c;
-    }
-
-    .icon {
-      grid-area: a;
-      height: 65px;
-      width: 65px;
+  .icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 9999px;
       background-color: $accent;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: 10px;
 
-      &.error {
-        background-color: $menu-error-color;
+      img {
+          width: 24px;
+          height: 24px;
       }
-    }
   }
+
+  .text {
+      display: flex;
+      flex-direction: column;
+
+      .title {
+          color: $text;
+          font-weight: 600;
+          font-size: 16px;
+      }
+
+      .message {
+          color: $overlay0;
+          font-size: 14px;
+      }
+  }
+
+  .progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: white;
+      border-radius: 1px;
+      transition: width 0.3s ease;
+  }
+}
 </style>

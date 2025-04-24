@@ -71,6 +71,33 @@ listen("key", (e: KeyEvent) => {
   overflow: hidden;
   border-radius: 12px;
   transition: box-shadow 0.1s ease;
+  background: linear-gradient(
+    135deg,
+    rgba($base, 0.6) 0%,
+    rgba(darken($base, 5%), 0.5) 100%
+  );
+  backdrop-filter: blur(12px) brightness(1.2);
+  -webkit-backdrop-filter: blur(12px) brightness(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at 50% 0%,
+      rgba($accent-color, 0.15) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.4, 1.2);
+  }
+
 
   &:active {
     box-shadow: 0 0 10px rgba($key-color, 0.6) inset;
@@ -100,6 +127,7 @@ listen("key", (e: KeyEvent) => {
     z-index: 1;
     transform-origin: center;
     pointer-events: none;
+    transform: scale(0.95);
   }
 
   &.active::after {

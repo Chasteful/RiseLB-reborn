@@ -161,9 +161,7 @@ function easeInQuad(t: number): number {
     transition: opacity 0.5s ease;
   }
 
-  .notification:hover::before {
-    opacity: 1;
-  }
+
 
   .header {
     display: flex;

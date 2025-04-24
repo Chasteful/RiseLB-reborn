@@ -74,19 +74,26 @@
   });
 
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
-      if (playerData) {
-          lastX = playerData.position.x;
-          lastZ = playerData.position.z;
-      }
-      playerData = event.playerData;
-      
-      if (playerData) {
-          xPos.set(playerData.position.x);
-          yPos.set(playerData.position.y);
-          zPos.set(playerData.position.z);
-          bps.set(getBPS(lastX, playerData.position.x, lastZ, playerData.position.z, 20));
-      }
-  });
+  if (playerData) {
+    lastX = playerData.position.x;
+    lastZ = playerData.position.z;
+  }
+
+  playerData = event.playerData;
+
+  if (playerData) {
+    xPos.set(playerData.position.x);
+    yPos.set(playerData.position.y);
+    zPos.set(playerData.position.z);
+
+    const calculatedBps = getBPS(lastX, playerData.position.x, lastZ, playerData.position.z, 20);
+
+
+    if (calculatedBps <= 200) {
+      bps.set(calculatedBps);
+    }
+  }
+});
 
   listen("session", async () => {
       await updateSession();

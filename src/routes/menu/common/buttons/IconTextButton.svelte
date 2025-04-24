@@ -21,41 +21,49 @@
     @use "../../../../colors.scss" as *;
 
     .icon-text-button {
-      display: flex;
-      border: none;
+  display: flex;
+  align-items: center;
+  padding: 8px 20px;
+  border-radius: 14px;
+  background: rgba($base, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.03);
+  font-size: 24px;
+  color: $text;
+  transition: all 0.2s ease;
 
-      border-radius: 16px;
-      border: 1px solid rgba(white, 0.1);
-      background: rgba($base, 0.6);
-      align-items: center;
-      overflow: hidden;
-      transition: ease opacity .2s, transform .3s ease;
+  &:not([disabled]):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2),
+                0 0 6px rgba(255, 255, 255, 0.05);
+  }
 
-      &:not([disabled]):hover {
-        &:hover {
-          cursor: pointer;
-          transform: translateY(-4px);
-        }
-      }
+  &[disabled] {
+    opacity: 0.4;
+    pointer-events: none;
+  }
 
-      &[disabled] {
-        opacity: .6;
-      }
+  .icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(white, 0.05);
+    border-radius: 8px;
+    margin-right: 10px;
+
+    img {
+      width: 60%;
     }
+  }
 
-    .icon {
-      height: 58px;
-      width: 58px;
-      background: rgba($crust, 0.75);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  .title {
+    flex: 1;
+    white-space: nowrap;
+    text-shadow: 0 0 3px rgba(0,0,0,0.2);
+  }
+}
 
-    .title {
-      font-size: 20px;
-      font-weight: 500;
-      color: $text;
-      padding: 0 30px;
-    }
 </style>
