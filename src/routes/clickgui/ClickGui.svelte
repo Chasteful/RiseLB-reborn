@@ -154,7 +154,7 @@
      <!-- svelte-ignore element_invalid_self_closing_tag -->
      <div class="elegant-overlay" />
    {/if}
-  <!-- 提示文字 -->
+
   {#if !$showSearch}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -167,25 +167,20 @@
     </div>
   {/if}
 
-  <!-- 搜索框 -->
+
   {#if $showSearch}
     <div transition:fade={{ duration: 300, easing: cubicOut }}>
       <Search modules={structuredClone(modules)} />
     </div>
   {/if}
 
-  <!-- 其他内容 -->
+
   {#each Object.entries(categories) as [category, modules], panelIndex}
     <Panel {category} {modules} {panelIndex} />
   {/each}
 </div>
 
-  <!-- 搜索框 -->
-  {#if $showSearch}
-    <div transition:fade={{ duration: 300, easing: cubicOut }}>
-      <Search modules={structuredClone(modules)} />
-    </div>
-  {/if}
+
 <Description />
 
 <style lang="scss">
@@ -212,23 +207,22 @@
   position: fixed;
   inset: 0;
   z-index: 998;
-  pointer-events: auto; // 允许点击交互
-  
-  // 渐变光晕效果
+  pointer-events: auto; 
+
   background: radial-gradient(
     ellipse at center,
     rgba(0, 0, 0, 0) 0%,
     rgba(0, 0, 0, 0.5) 100%
   );
   
-  // 边缘光效
+ 
   box-shadow: inset 0 0 60px 20px rgba(255, 255, 255, 0.03);
   
-  // 高级模糊效果
+
   backdrop-filter: blur(12px) brightness(0.95);
   -webkit-backdrop-filter: blur(12px) brightness(0.95);
   
-  // 微妙的纹理
+
   &::before {
     content: "";
     position: absolute;
@@ -238,11 +232,11 @@
       linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.02) 100%);
   }
   
-  // 优雅的入场动画
+
   opacity: 0;
   animation: elegant-appear 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   
-  // 边缘高光
+ 
   &::after {
     content: "";
     position: absolute;
@@ -264,7 +258,7 @@
 }
 
 
-.hud-edit-button {
+/*.hud-edit-button {
   position: absolute;
   top: 30px;
   right: 30px;
@@ -282,7 +276,7 @@
     background: rgba($accent-color, 0.3);
     transform: scale(1.05);
   }
-}
+}*/
   .ctrl-f-tip {
   position: absolute;
   bottom: 150px;

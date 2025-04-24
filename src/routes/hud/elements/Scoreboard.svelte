@@ -86,7 +86,7 @@
   {#if scoreboard}
       <div class="scoreboard-section"transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
           {#if scoreboard.header}
-          <div class="gradient-separator"></div>
+    
               <div class="header">
                   <TextComponent fontSize={16} allowPreformatting={true} textComponent={scoreboard.header}/>
               </div>
