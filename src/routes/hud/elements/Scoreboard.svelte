@@ -73,7 +73,7 @@
 
 <div class="combined-container">
   {#if enabledModules.length > 0}
-      <div class="arraylist-section"id="arraylist">
+      <div class="arraylist-section"id="arraylist"transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
           {#each enabledModules as { formattedName, prefix, name } (name)}
               <div class="module" id="module-name" animate:flip={{ duration: 200 }} in:fly={{ x: 50, duration: 200 }}>
                 {formattedName}{#if prefix}&nbsp;<span class="prefix">{prefix}</span>{/if}
@@ -84,7 +84,7 @@
   {/if}
 
   {#if scoreboard}
-      <div class="scoreboard-section">
+      <div class="scoreboard-section"transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
           {#if scoreboard.header}
           <div class="gradient-separator"></div>
               <div class="header">
