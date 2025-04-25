@@ -5,6 +5,7 @@
   import { listen } from "../../../integration/ws";
   import { getPlayerData } from "../../../integration/rest";
   import { onMount } from "svelte";
+    import { elasticOut } from "svelte/easing";
 
   let playerData: PlayerData | null = null;
   let count: number | undefined;
@@ -26,10 +27,50 @@
   function isAirItem(identifier: string): boolean {
     return identifier.includes("air");
   }
+  function FadeIn(node: Element, { delay = 0, duration = 200 } = {}) {
+    return {
+        delay,
+        duration,
+        css: (t: number) => {
+            const eased = easeInBack(t);
+            return `
+                transform: 
+                    scale(${1 - (1 - t) * 0.5});
+                opacity: ${eased};
+                transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+                transform-origin:center;
+            `;
+        }
+    };
+}
+  
+    function FadeOut(node: Element, { delay = 0, duration = 200 } = {}) {
+    return {
+      delay,
+      duration,
+      css: (t: number) => {
+               const eased = easeInBack(1 - t);        
+        return `
+          transform: 
+            scale(${1 - eased * 0.5});
+          opacity: ${1 - eased};
+          transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+          transform-origin: center;
+        `;
+      }
+    };
+  }
+  
+   function easeInBack(t: number): number {
+    const c1 = 1.5;    const c3 = c1 + 1;
+    return c3 * t * t * t - c1 * t * t;
+  }
 </script>
 
 {#if count !== undefined}
-  <div class="hud">
+  <div class="hud"
+  in:FadeIn|global={{ duration: 200 }}
+  out:FadeOut|global={{ duration: 200 }}>
     <div class="blocks-icon">
       {#if playerData?.mainHandStack && !isAirItem(playerData.mainHandStack.identifier)}
         <div class="item-box">
@@ -86,7 +127,7 @@
     position: relative;
     width: 80px;
     padding: 8px 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    background: rgba(20, 20, 20, 0.8);
     border-radius: 8px;
     text-align: center;
     color: #fff;
