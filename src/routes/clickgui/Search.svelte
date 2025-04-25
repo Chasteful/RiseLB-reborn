@@ -26,23 +26,26 @@
   let autoFocus: boolean = true;
   let clickOutsideCount = 0;
   let placeholder = ""; 
-  
+  let inputRef;
   let showHistory = false;   function clearAllHistory() {
     searchHistory.set([]);
   }
   let errorMessage = "";
   function handleFocus() {
   placeholder = "Search (A-Z only)";
+
+  if (query.length > 0) {
+    setTimeout(() => {
+      if (document.activeElement === searchInputElement) {
+        (searchInputElement as HTMLInputElement).select();
+      }
+    }, 0);
+  }
 }
 const options = [
   { text: "Ciallo~(∠・ω< )⌒★ 输入字母开始搜索喵~", weight: 2 },
-
-{
-  text: "ねえねえ、今日一緒に図書館で勉強しない？", weight: 2
-},
-{
-  text: "ちょっと疲れてるみたいだけど、休まない？", weight: 1
-},
+  {text: "ねえねえ、今日一緒に図書館で勉強しない？", weight: 2},
+  {text: "ちょっと疲れてるみたいだけど、休まない？", weight: 1},
   { text: "呐呐~先輩と一緒に検索しましょうか？♡", weight: 2 },
   { text: "お兄ちゃん、何を探しているの？", weight: 2 },
   { text: "ククク...この堕天使に検索させてみる？", weight: 1 },
@@ -406,6 +409,7 @@ function getWeightedRandomPlaceholder(): string {
       on:blur={() => isSearchFocused = false}
       on:input={filterModules}
       on:input={handleInput}
+      bind:this={inputRef}
       on:keydown={handleBrowserKeyDown}
       placeholder={placeholder}
       spellcheck="false"
@@ -615,8 +619,12 @@ function getWeightedRandomPlaceholder(): string {
   &::placeholder {
     color: rgba($text, 0.5);
   }
+  
 }
-
+.search-input::selection {
+  background: transparent;
+  color: inherit;
+}
 .results, .history-results {
   border-top: 2px solid rgba($accent, 0.2);
   padding: 0;

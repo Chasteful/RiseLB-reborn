@@ -179,7 +179,7 @@
     position: relative;
     overflow: hidden;
     font-size: 14px;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.7);
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.6);
     border-radius: 0;
     display: inline-block; 
     max-width: 180px; 
@@ -187,7 +187,7 @@
 }
 
 .entries {
-    background-color: rgba($scoreboard-base-color, 0.6);
+    background-color: rgba($scoreboard-base-color, 0.5);
     padding: 10px;
 }
 .row {
@@ -202,7 +202,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba($scoreboard-base-color, 0.6);
+    background-color: rgba($scoreboard-base-color, 0.5);
     padding: 10px;
     color: $accent-color;
     text-shadow: $base 0px 0px 16px;
