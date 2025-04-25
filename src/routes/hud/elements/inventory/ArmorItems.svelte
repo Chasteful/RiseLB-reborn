@@ -1,38 +1,107 @@
 <script lang="ts">
-    import {listen} from "../../../../integration/ws";
-    import type {PlayerInventory, PlayerInventoryEvent} from "../../../../integration/events";
-    import type {ItemStack} from "../../../../integration/types";
+    import { listen } from "../../../../integration/ws";
+    import type { ClientPlayerDataEvent, PlayerInventory, PlayerInventoryEvent } from "../../../../integration/events";
+    import type { PlayerData, ItemStack } from "../../../../integration/types";
     import ItemStackView from "./ItemStackView.svelte";
-    import {onMount} from "svelte";
-    import {getPlayerInventory} from "../../../../integration/rest";
+    import { onMount } from "svelte";
+    import { getPlayerInventory, getPlayerData } from "../../../../integration/rest";
+    let inventorySlots: ItemStack[] = Array(36).fill({ identifier: "minecraft:air", count: 0 });
+let mainHand: ItemStack | null = null;
+let offHand: ItemStack | null = null;
+let selectedSlot = 0;
+$: reversedArmorSlots = [...inventorySlots].reverse();
+function updatePlayerData(newData: PlayerData) {
 
-    let stacks: ItemStack[] = [];
-
-    function updateStacks(inventory: PlayerInventory) {
-        stacks = inventory.armor;
-    }
-
-    listen("clientPlayerInventory", (data: PlayerInventoryEvent) => {
-        updateStacks(data.inventory);
-    });
-
-    onMount(async () => {
-        const inventory = await getPlayerInventory();
-        updateStacks(inventory);
-    });
-</script>
-
-<div class="armor-items">
-    {#each stacks as stack (stack)}
-        <ItemStackView {stack}/>
-    {/each}
-</div>
-
-<style lang="scss">
-  .armor-items {
-    position: relative;
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 2px;
+  if (selectedSlot !== newData.selectedSlot) {
+    selectedSlot = newData.selectedSlot;
+ 
   }
-</style>
+  
+  if (newData.mainHandStack) {
+    mainHand = newData.mainHandStack;
+  }
+  if (newData.offHandStack) {
+    offHand = newData.offHandStack;
+  }
+}
+function updateInventory(inventory: PlayerInventory) {
+    inventorySlots = inventory.armor;
+    }
+  
+listen("clientPlayerInventory", (event: PlayerInventoryEvent) => {
+  updateInventory(event.inventory);
+});
+
+listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
+  updatePlayerData(event.playerData);
+});
+  
+onMount(async () => {
+  const inventory = await getPlayerInventory();
+  updateInventory(inventory);
+  
+  const playerData = await getPlayerData();
+  updatePlayerData(playerData);
+});
+  
+    function isValidStack(stack: ItemStack | null): boolean {
+      return !!stack && stack.identifier !== "minecraft:air" && stack.count > 0;
+    }
+  </script>
+  
+  <div class="armoritems-hud">
+    <div class="inventory-hud"></div>
+        <div class="title">
+          <span class="bar"></span>
+          <span>ARMORITEMS HUD</span>
+        </div>
+      
+
+        <div class="armor-items">
+            {#each reversedArmorSlots as stack (stack.identifier + stack.count)}
+              <ItemStackView {stack} />
+            {/each}
+            {#if isValidStack(offHand)}
+              <ItemStackView stack={offHand!} />
+            {/if}
+          </div>
+      </div>
+      
+  <style lang="scss">
+      @import "../../../../colors";
+      .armoritems-hud   {
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 6px;
+      padding: 6px 10px;
+      width: fit-content;
+      font-family: sans-serif;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      user-select: none;
+      flex-direction: column;  
+    }
+      .armor-items {
+  display: flex;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  
+}
+.title {
+      display: flex;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+  
+    .bar {
+      width: 5px;
+      height: 1.2em;
+      background-color: $Items-bar;
+      margin-right: 6px;
+      border-radius: 6px;
+    }
+  
+  </style>
+  

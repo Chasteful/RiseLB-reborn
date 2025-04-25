@@ -285,9 +285,7 @@
       </div>
     </div>
 
-    {#if playerData.offHandStack.identifier !== "minecraft:air"}
-      <div class="offhand-slot"></div>
-    {/if}
+
   </div>
 {/if}
 
@@ -338,15 +336,6 @@
     }
   }
 
-  .offhand-slot {
-    height: 45px;
-    width: 45px;
-    border-radius: 16px;
-    background-color: rgba(0, 0, 0, 0.4);
-    position: absolute;
-    bottom: 0;
-    left: -65px;
-  }
 
   .item-name {
     color: $hotbar-text-color;

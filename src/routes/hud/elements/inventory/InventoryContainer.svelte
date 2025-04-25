@@ -60,7 +60,7 @@
     .bar {
       width: 5px;
       height: 1.2em;
-      background-color: $text;
+      background-color: $Items-bar;
       margin-right: 6px;
       border-radius: 6px;
     }

@@ -85,17 +85,5 @@ export let onDone: (() => void) | undefined;
     right: 0;
     left: unset;
   }
-.progress-bar.damage-layer {
-  animation: statusShrink 0.8s cubic-bezier(0.4, 0, 0.6, 1) forwards;
-}
 
-
-@keyframes statusShrink {
-  0% {
-    width: calc(var(--value) / var(--max) * 100%);
-  }
-  100% {
-    width: calc(var(--target) / var(--max) * 100%);
-  }
-}
 </style>

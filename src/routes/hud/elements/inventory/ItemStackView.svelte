@@ -1,23 +1,45 @@
 <script lang="ts">
-    import type {ItemStack} from "../../../../integration/types";
+    import type {ItemStack, PlayerData} from "../../../../integration/types";
     import {REST_BASE} from "../../../../integration/host";
     import {mapToColor} from "../../../../util/color_utils";
-
+    import {getPlayerData} from "../../../../integration/rest";
+    import { onMount } from "svelte";
     export let stack: ItemStack;
+    let playerData: PlayerData | null = null;
 
-    const {count, damage, identifier, maxDamage, hasEnchantment} = stack;
+    const {count, damage, identifier, maxDamage, hasEnchantment } = stack;
 
     const countColor = count <= 0 ? "red" : "white";
 
     const valueColor = mapToColor(120 * (maxDamage - damage) / maxDamage);
     const itemIconUrl = `${REST_BASE}/api/v1/client/resource/itemTexture?id=${identifier}`;
+    
+
+
+onMount(async () => {
+  playerData = await getPlayerData();
+});
+
+function isAir(stack: ItemStack): boolean {
+  return stack.identifier === "minecraft:air" || stack.count <= 0;
+}
+
 </script>
+  
 
 <div class="item-stack">
     {#if hasEnchantment}
         <div class="mask" style="mask-image: url({itemIconUrl})"></div>
     {/if}
     <img class="item-icon" src={itemIconUrl} alt={identifier}/>
+
+    {#if playerData && !isAir(playerData.mainHandStack)}
+    <div class="mainHand-slot"></div>
+  {/if}
+  
+  {#if playerData && !isAir(playerData.offHandStack)}
+    <div class="offhand-slot"></div>
+  {/if}
 
     <div class="durability-bar" class:hidden={damage === 0}>
         <div class="durability"
@@ -29,7 +51,6 @@
         {count}
     </div>
 </div>
-
 <style lang="scss">
   @import "../../../../colors";
 

@@ -1,7 +1,7 @@
 {
-  "name": "Client",
+  "name": "LiquidBounce",
   "version": "0.1.0",
-  "author": "alan34",
+  "author": "CCBlueX",
   "supports": [
     "clickgui",
     "title",
@@ -14,7 +14,6 @@
   "overlays": [
     "hud",
     "inventory",
-    "splash",
     "container",
     "disconnected",
     "browser"
@@ -32,11 +31,11 @@
           "value": [
             {
               "name": "Horizontal",
-              "value": "CenterTranslated"
+              "value": "Left"
             },
             {
               "name": "HorizontalOffset",
-              "value": 0
+              "value": 15
             },
             {
               "name": "Vertical",
@@ -44,7 +43,7 @@
             },
             {
               "name": "VerticalOffset",
-              "value": 0
+              "value": -50
             }
           ]
         }
@@ -74,7 +73,7 @@
             },
             {
               "name": "VerticalOffset",
-              "value": 90
+              "value": 0
             }
           ]
         }
@@ -96,7 +95,7 @@
             },
             {
               "name": "HorizontalOffset",
-              "value": 5
+              "value": 0
             },
             {
               "name": "Vertical",
@@ -104,7 +103,7 @@
             },
             {
               "name": "VerticalOffset",
-              "value": 5
+              "value": 0
             }
           ]
         }
@@ -122,11 +121,11 @@
           "value": [
             {
               "name": "Horizontal",
-              "value": "Right"
+              "value": "Left"
             },
             {
               "name": "HorizontalOffset",
-              "value": -23
+              "value": 10
             },
             {
               "name": "Vertical",
@@ -134,7 +133,7 @@
             },
             {
               "name": "VerticalOffset",
-              "value": -8
+              "value": 5
             }
           ]
         }
@@ -145,7 +144,7 @@
       "value": [
         {
           "name": "Enabled",
-          "value": false
+          "value": true
         },
         {
           "name": "Alignment",
@@ -186,7 +185,37 @@
             },
             {
               "name": "HorizontalOffset",
-              "value": 5
+              "value": 1
+            },
+            {
+              "name": "Vertical",
+              "value": "Top"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ArmorItems",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": true
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "Left"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 15
             },
             {
               "name": "Vertical",
@@ -194,7 +223,66 @@
             },
             {
               "name": "VerticalOffset",
-              "value": 205
+              "value": 700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": true
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "Left"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 15
+            },
+            {
+              "name": "Vertical",
+              "value": "Bottom"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 800            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CraftingInventory",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": false
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "Right"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 15
+            },
+            {
+              "name": "Vertical",
+              "value": "Bottom"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 150
             }
           ]
         }
@@ -239,7 +327,7 @@
       "value": [
         {
           "name": "Enabled",
-          "value": false
+          "value": true
         },
         {
           "name": "Alignment",
@@ -276,41 +364,11 @@
           "value": [
             {
               "name": "Horizontal",
-              "value": "CenterTranslated"
-            },
-            {
-              "name": "HorizontalOffset",
-              "value": 0
-            },
-            {
-              "name": "Vertical",
               "value": "Center"
             },
             {
-              "name": "VerticalOffset",
-              "value": 100
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "PointerESP",
-      "value": [
-        {
-          "name": "Enabled",
-          "value": true
-        },
-        {
-          "name": "Alignment",
-          "value": [
-            {
-              "name": "Horizontal",
-              "value": "CenterTranslated"
-            },
-            {
               "name": "HorizontalOffset",
-              "value": 0
+              "value": 20
             },
             {
               "name": "Vertical",
@@ -348,7 +406,7 @@
             },
             {
               "name": "VerticalOffset",
-              "value": 15
+              "value": 5
             }
           ]
         }
@@ -359,7 +417,7 @@
       "value": [
         {
           "name": "Enabled",
-          "value": false
+          "value": true
         },
         {
           "name": "Alignment",
@@ -374,7 +432,7 @@
             },
             {
               "name": "Vertical",
-              "value": "Top"
+              "value": "Bottom"
             },
             {
               "name": "VerticalOffset",
@@ -389,26 +447,26 @@
       "value": [
         {
           "name": "Enabled",
-          "value": false
+          "value": true
         },
         {
           "name": "Alignment",
           "value": [
             {
               "name": "Horizontal",
-              "value": "CenterTranslated"
+              "value": "Right"
             },
             {
               "name": "HorizontalOffset",
-              "value": 0
+              "value": 15
             },
             {
               "name": "Vertical",
-              "value": "CenterTranslated"
+              "value": "Bottom"
             },
             {
               "name": "VerticalOffset",
-              "value": 0
+              "value": 10
             }
           ]
         }
