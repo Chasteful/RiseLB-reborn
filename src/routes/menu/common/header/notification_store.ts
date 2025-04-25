@@ -1,6 +1,7 @@
 import {type Writable, writable} from "svelte/store";
 
 export interface TNotification {
+    [x: string]: any;
     title: string;
     message: string;
     error: boolean;

@@ -37,7 +37,7 @@
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease; 
 
-  img, svg, i {
+  img {
     transition: transform 0.2s ease, filter 0.4s ease;
     transform-origin: center center;
   }
@@ -46,16 +46,8 @@
   &:hover {
     cursor: pointer;
     transform: translateY(-4px);
-    img, svg, i {
+    img {
       filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8)); 
-    }
-  }
-
-  &[disabled] {
-    opacity: .6;
-
-    img, svg, i {
-      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
     }
   }
 }

@@ -9,19 +9,10 @@
     import { convertToSpacedString, spaceSeperatedNames } from "../../../theme/theme_config";
     import { getPrefixAsync } from "../../../theme/arraylist";
     import { expoInOut } from "svelte/easing"; 
-    import { setContext } from 'svelte';
-    import { writable } from "svelte/store";
     let enabledModules: (Module & { prefix: string; formattedName: string; width: number })[] = [];
 
-    export let arraylistRef: HTMLDivElement;
-    export const scoreboardTop = writable(0);
-    setContext("scoreboardTop", scoreboardTop);
-    setContext('arraylistRef', arraylistRef);
-    $: if (arraylistRef) {
-  tick().then(() => {
-    scoreboardTop.set(arraylistRef.offsetTop + arraylistRef.offsetHeight + 10);
-  });
-}
+
+
 
     async function updateEnabledModules() {
     await document.fonts.load("500 16px 'Product Sans'");
@@ -79,7 +70,7 @@
     });
 </script>
 
-<div bind:this={arraylistRef} class="arraylist" id="arraylist" transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
+<div  class="arraylist" id="arraylist" transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
     {#each enabledModules as { formattedName, prefix, name } (name)}
     <div class="module" id="module-name" animate:flip={{ duration: 200 }} in:fly={{ x: 50, duration: 200 }}>
 

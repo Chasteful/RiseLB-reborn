@@ -19,7 +19,7 @@
   import InventoryContainer from "./elements/inventory/InventoryContainer.svelte";
   import Text from "./elements/Text.svelte";
   import CraftingInput from "./elements/inventory/CraftingInput.svelte";
-
+  import AutoScaler from "../AutoScaler.svelte";
   
     let components: Component[] = [];
     let manualZoom = 1;
@@ -64,61 +64,59 @@
   
   <div
     class="hud"
-    style="transform: scale({baseScale * manualZoom}); transform-origin: 0 0;"
   >
+<AutoScaler {manualZoom} baseResolution={{ width: 1920, height: 1080 }}>
   {#each components as c}
-  {#if c.settings.enabled}
+    {#if c.settings.enabled}
       <div style="{c.settings.alignment}">
         {#if c.name === "Watermark"}
-        <Watermark/>
-    {:else if c.name === "ArrayList"}
-        <ArrayList/>
-    {:else if c.name === "TabGui"}
-        <TabGui/>
-    {:else if c.name === "Notifications"}
-        <Notifications/>
-    {:else if c.name === "TargetHud"}
-        <TargetHud/>
-    {:else if c.name === "BlockCounter"}
-        <BlockCounter/>
-
-    {:else if c.name === "Scoreboard"}
-        <Scoreboard/>
-    {:else if c.name === "ArmorItems"}
-        <ArmorItems/>
-    {:else if c.name === "Inventory"}
-        <InventoryContainer/>
-    {:else if c.name === "CraftingInventory"}
-        <CraftingInput/>
-    {:else if c.name === "Taco"}
-        <Taco/>
-    {:else if c.name === "Keystrokes"}
-        <Keystrokes/>
-    {:else if c.name === "Effects"}
-        <Effects/>
+          <Watermark/>
+        {:else if c.name === "ArrayList"}
+          <ArrayList/>
+        {:else if c.name === "TabGui"}
+          <TabGui/>
+        {:else if c.name === "Notifications"}
+          <Notifications/>
+        {:else if c.name === "TargetHud"}
+          <TargetHud/>
+        {:else if c.name === "BlockCounter"}
+          <BlockCounter/>
+        {:else if c.name === "Scoreboard"}
+          <Scoreboard/>
+        {:else if c.name === "ArmorItems"}
+          <ArmorItems/>
+        {:else if c.name === "Inventory"}
+          <InventoryContainer/>
+        {:else if c.name === "CraftingInventory"}
+          <CraftingInput/>
+        {:else if c.name === "Taco"}
+          <Taco/>
+        {:else if c.name === "Keystrokes"}
+          <Keystrokes/>
+        {:else if c.name === "Effects"}
+          <Effects/>
         {:else if c.name === "Text"}
-        <Text settings={c.settings} />
+          <Text settings={c.settings} />
         {:else if c.name === "Image"}
-        <img alt="" src="{c.settings.src}" style="scale: {c.settings.scale};">
-                {:else if c.name === "Frame"}
-                    {#if c.settings.src.startsWith("http")}
-                        <iframe title="" src="{c.settings.src}"
-                                style="width: {c.settings.width}px; height: {c.settings.height}px; border: none;scale: {c.settings.scale};"></iframe>
-                    {:else}
-                        <iframe title="" srcdoc="{c.settings.src}"
-                                style="width: {c.settings.width}px; height: {c.settings.height}px; border: none;scale: {c.settings.scale};"></iframe>
-                    {/if}
-                {:else if c.name === "Html"}
-                    {@html c.settings.code}
-                {:else if c.name === "Text"}
-                    <p>{c.settings.text}</p>
-                {:else if c.name === "Image"}
-                    <img alt="" src="{c.settings.src}" style="scale: {c.settings.scale};">
-                {/if}
-            </div>
+          <img alt="" src="{c.settings.src}" style="scale: {c.settings.scale};">
+        {:else if c.name === "Frame"}
+          {#if c.settings.src.startsWith("http")}
+            <!-- svelte-ignore a11y_missing_attribute -->
+            <!-- svelte-ignore element_invalid_self_closing_tag -->
+            <iframe src="{c.settings.src}" style="width: {c.settings.width}px; height: {c.settings.height}px; border: none; scale: {c.settings.scale};" />
+          {:else}
+            <!-- svelte-ignore a11y_missing_attribute -->
+            <!-- svelte-ignore element_invalid_self_closing_tag -->
+            <iframe srcdoc="{c.settings.src}" style="width: {c.settings.width}px; height: {c.settings.height}px; border: none; scale: {c.settings.scale};" />
+          {/if}
+        {:else if c.name === "Html"}
+          {@html c.settings.code}
         {/if}
-    {/each}
-</div >
+      </div>
+    {/if}
+  {/each}
+</AutoScaler>
+  </div>
 {#if hotbarEnabled}
   <div style="position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);">
     <HotBar/>

@@ -1,6 +1,5 @@
 <script lang="ts">
     import MainButton from "./buttons/MainButton.svelte";
-    import ChildButton from "./buttons/ChildButton.svelte";
     import ButtonContainer from "../common/buttons/ButtonContainer.svelte";
     import IconTextButton from "../common/buttons/IconTextButton.svelte";
     import IconButton from "../common/buttons/IconButton.svelte";
@@ -21,11 +20,11 @@
 
     onMount(() => {
         setTimeout(async () => {
-            const update = await getClientUpdate();
+            const clientUpdate = await getClientUpdate();
 
-            if (update.updateAvailable) {
+            if (clientUpdate.update) {
                 notification.set({
-                    title: `LiquidBounce ${update.newestVersion?.clientVersion} has been released!`,
+                    title: `LiquidBounce ${clientUpdate.update.clientVersion} has been released!`,
                     message: `Download it from liquidbounce.net!`,
                     error: false,
                     delay: 99999999
@@ -37,13 +36,18 @@
     function toggleButtons() {
         if (clientButtonsShown) {
             clientButtonsShown = false;
-            regularButtonsShown = true;
+            setTimeout(() => {
+                regularButtonsShown = true;
+            }, 750);
         } else {
             regularButtonsShown = false;
-            clientButtonsShown = true;
+            setTimeout(() => {
+                clientButtonsShown = true;
+            }, 750);
         }
     }
 </script>
+
 
 <Menu>
     <div class="content">
@@ -66,8 +70,7 @@
                 <MainButton title="Back" icon="back-large" on:click={toggleButtons} index={2}/>
             {/if}
         </div>
-
-        <div class="additional-buttons">
+        <div class="additional-buttons" transition:fly|global={{duration: 300, y: 100}}>
             <ButtonContainer>
                 <IconTextButton icon="icon-exit.svg" title="Exit" on:click={exitClient}/>
                 <IconTextButton icon="icon-change-background.svg" title="Toggle Shader"
@@ -75,7 +78,7 @@
             </ButtonContainer>
         </div>
 
-        <div class="social-buttons">
+        <div class="social-buttons" transition:fly|global={{duration: 300, y: 100}}>
             <ButtonContainer>
                 <IconButton title="Forum" icon="nodebb" on:click={() => browse("MAINTAINER_FORUM")}/>
                 <IconButton title="GitHub" icon="github" on:click={() => browse("MAINTAINER_GITHUB")}/>

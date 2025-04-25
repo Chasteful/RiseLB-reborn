@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+    import { backIn, backOut } from "svelte/easing";
 
+  import {fade, fly} from "svelte/transition";
   export let title: string;
   export let icon: string;
   // svelte-ignore export_let_unused
@@ -14,16 +16,20 @@ export let index: number;
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="main-button" on:mouseenter={() => hovered = true} on:mouseleave={() => hovered = false} on:click={() => hovered = false}
-   on:click={() => dispatch("click")}>
-  <div class="icon">
-    <img src="img/menu/icon-{icon}.svg" alt={icon}>
-  </div>
+  on:click={() => dispatch("click")} out:fly|global={{duration: 400, x: -500, delay: index * 100, easing: backIn}}
+  in:fly|global={{duration: 400, x: -500, delay: index * 100, easing: backOut}}>
+ <div class="icon">
+     
+         <img transition:fade={{duration: 200}} src="img/menu/icon-{icon}.svg" alt={icon}>
+     
+ 
+ </div>
 
-  <div class="title">{title}</div>
+ <div class="title">{title}</div>
 
-  <div class="wrapped-content">
-      <slot parentHovered={hovered}/>
-  </div>
+ <div class="wrapped-content">
+     <slot parentHovered={hovered}/>
+ </div>
 </div>
 
 <style lang="scss">

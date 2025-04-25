@@ -31,7 +31,6 @@
             component: SessionAccountTab
         }
     ];
-
     let activeTab = parseInt(localStorage.getItem("altmanager_add_account_active_tab") ?? "0");
 
     async function handleChangeTab(e: CustomEvent<{ activeTab: number }>) {

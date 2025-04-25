@@ -1,6 +1,8 @@
 <script lang="ts">
     import {createEventDispatcher} from "svelte";
     import GenericSelect from "./GenericSelect.svelte";
+    import { slide } from "svelte/transition";
+    import { quintOut } from "svelte/easing";
 
     export let options: string[];
     export let values: string[];
@@ -29,8 +31,9 @@
 
     <svelte:fragment slot="options">
         {#each options as o}
-            <div on:click={() => handleOptionClick(o)} class="option" class:active={values.includes(o)}>
-                <span>{o}</span>
+        <div on:click={() => handleOptionClick(o)} class="option" class:active={values.includes(o)}
+            transition:slide|global={{ duration: 200, easing: quintOut }}>
+           <span>{o}</span>
             </div>
         {/each}
     </svelte:fragment>

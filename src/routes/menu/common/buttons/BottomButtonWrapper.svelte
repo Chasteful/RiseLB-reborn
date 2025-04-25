@@ -1,4 +1,9 @@
-<div class="bottom-button-wrapper">
+<script>
+
+    import { fly } from "svelte/transition";
+
+</script>
+<div class="bottom-button-wrapper" transition:fly|global={{duration: 300, y: 100}}>
     <slot/>
 </div>
 
