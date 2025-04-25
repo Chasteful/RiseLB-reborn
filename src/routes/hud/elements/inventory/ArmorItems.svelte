@@ -5,6 +5,8 @@
     import ItemStackView from "./ItemStackView.svelte";
     import { onMount } from "svelte";
     import { getPlayerInventory, getPlayerData } from "../../../../integration/rest";
+    import { fly } from "svelte/transition";
+    import { expoInOut } from "svelte/easing";
     let inventorySlots: ItemStack[] = Array(36).fill({ identifier: "minecraft:air", count: 0 });
 let mainHand: ItemStack | null = null;
 let offHand: ItemStack | null = null;
@@ -49,7 +51,7 @@ onMount(async () => {
     }
   </script>
   
-  <div class="armoritems-hud">
+  <div class="armoritems-hud"id="armoritemshud" transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
     <div class="inventory-hud"></div>
         <div class="title">
           <span class="bar"></span>

@@ -4,6 +4,8 @@
     import {getMinecraftKeybinds} from "../../../../integration/rest";
     import type { MinecraftKeybind} from "../../../../integration/types";
     import {listen} from "../../../../integration/ws";
+    import { expoInOut } from "svelte/easing";
+    import { fly } from "svelte/transition";
 
     let keyForward: MinecraftKeybind | undefined;
     let keyBack: MinecraftKeybind | undefined;
@@ -26,7 +28,7 @@
     listen("keybindChange", updateKeybinds)
 </script>
 
-<div class="keystrokes">
+<div class="keystrokes"transition:fly|global={{duration: 500, x: -50, easing: expoInOut}}>
     <Key key={keyForward} gridArea="a" />
     <Key key={keyLeft} gridArea="b" />
     <Key key={keyBack} gridArea="c" />

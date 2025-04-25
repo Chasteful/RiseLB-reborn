@@ -5,6 +5,8 @@
     import { getPlayerInventory } from "../../../../integration/rest";
     import ItemStackView from "./ItemStackView.svelte";
     import { onMount } from "svelte";
+    import { expoInOut } from "svelte/easing";
+    import { fly } from "svelte/transition";
   
     let stacks: ItemStack[] = [];
   
@@ -22,7 +24,7 @@
     });
   </script>
   
-  <div class="inventory-hud">
+  <div class="inventory-hud" id="inventoryhud" transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
     <div class="title">
       <span class="bar"></span>
       <span>INVENTORY HUD</span>

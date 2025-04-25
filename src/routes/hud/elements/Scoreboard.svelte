@@ -84,7 +84,7 @@
   {/if}
 
   {#if scoreboard}
-      <div class="scoreboard-section"transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
+      <div class="scoreboard-section"transition:fly|global={{duration: 500, x: 50, easing: expoInOut}}>
           {#if scoreboard.header}
     
               <div class="header">

@@ -5,8 +5,9 @@
   import type { ClientInfo, PlayerData, Session, Server } from "../../../../integration/types";
   import { onMount } from "svelte";
   import { tweened } from 'svelte/motion';
-  import { cubicOut } from 'svelte/easing';
+  import { cubicOut, expoInOut } from 'svelte/easing';
   import { writable } from 'svelte/store';
+    import { fly } from "svelte/transition";
   let playerData: PlayerData | null = {
       position: { x: 0, y: 0, z: 0 },
   } as PlayerData;
@@ -104,6 +105,7 @@
   @use "../../../../colors.scss" as *;
 
   .stats-container {
+      position: relative;
       display: flex;
       flex-direction: column;
       font-family: monospace;
@@ -140,7 +142,7 @@
   }
 </style>
 
-<div class="stats-container">
+<div class="stats-container"  transition:fly={{duration: 700, y: 50, easing: expoInOut}}>
 
   {#if clientInfo}
       <div class="stat">

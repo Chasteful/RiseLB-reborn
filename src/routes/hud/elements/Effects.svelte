@@ -78,8 +78,8 @@
     display: flex; 
     align-items: center;
     gap: 4px; 
-    transform-origin: right center; /* 从右侧开始变换 */
-    will-change: transform, opacity; /* 优化动画性能 */
+    transform-origin: right center;
+    will-change: transform, opacity; 
     filter: drop-shadow(4px 4px 16px $mantle);
 
   

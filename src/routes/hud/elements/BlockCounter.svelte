@@ -1,299 +1,117 @@
 <script lang="ts">
-    import { listen } from "../../../integration/ws";
-    import type { BlockCountChangeEvent, ClientPlayerDataEvent } from "../../../integration/events";
-    import type { PlayerData } from "../../../integration/types";
-    import { elasticOut, quintOut } from "svelte/easing";
-         
-    let count: number | undefined;
-    let playerData: PlayerData | null = null;
+  import { REST_BASE } from "../../../integration/host";
+  import type { PlayerData } from "../../../integration/types";
+  import type { BlockCountChangeEvent, ClientPlayerDataEvent } from "../../../integration/events";
+  import { listen } from "../../../integration/ws";
+  import { getPlayerData } from "../../../integration/rest";
+  import { onMount } from "svelte";
 
-    let lastX = 0;
-    let lastZ = 0;
+  let playerData: PlayerData | null = null;
+  let count: number | undefined;
 
-    function pop(node: Element, { delay = 0, duration = 400 }) {
-  const style = getComputedStyle(node);
-  const opacity = +style.opacity;
-  const transform = style.transform === 'none' ? '' : style.transform;
 
-  return {
-    delay,
-    duration,
-    css: (t: number) => {
-      const eased = elasticOut(t);
-      const fadeEased = quintOut(t);
-      return `
-        transform: ${transform} scale(${eased * 0.2 + 0.8});
-        opacity: ${fadeEased * opacity};
-      `;
-    }
-  };
-}
+  listen("blockCountChange", (e: BlockCountChangeEvent) => {
+    count = e.count;
+  });
 
-function popOut(node: Element, { delay = 0, duration = 500 }) {
-  const style = getComputedStyle(node);
-  const opacity = +style.opacity;
-  const transform = style.transform === 'none' ? '' : style.transform;
+  listen("clientPlayerData", (e: ClientPlayerDataEvent) => {
+  playerData = e.playerData;
+});
 
-  return {
-    delay,
-    duration,
-    css: (t: number) => {
-      const progress = 1 - t;
-            
-                         const scaleProgress = progress < 0.5 
-                ? easeOutQuad(progress * 2)                        : easeInQuad(1 - (progress - 0.5) * 2);              
-            const scale = 1 + scaleProgress * 0.1;              
-                         const opacityEased = progress < 0.5 
-                ? 1 
-                : easeInQuad(1 - (progress - 0.5) * 2);
 
-            return `
-                transform: ${transform} scale(${scale});
-                opacity: ${opacity * opacityEased};
-            `;
-    }
-  };
-}
+  onMount(async () => {
+    playerData = await getPlayerData();
+  });
 
-function easeOutQuad(t: number): number {
-  return t * (2 - t);
-}
-
-function easeInQuad(t: number): number {
-  return t * t;
-}
-    listen("blockCountChange", (data: BlockCountChangeEvent) => {
-        count = data.count;
-    });
-
-    listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
-      if (playerData) {
-        lastX = playerData.position.x;
-        lastZ = playerData.position.z;
-      }
-      playerData = event.playerData;
-    });
-
-    function getProgressPercentage(value: number): number {
-        return (value % 64) / 64 * 100;
-    };
-
-    function roundToDecimal(value: number, decimal: number) {
-      return Math.round(value * Math.pow(10, decimal)) / Math.pow(10, decimal)
-    }
-
-    function getBPS(
-      lastX: number,
-      currentX: number,
-      lastZ: number,
-      currentZ: number,
-      tickrate: number
-    ): number {
-      const deltaX = currentX - lastX;
-      const deltaZ = currentZ - lastZ;
-
-      const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-      const blocksPerSecond = distanceMoved * tickrate;
-
-      return blocksPerSecond;
-    }
+  function isAirItem(identifier: string): boolean {
+    return identifier.includes("air");
+  }
 </script>
 
-
 {#if count !== undefined}
-  <div class="notification" in:pop|global={{ duration: 400 }} out:popOut|global={{ duration: 500 }}>
-    <div class="header">
-      <span class="accent">BlockCounter</span>
-    </div>
-    <div class="info">
-      {count} blocks left
-      {#if playerData}
-        | {roundToDecimal(getBPS(lastX, playerData.position.x, lastZ, playerData.position.z, 20), 2)}m/s
+  <div class="hud">
+    <div class="blocks-icon">
+      {#if playerData?.mainHandStack && !isAirItem(playerData.mainHandStack.identifier)}
+        <div class="item-box">
+          <div class="content">
+            <!-- svelte-ignore element_invalid_self_closing_tag -->
+            <div class="bg" />
+            <img
+              class="icon"
+              src="{REST_BASE}/api/v1/client/resource/itemTexture?id={playerData.mainHandStack.identifier}"
+              alt={playerData.mainHandStack.identifier}
+            />
+          </div>
+        </div>
       {/if}
     </div>
-    <div class="progress-bar">
-      <div class="progress" style="width: {getProgressPercentage(count)}%">
-        <div class="progress-shadow"></div>
-      </div>
-    </div>
+    <div class="count">{count}</div>
+    <div class="pointer"></div>
   </div>
 {/if}
 
 <style lang="scss">
   @use "../../../colors.scss" as *;
 
-  .notification {
-    background: linear-gradient(
-      135deg,
-      rgba($base, 0.6) 0%,
-      rgba(darken($base, 5%), 0.5) 100%
-    );
-    backdrop-filter: blur(12px) brightness(1.2);
-    -webkit-backdrop-filter: blur(12px) brightness(1.2);
-    border-radius: 12px;
-    padding: 16px;
-    min-width: 240px;
-    color: rgba($text, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.28),
-      0 0 0 1px rgba(255, 255, 255, 0.03) inset;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .notification::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-      circle at 50% 0%,
-      rgba($accent-color, 0.15) 0%,
-      transparent 70%
-    );
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-
-
-
-  .header {
+  .item-box {
     display: flex;
     align-items: center;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
+    justify-content: center;
   }
 
-  .accent {
-    color: $accent-color;
-    text-shadow: 0 0 12px rgba($accent-color, 0.4);
-  }
-
-  .info {
-    font-size: 14px;
-    margin-top: 6px;
-    opacity: 0.9;
-    font-weight: 400;
-  }
-
-  .progress-bar {
-    margin-top: 14px;
-    background-color: rgba(255, 255, 255, 0.08);
-    border-radius: 100px;
-    height: 6px;
+  .content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
     overflow: hidden;
-    position: relative;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 0;
   }
 
-  .progress {
-    height: 100%;
-    border-radius: 100px;
-    position: relative;
-    transition: width 0.5s cubic-bezier(0.2, 0.8, 0.4, 1);
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(
-        135deg,
-        rgba($accent-color, 0.8) 10%,
-        rgba($accent-color-2, 0.8) 90%
-      );
-      z-index: 1;
-      transition: opacity 0.3s ease;
-    }
-    
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.2) 50%,
-        transparent 100%
-      );
-      animation: shine 2.5s infinite;
-      z-index: 2;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
 
-    &:hover::after {
-      opacity: 1;
-    }
+  .icon {
+    width: 24px;
+    height: 24px;
+    image-rendering: pixelated;
+    z-index: 1;
+    margin-bottom: 4px;
   }
 
-  .progress-shadow {
+
+  .hud {
+    position: relative;
+    width: 80px;
+    padding: 8px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    text-align: center;
+    color: #fff;
+    font-family: monospace;
+    user-select: none;
+    box-shadow:
+      0 0 16px rgba(20,20, 20, 0.8);
+    animation: glow 2s infinite alternate;
+  }
+
+  .count {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .pointer {
     position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 100%;
-    transform: translateY(-50%);
-    border-radius: inherit;
-    box-shadow: 0 0 10px 2px rgba($accent-color, 0.4);
-    opacity: 0;
-    transition: opacity 0.3s ease, box-shadow 0.3s ease;
-    animation: pulseShadow 2s infinite alternate;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid rgba(20, 20, 20, 0.8);
   }
 
-  .progress:hover .progress-shadow {
-    opacity: 1;
-    box-shadow: 0 0 15px 3px rgba($accent-color, 0.6);
-  }
-
-  @keyframes shine {
-    0% {
-      transform: translateX(-100%);
-      opacity: 0;
-    }
-    20% {
-      opacity: 1;
-    }
-    80% {
-      opacity: 1;
-    }
-    100% {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-  }
-
-  @keyframes pulseShadow {
-    0% {
-      box-shadow: 0 0 10px 2px rgba($accent-color, 0.3);
-    }
-    100% {
-      box-shadow: 0 0 15px 4px rgba($accent-color, 0.5);
-    }
-  }
-
-  @keyframes flowBorder {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
 </style>
