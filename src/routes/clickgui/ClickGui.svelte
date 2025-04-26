@@ -59,10 +59,7 @@
     const heightRatio = window.innerHeight / baseHeight;
     return heightRatio;
   };
-  const overlayVisible = derived(showResults, ($s) => {
-  showOverlay.set($s);
-  return $s;
-});
+
   const updateViewport = () => {
     const baseWidth = 1920;
     const baseHeight = 1080;
