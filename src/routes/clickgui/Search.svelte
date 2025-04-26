@@ -9,7 +9,7 @@
   import { quintOut } from 'svelte/easing';
   import { onMount, onDestroy } from "svelte";
   import { showResults } from "./clickgui_store";
-  import { RevealEffects } from '../../Js/revealDirect.js';
+
   import { writable } from 'svelte/store';
   export let modules: Module[];
   let wrapperRect: DOMRect;
@@ -43,7 +43,7 @@
   }
 }
 const options = [
-  { text: "Ciallo~(∠・ω< )⌒★ 输入字母开始搜索喵~", weight: 2 },
+  { text: "Ciallo~(∠・ω< )⌒★ ", weight: 2 },
   {text: "ねえねえ、今日一緒に図書館で勉強しない？", weight: 2},
   {text: "ちょっと疲れてるみたいだけど、休まない？", weight: 1},
   { text: "呐呐~先輩と一緒に検索しましょうか？♡", weight: 2 },
@@ -299,11 +299,7 @@ function filterModules() {
   }
 
   onMount(() => {
-    const FRDirect = new RevealEffects("#search", {
-    selector: searchWrapperElement,  // This will apply effects to the search container
-    borderGradientSize: 60,
-    borderLightColor: "rgba(173, 83, 137, 0.5)",
-  });
+
   const interval = setInterval(() => {
     if (!searchInputElement.matches(':focus')) {
       placeholder = getWeightedRandomPlaceholder();
@@ -315,15 +311,7 @@ function filterModules() {
     placeholder = getWeightedRandomPlaceholder();
     if (autoFocus) searchInputElement.focus();
   };
-  // Optional: Example to trigger the effect on focus
-  searchInputElement.addEventListener('focus', () => {
-    FRDirect.applyEffect(); // Assuming `applyEffect` is a method in RevealEffects
-  });
 
-  // Optional: Example to reset the effect when the search container loses focus
-  searchInputElement.addEventListener('blur', () => {
-    FRDirect.removeEffect(); // Assuming `removeEffect` is a method to reset the effect
-  });
   fetchSettings();
 
   
