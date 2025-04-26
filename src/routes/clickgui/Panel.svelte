@@ -426,8 +426,8 @@
 
 <!-- Panel Wrapper -->
 <div 
-  bind:this={panelElement}
-  class="panel-wrapper"
+class="panel-wrapper {moving ? 'no-transition' : ''}" 
+bind:this={panelElement}
   class:expanded={panelConfig.expanded}
   style="left: {panelConfig.left}px; top: {panelConfig.top}px; z-index: {panelConfig.zIndex};"
   in:fly|global={{y: -30, duration: 250, easing: expoInOut}}
@@ -438,7 +438,6 @@
       class="panel"
       class:locked={$locked}
       class:glowing={$glowState}
-      on:mousedown={onMouseDown}
   >
       <!-- Panel Title -->
       <div 
@@ -569,8 +568,10 @@
   padding: 4px;
   background:transparent;
   box-shadow: 0 0 10px rgba($base, 0.4);
-
-
+  transition: all 0.5s ease;
+  &.no-transition {
+    transition: none;
+  }
  &::before {
     content: '';
     position: absolute;
