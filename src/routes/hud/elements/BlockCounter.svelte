@@ -153,7 +153,7 @@
     height: 0;
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
-    border-top: 6px solid rgba(20, 20, 20, 0.5);
+    border-top: 6px solid rgba(20, 20, 20, 0.3);
   }
 
 </style>
