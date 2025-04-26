@@ -17,7 +17,6 @@
     viewportOffset,
     scaleFactor,
     showResults,
-    isClickGuiOpen, 
   } from "./clickgui_store";
   import {
     gridSize,

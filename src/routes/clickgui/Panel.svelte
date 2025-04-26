@@ -1,496 +1,508 @@
 <script lang="ts">
-    import {onMount, tick} from "svelte";
-    import type {Module as TModule} from "../../integration/types";
-    import {listen} from "../../integration/ws";
-    import Module from "./Module.svelte";
-    import type {ModuleToggleEvent} from "../../integration/events";
-    import {fly} from "svelte/transition";
-    import {expoInOut} from "svelte/easing";
-    import { tweened } from 'svelte/motion';
-    import { cubicOut } from 'svelte/easing';
-    import {
-        gridSize,
-        highlightModuleName,
-        maxPanelZIndex,
-        scaleFactor,
-        showGrid,
-        snappingEnabled
-    } from "./clickgui_store";
-    import {setItem} from "../../integration/persistent_storage";
-    import { filteredModules } from './clickgui_store';
-    import { writable } from 'svelte/store';
-    export const locked = writable(false);
-    export const showLockHint = writable(false);
-    export let category: string;
-    export let modules: TModule[];
-    export let panelIndex: number;
-    export const saveAnimation = writable<'save' | null>(null);
-    export const lockAnimation = writable<'lock' | 'unlock' | null>(null);
-    let lastSaveTime = 0;
-    let lastLockToggleTime = 0;
-    let panelElement: HTMLElement;
-    let modulesElement: HTMLElement;
-    const glowState = writable(false);
-    let filterMode: 'all' | 'enabled' | 'disabled' = 'all';
-    let savedConfig: PanelConfig | null = null;
-    let undoStack: PanelConfig[] = [];
-    let redoStack: PanelConfig[] = [];
-    locked.subscribe(v => $locked = v);
-    lockAnimation.subscribe(v => $lockAnimation = v);
-    export function setupGlobalShortcuts() {
-        window.addEventListener("keydown", (e) => {
-            if ((e.ctrlKey && e.key.toLowerCase() === 'r') || e.key === 'F5') {
-                e.preventDefault()
-            }
-        }, true);
-    }
-    
+  import { onMount, tick } from "svelte";
+  import { fly } from "svelte/transition";
+  import { expoInOut } from "svelte/easing";
+  import { tweened } from 'svelte/motion';
+  import { cubicOut } from 'svelte/easing';
+  import { writable } from 'svelte/store';
+  
+  import type { Module as TModule } from "../../integration/types";
+  import type { ModuleToggleEvent } from "../../integration/events";
+  import { listen } from "../../integration/ws";
+  import { setItem } from "../../integration/persistent_storage";
+  
+  import Module from "./Module.svelte";
+  import {
+      gridSize,
+      highlightModuleName,
+      maxPanelZIndex,
+      scaleFactor,
+      showGrid,
+      snappingEnabled,
+      filteredModules
+  } from "./clickgui_store";
+
+  // Constants
+  const EDGE_THRESHOLD = 50;
+  const UNDO_STACK_LIMIT = 100;
+  const ANIMATION_DURATION = 2000;
+
+  // Stores
+  export const locked = writable(false);
+  export const showLockHint = writable(false);
+  export const saveAnimation = writable<'save' | null>(null);
+  export const lockAnimation = writable<'lock' | 'unlock' | null>(null);
+  const glowState = writable(false);
+  const indicatorOpacity = tweened(0, { duration: 150, easing: cubicOut });
+
+  // Props
+  export let category: string;
+  export let modules: TModule[];
+  export let panelIndex: number;
+
+  // Local state
+  let panelElement: HTMLElement;
+  let modulesElement: HTMLElement;
+  let filterMode: 'all' | 'enabled' | 'disabled' = 'all';
+  let savedConfig: PanelConfig | null = null;
+  let undoStack: PanelConfig[] = [];
+  let redoStack: PanelConfig[] = [];
+  let lastSaveTime = 0;
+  let lastLockToggleTime = 0;
+  let moving = false;
+  let offsetX = 0;
+  let offsetY = 0;
+  let scrollPositionSaveTimeout: ReturnType<typeof setTimeout>;
+  let ignoreGrid = false;
   let isScrollMode = false;
   let mouseX = 0;
-  const edgeThreshold = 50;
-  const panelRef: HTMLDivElement | null = null;
 
-  const indicatorOpacity = tweened(0, { duration: 150, easing: cubicOut });
+  // Panel config
+  interface PanelConfig {
+      top: number;
+      left: number;
+      expanded: boolean;
+      scrollTop: number;
+      zIndex: number;
+  }
+
+  const panelConfig = loadPanelConfig();
+
+  // Computed values
+  $: renderedModules = $filteredModules.length > 0
+      ? modules.filter(module => 
+          $filteredModules.some(fm => fm.name === module.name)
+      )
+      : modules.filter(module => {
+          if (!panelConfig.expanded) return false;
+          if (filterMode === 'enabled') return module.enabled;
+          if (filterMode === 'disabled') return !module.enabled;
+          return true;
+      });
+
+  // Utility functions
+  function clamp(number: number, min: number, max: number): number {
+      return Math.max(min, Math.min(number, max));
+  }
+
+  function clonePanelConfig(config: PanelConfig): PanelConfig {
+      return JSON.parse(JSON.stringify(config));
+  }
+
+  function snapToGrid(value: number): number {
+      return (ignoreGrid || !$snappingEnabled) 
+          ? value 
+          : Math.round(value / $gridSize) * $gridSize;
+  }
+
+  // Panel config management
+  function loadPanelConfig(): PanelConfig {
+      const localStorageItem = localStorage.getItem(`clickgui.panel.${category}`);
+
+      if (!localStorageItem) {
+          return {
+              top: panelIndex * 50 + 20,
+              left: 20,
+              expanded: false,
+              scrollTop: 0,
+              zIndex: 0
+          };
+      }
+
+      const config: PanelConfig = JSON.parse(localStorageItem);
+      config.zIndex = config.zIndex || 0;
+
+      if (config.zIndex > $maxPanelZIndex) {
+          $maxPanelZIndex = config.zIndex;
+      }
+
+      if (config.expanded) {
+          renderedModules = modules;
+      }
+
+      return config;
+  }
+
+  async function savePanelConfig() {
+      const cloned = clonePanelConfig(panelConfig);
+      await setItem(`clickgui.panel.${category}`, JSON.stringify(cloned));
+  }
+
+  function fixPosition() {
+      panelConfig.left = clamp(
+          panelConfig.left,
+          0,
+          document.documentElement.clientWidth * (2 / $scaleFactor) - panelElement.offsetWidth
+      );
+      panelConfig.top = clamp(
+          panelConfig.top,
+          0,
+          document.documentElement.clientHeight * (2 / $scaleFactor) - panelElement.offsetHeight
+      );
+  }
+
+  function applyPanelConfig(config: PanelConfig, saveHistory = false) {
+      if (saveHistory) {
+          pushUndoState();
+      }
+      
+      Object.assign(panelConfig, {
+          ...config,
+          zIndex: config.zIndex === 0 ? 0 : ++$maxPanelZIndex
+      });
+      
+      fixPosition();
+      savePanelConfig();
+      
+      tick().then(() => {
+          if (modulesElement) {
+              modulesElement.scrollTop = panelConfig.scrollTop;
+          }
+      });
+  }
+
+  // Undo/redo functionality
+  function pushUndoState() {
+      undoStack.push(clonePanelConfig(panelConfig));
+      if (undoStack.length > UNDO_STACK_LIMIT) {
+          undoStack.shift();
+      }
+      redoStack = [];
+  }
+
+  // Event handlers
+  function onMouseDown(e: MouseEvent) {
+      if ($locked) return;
+      
+      moving = true;
+      offsetX = e.clientX * (2 / $scaleFactor) - panelConfig.left;
+      offsetY = e.clientY * (2 / $scaleFactor) - panelConfig.top;
+      panelConfig.zIndex = ++$maxPanelZIndex;
+      $showGrid = $snappingEnabled;
+      panelElement.style.transition = "none";
+  }
+
+  function onMouseMove(e: MouseEvent) {
+      if ($locked || !moving) return;
+
+      panelConfig.left = snapToGrid(e.clientX * (2 / $scaleFactor) - offsetX);
+      panelConfig.top = snapToGrid(e.clientY * (2 / $scaleFactor) - offsetY);
+      fixPosition();
+  }
+
+  function onMouseUp() {
+      if (moving) {
+          savePanelConfig();
+      }
+      moving = false;
+      $showGrid = false;
+      panelElement.style.transition = "all 0.5s ease";
+  }
+
+  function toggleExpanded() {
+      if ($filteredModules.length > 0) return;
+      
+      pushUndoState();
+      panelConfig.expanded = !panelConfig.expanded;
+      
+      setTimeout(() => {
+          fixPosition();
+          savePanelConfig();
+      }, 500);
+  }
+
+  function handleModulesScroll() {
+      panelConfig.scrollTop = modulesElement.scrollTop;
+
+      clearTimeout(scrollPositionSaveTimeout);
+      scrollPositionSaveTimeout = setTimeout(() => {
+          savePanelConfig();
+          pushUndoState();
+      }, 500);
+  }
+
+  // Scroll mode functionality
   const toggleScrollMode = (enabled: boolean) => {
-    isScrollMode = enabled;
-    indicatorOpacity.set(enabled ? 1 : 0);
+      isScrollMode = enabled;
+      indicatorOpacity.set(enabled ? 1 : 0);
   };
 
-  const handleMouseMove = (event: MouseEvent) => {
-    mouseX = event.clientX;
-  };
-  const handleMouseDown = (event: MouseEvent) => {
-    if (event.button === 1 && mouseX >= window.innerWidth - edgeThreshold) {
-      event.preventDefault();
-      toggleScrollMode(true);
-    }
-  };
+  function handleMouseMove(event: MouseEvent) {
+      mouseX = event.clientX;
+  }
 
-  const handleMouseUp = (event: MouseEvent) => {
-    if (event.button === 2 && isScrollMode) {
-      toggleScrollMode(false);
-    }
-  };
+  function handleMouseDown(event: MouseEvent) {
+      if (event.button === 1 && mouseX >= window.innerWidth - EDGE_THRESHOLD) {
+          event.preventDefault();
+          toggleScrollMode(true);
+      }
+  }
 
-  const handleWheel = (event: WheelEvent) => {
-    if (!isScrollMode) return;
+  function handleMouseUp(event: MouseEvent) {
+      if (event.button === 2 && isScrollMode) {
+          toggleScrollMode(false);
+      }
+  }
 
-    if (event.deltaY < 0) {
-      console.log('Scroll up → previous category');
-    } else if (event.deltaY > 0) {
-      console.log('Scroll down → next category');
-    }
-  };
+  function handleWheel(event: WheelEvent) {
+      if (!isScrollMode) return;
 
-    setupGlobalShortcuts();
-    window.addEventListener("keydown", (e) => {
-                 if ((e.ctrlKey && e.key.toLowerCase() === 'r') || e.key === 'F5') {
-            e.preventDefault();
-            console.log("阻止了刷新行为");
-        }
-    }, true);  
-    $: renderedModules = $filteredModules.length > 0
-        ? modules.filter(module => 
-            $filteredModules.some(fm => fm.name === module.name)
-        )
-        : modules.filter(module => {
-            if (!panelConfig.expanded) return false;
-            if (filterMode === 'enabled') return module.enabled;
-            if (filterMode === 'disabled') return !module.enabled;
-            return true;
-        });
-        const now = Date.now();
-    let moving = false;
-    let offsetX = 0;
-    let offsetY = 0;
-    let scrollPositionSaveTimeout: ReturnType<typeof setTimeout>
+      if (event.deltaY < 0) {
+          console.log('Scroll up → previous category');
+      } else if (event.deltaY > 0) {
+          console.log('Scroll down → next category');
+      }
+  }
 
+  // Keyboard handlers
+  function handleKeydown(e: KeyboardEvent) {
+      if (e.key === "Shift") {
+          ignoreGrid = true;
+          return;
+      }
 
-    const panelConfig = loadPanelConfig();
+      if (!e.altKey || e.ctrlKey || e.metaKey) return;
 
-    let ignoreGrid = false;
+      const key = e.key.toLowerCase();
+      if (!['r', 's', 'l', 'd', 'e', 'a', 'z', 'y', 'n'].includes(key)) return;
 
-    interface PanelConfig {
-        top: number;
-        left: number;
-        expanded: boolean;
-        scrollTop: number;
-        zIndex: number;
-    }
-    function applyPanelConfig(config: PanelConfig, saveHistory = false) {
-        if (saveHistory) {
-            pushUndoState();
-        }
-        
-        panelConfig.top = config.top;
-        panelConfig.left = config.left;
-        panelConfig.expanded = config.expanded;
-        panelConfig.scrollTop = config.scrollTop;
-        panelConfig.zIndex = config.zIndex === 0 ? 0 : ++$maxPanelZIndex;
-        
-        fixPosition();
-        savePanelConfig();
-        
-        tick().then(() => {
-            if (modulesElement) {
-                modulesElement.scrollTop = panelConfig.scrollTop;
-            }
-        });
-    }
-    function clonePanelConfig(config: PanelConfig): PanelConfig {
-        return {
-            top: config.top,
-            left: config.left,
-            expanded: config.expanded,
-            scrollTop: config.scrollTop,
-            zIndex: config.zIndex
-        };
-    }
+      e.preventDefault();
+      const now = Date.now();
 
-    function pushUndoState() {
-        undoStack.push(clonePanelConfig(panelConfig));
+      switch (key) {
+          case "l":
+              handleLockToggle(now);
+              break;
+          case "s":
+              handleSave(now);
+              break;
+          case "r":
+              handleRestore();
+              break;
+          case "n":
+              handleReset();
+              break;
+          case "d":
+              filterMode = 'disabled';
+              break;
+          case "e":
+              filterMode = 'enabled';
+              break;
+          case "a":
+              filterMode = 'all';
+              break;
+      }
+  }
 
-        
-        if (undoStack.length > 100) {
-            undoStack.shift();
-        }
+  function handleLockToggle(now: number) {
+      if (now - lastLockToggleTime < ANIMATION_DURATION) return;
+      lastLockToggleTime = now;
 
-        redoStack = [];
-    }
-    function fixPosition() {
-        panelConfig.left = clamp(panelConfig.left, 0, document.documentElement.clientWidth * (2 / $scaleFactor) - panelElement.offsetWidth);
-        panelConfig.top = clamp(panelConfig.top, 0, document.documentElement.clientHeight * (2 / $scaleFactor) - panelElement.offsetHeight);
-    }
+      locked.update(current => {
+          const next = !current;
+          lockAnimation.set(next ? 'lock' : 'unlock');
+          showLockHint.set(true);
 
-    function clamp(number: number, min: number, max: number) {
-        return Math.max(min, Math.min(number, max));
-    }
+          setTimeout(() => {
+              lockAnimation.set(null);
+              showLockHint.set(false);
+          }, ANIMATION_DURATION);
 
-    function loadPanelConfig(): PanelConfig {
-        const localStorageItem = localStorage.getItem(
-            `clickgui.panel.${category}`,
-        );
+          return next;
+      });
+  }
 
-        if (!localStorageItem) {
-            return {
-                top: panelIndex * 50 + 20,
-                left: 20,
-                expanded: false,
-                scrollTop: 0,
-                zIndex: 0
-            };
-        } else {
-            const config: PanelConfig = JSON.parse(localStorageItem);
+  function handleSave(now: number) {
+      if (now - lastSaveTime < ANIMATION_DURATION) return;
+      lastSaveTime = now;
 
-                         if (!config.zIndex) {
-                config.zIndex = 0;
-            }
+      savedConfig = clonePanelConfig(panelConfig);
+      saveAnimation.set('save');
+      setTimeout(() => saveAnimation.set(null), ANIMATION_DURATION);
+      
+      glowState.set(true);
+      setTimeout(() => glowState.set(false), 1500);
+  }
 
-            if (config.zIndex > $maxPanelZIndex) {
-                $maxPanelZIndex = config.zIndex;
-            }
+  function handleRestore() {
+      if (savedConfig) {
+          applyPanelConfig(savedConfig);
+      }
+  }
 
-            if (config.expanded) {
-                renderedModules = modules;
-            }
+  function handleReset() {
+      localStorage.removeItem(`clickgui.panel.${category}`);
+      const initialConfig = loadPanelConfig();
+      applyPanelConfig(initialConfig, true);
+  }
 
-            return config;
-        }
-    }
+  function handleKeyup(e: KeyboardEvent) {
+      if (e.key === "Shift") {
+          ignoreGrid = false;
+      }
+  }
 
-    async function savePanelConfig() {
-    const cloned = clonePanelConfig(panelConfig);
-    await setItem(
-        `clickgui.panel.${category}`,
-        JSON.stringify(cloned)
-    );
-}
+  function setupGlobalShortcuts() {
+      window.addEventListener("keydown", (e) => {
+          if ((e.ctrlKey && e.key.toLowerCase() === 'r') || e.key === 'F5') {
+              e.preventDefault();
+          }
+      }, true);
+  }
 
-function onMouseDown(e: MouseEvent) {
-    moving = true;
-    offsetX = e.clientX * (2 / $scaleFactor) - panelConfig.left;
-    offsetY = e.clientY * (2 / $scaleFactor) - panelConfig.top;
-    panelConfig.zIndex = ++$maxPanelZIndex;
-    $showGrid = $snappingEnabled;
-    panelElement.style.transition = "none"; // ← 这里关掉动画
-}
-    function onMouseMove(e: MouseEvent) {
-        if ($locked) { 
+  // Lifecycle
+  onMount(() => {
+      setupGlobalShortcuts();
+      fixPosition();
 
-      e.stopImmediatePropagation();
-      return;
-    }
-        if (moving) {
-            const newLeft = (e.clientX * (2 / $scaleFactor) - offsetX);
-            const newTop = (e.clientY * (2 / $scaleFactor) - offsetY);
+      const keydownHandler = (e: KeyboardEvent) => handleKeydown(e);
+      const keyupHandler = (e: KeyboardEvent) => handleKeyup(e);
 
-            panelConfig.left = snapToGrid(newLeft);
-            panelConfig.top = snapToGrid(newTop);
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mousedown', handleMouseDown);
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('wheel', handleWheel, { passive: false });
+      window.addEventListener("keydown", keydownHandler, true);
+      window.addEventListener("keyup", keyupHandler, true);
 
-            fixPosition();
-        }
-    }
+      return () => {
+          window.removeEventListener("keydown", keydownHandler, true);
+          window.removeEventListener("keyup", keyupHandler, true);
+          window.removeEventListener('mousemove', handleMouseMove);
+          window.removeEventListener('mousedown', handleMouseDown);
+          window.removeEventListener('mouseup', handleMouseUp);
+          window.removeEventListener('wheel', handleWheel);
+      };
+  });
 
-    function onMouseUp() {
-    if (moving) {
-        savePanelConfig();
-    }
-    moving = false;
-    $showGrid = false;
-    panelElement.style.transition = "all 0.5s ease"; 
-}
+  // Store subscriptions
+  highlightModuleName.subscribe((name) => {
+      const index = modules.findIndex((m) => m.name === name);
+      if (index === -1) return;
 
-    function toggleExpanded() {
-        if ($filteredModules.length > 0) return;
-        
-        pushUndoState();          panelConfig.expanded = !panelConfig.expanded;
-        
-        setTimeout(() => {
-            fixPosition();
-            savePanelConfig();
-        }, 500);
-    }
-    function handleModulesScroll() {
-        panelConfig.scrollTop = modulesElement.scrollTop;
+      panelConfig.zIndex = ++$maxPanelZIndex;
+      panelConfig.expanded = true;
+      renderedModules = modules;
 
-        if (scrollPositionSaveTimeout !== undefined) {
-            clearTimeout(scrollPositionSaveTimeout);
-        }
-        scrollPositionSaveTimeout = setTimeout(() => {
-            savePanelConfig();
-            pushUndoState();          }, 500)
-    }
+      tick().then(() => {
+          const moduleEls = modulesElement.querySelectorAll('.module');
+          const targetEl = moduleEls[index] as HTMLElement;
 
-    highlightModuleName.subscribe((name) => {
-        const index = modules.findIndex((m) => m.name === name);
-        if (index !== -1) {
-            panelConfig.zIndex = ++$maxPanelZIndex;
-            panelConfig.expanded = true;
-            renderedModules = modules;
+          if (targetEl) {
+              modulesElement.scrollTo({
+                  top: targetEl.offsetTop - 20,
+                  behavior: 'smooth'
+              });
+          }
+      });
 
-                         tick().then(() => {
-                const moduleEls = modulesElement.querySelectorAll('.module');
-                const targetEl = moduleEls[index] as HTMLElement;
+      savePanelConfig();
+  });
 
-                if (targetEl) {
-                    modulesElement.scrollTo({
-                        top: targetEl.offsetTop - 20,                          behavior: 'smooth'
-                    });
-                }
-            });
+  listen("moduleToggle", (e: ModuleToggleEvent) => {
+      const mod = modules.find((m) => m.name === e.moduleName);
+      if (!mod) return;
 
-            savePanelConfig();
-        }
-    });
-
-    listen("moduleToggle", (e: ModuleToggleEvent) => {
-        const moduleName = e.moduleName;
-        const moduleEnabled = e.enabled;
-
-        const mod = modules.find((m) => m.name === moduleName);
-        if (!mod) return;
-
-        pushUndoState();          mod.enabled = moduleEnabled;
-        modules = modules;
-        if (panelConfig.expanded) {
-            renderedModules = modules;
-        }
-    });
-
-    onMount(() => {
-        fixPosition();
-        const keydownHandler = (e: KeyboardEvent) => {
-            handleKeydown(e);          };
-        const keyupHandler = (e: KeyboardEvent) => {
-            handleKeyup(e);          };
-        window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('wheel', handleWheel, { passive: false });
-
-        window.addEventListener("keydown", keydownHandler, true);          window.addEventListener("keyup", keyupHandler, true);
-        window.addEventListener('keydown', handleKeydown);
-        return () => {
-            window.removeEventListener("keydown", keydownHandler, true);
-            window.removeEventListener("keyup", keyupHandler, true);
-            window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('wheel', handleWheel);
-
-        };
-    });
-    function handleKeydown(e: KeyboardEvent) {
-    console.log(`KEYDOWN: ctrl=${e.ctrlKey}, shift=${e.shiftKey}, key=${e.key}`);
-
-    if (e.key === "Shift") {
-        ignoreGrid = true;
-    }
-
-    const key = e.key.toLowerCase();
-
-    if (e.altKey && !e.ctrlKey && !e.metaKey && ['r', 's', 'l', 'd', 'e', 'a', 'z', 'y', 'n'].includes(key)) {
-        e.preventDefault();
-
-        const now = Date.now();
-
-        switch (key) {
-            case "l": {
-                if (now - lastLockToggleTime < 2000) break;
-                lastLockToggleTime = now;
-
-                locked.update(current => {
-                    const next = !current;
-                    lockAnimation.set(next ? 'lock' : 'unlock');
-                    showLockHint.set(true);
-
-                    setTimeout(() => {
-                        lockAnimation.set(null);
-                        showLockHint.set(false);
-                    }, 2000);
-
-                    return next;
-                });
-                break;
-            }
-
-            case "s": {
-                if (now - lastSaveTime < 2000) break;
-                lastSaveTime = now;
-
-                savedConfig = JSON.parse(JSON.stringify(panelConfig));
-                
-                // 触发保存动画
-                saveAnimation.set('save');
-                setTimeout(() => saveAnimation.set(null), 2000);
-                
-                glowState.set(true);
-                setTimeout(() => glowState.set(false), 1500);
-                break;
-            }
-
-            case "r": {
-                if (savedConfig) {
-                    applyPanelConfig(savedConfig);
-                }
-                break;
-            }
-
-            case "n": {
-                localStorage.removeItem(`clickgui.panel.${category}`);
-                const initialConfig = loadPanelConfig();
-                applyPanelConfig(initialConfig, true);
-                break;
-            }
-
-            case "d":
-                filterMode = 'disabled';
-                break;
-
-            case "e":
-                filterMode = 'enabled';
-                break;
-
-            case "a":
-                filterMode = 'all';
-                break;
-        }
-    }
-}
-    function handleKeyup(e: KeyboardEvent) {
-        if (e.key === "Shift") {
-            ignoreGrid = false;
-        }
-    }
-
-    function snapToGrid(value: number): number {
-        if (ignoreGrid || !$snappingEnabled) return value;
-
-        return Math.round(value / $gridSize) * $gridSize;
-    }
+      pushUndoState();
+      mod.enabled = e.enabled;
+      modules = modules;
+      
+      if (panelConfig.expanded) {
+          renderedModules = modules;
+      }
+  });
 </script>
-<div
-  class="scroll-indicator"
-  style="opacity: {$indicatorOpacity}"
-></div>
-<svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove} on:keydown={handleKeydown} on:keyup={handleKeyup}/>
 
+<!-- Scroll Indicator -->
+<div class="scroll-indicator" style="opacity: {$indicatorOpacity}"></div>
+
+<!-- Window Event Listeners -->
+<svelte:window 
+  on:mouseup={onMouseUp} 
+  on:mousemove={onMouseMove} 
+  on:keydown={handleKeydown} 
+  on:keyup={handleKeyup}
+/>
+
+<!-- Panel Wrapper -->
 <div 
-bind:this={panelElement}
-class="panel-wrapper"
-    class:expanded={panelConfig.expanded}
-    style="left: {panelConfig.left}px; top: {panelConfig.top}px; z-index: {panelConfig.zIndex};"
-    in:fly|global={{y: -30, duration: 250, easing: expoInOut}}
-    out:fly|global={{y: -30, duration: 250, easing: expoInOut}}>
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="panel"
-    class:locked={$locked}
-    class:glowing={$glowState}
-    bind:this={panelElement}
-    on:mousedown={onMouseDown}>
-    
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="title" 
-            on:mousedown={onMouseDown}
-            on:contextmenu|preventDefault={toggleExpanded}>
-            <img
-                class="icon"
-                src="img/clickgui/icon-{category.toLowerCase()}.svg"
-                alt="icon" />
-            <span class="category">{category === 'Client' ? 'Client' : category}</span>
+  bind:this={panelElement}
+  class="panel-wrapper"
+  class:expanded={panelConfig.expanded}
+  style="left: {panelConfig.left}px; top: {panelConfig.top}px; z-index: {panelConfig.zIndex};"
+  in:fly|global={{y: -30, duration: 250, easing: expoInOut}}
+  out:fly|global={{y: -30, duration: 250, easing: expoInOut}}
+>
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div 
+      class="panel"
+      class:locked={$locked}
+      class:glowing={$glowState}
+      on:mousedown={onMouseDown}
+  >
+      <!-- Panel Title -->
+      <div 
+          class="title" 
+          on:mousedown={onMouseDown}
+          on:contextmenu|preventDefault={toggleExpanded}
+      >
+          <img
+              class="icon"
+              src="img/clickgui/icon-{category.toLowerCase()}.svg"
+              alt="icon" 
+          />
+          <span class="category">{category === 'Client' ? 'Client' : category}</span>
 
-            {#if $lockAnimation || $saveAnimation}
-            <div class="status-indicator { $locked ? 'locked' : '' }">
-              {#if $lockAnimation}
-                <div class="icon-wrapper { $lockAnimation === 'lock' ? 'lock-animation' : '' } { $lockAnimation === 'unlock' ? 'unlock-animation' : '' }">
-                  {#if $locked}
-                    <!-- 锁定图标 -->
-                    <svg viewBox="0 0 24 24">
-                      <path d="M12 3a4 4 0 0 1 4 4v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a4 4 0 0 1 4-4m0 2a2 2 0 0 0-2 2v3h4V7a2 2 0 0 0-2-2Z"/>
-                    </svg>
-                  {:else}
-                    <!-- 解锁图标 -->
-                    <svg viewBox="0 0 24 24">
-                      <path d="M18 8h-1V7a5 5 0 0 0-9.9-1.2l2 1.5A3 3 0 0 1 15 7v1H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Z"/>
-                    </svg>
+          <!-- Status Indicator -->
+          {#if $lockAnimation || $saveAnimation}
+              <div class="status-indicator { $locked ? 'locked' : '' }">
+                  {#if $lockAnimation}
+                      <div class="icon-wrapper 
+                          { $lockAnimation === 'lock' ? 'lock-animation' : '' } 
+                          { $lockAnimation === 'unlock' ? 'unlock-animation' : '' }"
+                      >
+                          {#if $locked}
+                              <svg viewBox="0 0 24 24">
+                                  <path d="M12 3a4 4 0 0 1 4 4v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a4 4 0 0 1 4-4m0 2a2 2 0 0 0-2 2v3h4V7a2 2 0 0 0-2-2Z"/>
+                              </svg>
+                          {:else}
+                              <svg viewBox="0 0 24 24">
+                                  <path d="M18 8h-1V7a5 5 0 0 0-9.9-1.2l2 1.5A3 3 0 0 1 15 7v1H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Z"/>
+                              </svg>
+                          {/if}
+                      </div>
+                  {:else if $saveAnimation}
+                      <div class="icon-wrapper save-animation">
+                          <svg viewBox="0 0 32 32">
+                              <polygon fill="currentColor" points="26 14 24.59 12.59 17 20.17 17 2 15 2 15 20.17 7.41 12.59 6 14 16 24 26 14"/>
+                              <path fill="currentColor" d="m26,24v4H6v-4h-2v4h0c0,1.1.9,2,2,2h20c1.1,0,2-.9,2-2h0v-4h-2Z"/>
+                          </svg>
+                      </div>
                   {/if}
-                </div>
-              {:else if $saveAnimation}
-                <div class="icon-wrapper save-animation">
-                  <!-- 保存图标 -->
-                  <svg viewBox="0 0 32 32">
-                    <polygon fill="currentColor" points="26 14 24.59 12.59 17 20.17 17 2 15 2 15 20.17 7.41 12.59 6 14 16 24 26 14"/>
-                    <path fill="currentColor" d="m26,24v4H6v-4h-2v4h0c0,1.1.9,2,2,2h20c1.1,0,2-.9,2-2h0v-4h-2Z"/>
-                  </svg>
-                </div>
-              {/if}
-            </div>
+              </div>
           {/if}
-          
 
-            <!-- svelte-ignore a11y_consider_explicit_label -->
-            <button class="expand-toggle" on:click={toggleExpanded}>
-                <div class="icon" class:expanded={panelConfig.expanded || $filteredModules.length > 0}></div>
-            </button>
-       
-        </div>
+          <!-- Expand Toggle Button -->
+          <!-- svelte-ignore a11y_consider_explicit_label -->
+          <button class="expand-toggle" on:click={toggleExpanded}>
+              <div class="icon" class:expanded={panelConfig.expanded || $filteredModules.length > 0}></div>
+          </button>
+      </div>
 
-        <div class="modules"
-            on:scroll={handleModulesScroll}
-            bind:this={modulesElement}
-            style="--duration: 0.3s">
-            {#each renderedModules as {name, enabled, description, aliases}, i (name)} 
-            <div>
-                <Module
-                    {name}
-                    {enabled}
-                    {description}
-                    {aliases}
-                />
-            </div>
-        {/each}
-        </div>
-    </div>
+      <!-- Modules List -->
+      <div 
+          class="modules"
+          on:scroll={handleModulesScroll}
+          bind:this={modulesElement}
+          style="--duration: 0.3s"
+      >
+          {#each renderedModules as {name, enabled, description, aliases} (name)}
+              <div>
+                  <Module {name} {enabled} {description} {aliases} />
+              </div>
+          {/each}
+      </div>
+  </div>
 </div>
 <style lang="scss">
     @import "../../colors.scss";
@@ -714,7 +726,7 @@ class="panel-wrapper"
   text-shadow: 0 0 10px rgba($accent-color, 0.3);
   backdrop-filter: blur(2px);    border-radius: 8px 8px 0 0;
   transition: all 0.3s ease;
-  position: relative; /* 为绝对定位的指示器提供参考 */
+  position: relative; 
   padding-right: 80px;
   .panel:not(.expanded) & {
     background: rgba($base, 0.8);

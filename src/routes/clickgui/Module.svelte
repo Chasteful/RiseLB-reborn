@@ -57,9 +57,7 @@
     if (aliases.length > 0) {
       moduleDescription += ` (aka ${aliases.map(a => $spaceSeperatedNames ? convertToSpacedString(a) : a).join(", ")})`;
     }
-    descriptionStore.set({ x, y, description: moduleDescription });
   }
-
   async function toggleExpanded() {
     expanded = !expanded;
     await setItem(path, expanded.toString());
