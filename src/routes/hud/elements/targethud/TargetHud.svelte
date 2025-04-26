@@ -469,7 +469,7 @@ onDestroy(() => {
 
   padding-left: 0;
   font-size: 14px;
-  font-family: 'Product Sans';
+  font-family: 'Inter';
   color: white;
   text-shadow: 0 0 4px rgba(white,0.8);
   align-self: start;
@@ -549,7 +549,7 @@ onDestroy(() => {
   margin-left: 8px; 
   bottom: 0; 
   transform: translateY(25%);
-  font-family: 'Product Sans';
+  font-family: 'Inter';
   font-size: 14px;
   color: white;
   transition: opacity 0.3s ease;

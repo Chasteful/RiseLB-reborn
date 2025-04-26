@@ -60,12 +60,15 @@
     }
   
     .bar {
-      width: 5px;
-      height: 1.2em;
-      background-color: $Items-bar;
-      margin-right: 6px;
-      border-radius: 6px;
-    }
+  width: 5px;
+  height: 1.2em;
+  background: linear-gradient(135deg, $Items-bar, $blue);
+  background-size: 200% auto;
+  background-position: 0% center;
+  animation: gradientShift 3s ease infinite;
+  margin-right: 6px;
+  border-radius: 6px;
+}
   
     .container {
       display: grid;

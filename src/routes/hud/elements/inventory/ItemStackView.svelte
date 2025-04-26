@@ -66,7 +66,7 @@ function isAir(stack: ItemStack): boolean {
 
   .mask {
     position: absolute;
-    background: radial-gradient(circle, rgba(112, 48, 160, 0.8), rgba(255, 105, 180, 0) 100%);
+    background: radial-gradient(circle, rgba($accent-color ,0.8), rgba(255, 105, 180, 0) 100%);
     mix-blend-mode: screen;
     scale: 105%;
     top: 0;
@@ -101,7 +101,7 @@ function isAir(stack: ItemStack): boolean {
     right: 0;
     font-size: 14px;
     font-weight: bold;
-    text-shadow: 1px 1px black; // This is inconsistent with other UI elements but it looks better so I will let it pass ~Senk Ju
+    text-shadow: 1px 1px black; 
     font-family: monospace;
   }
 </style>

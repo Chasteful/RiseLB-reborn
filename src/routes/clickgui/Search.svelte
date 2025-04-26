@@ -525,12 +525,14 @@ function getWeightedRandomPlaceholder(): string {
     &::before {
       opacity: 0.6;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 50%);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     }
   }
 
   &:focus-within {
     &::before {
       opacity: 1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
       background: linear-gradient(135deg, rgba($accent-color, 0.12) 0%, transparent 70%);
       transition: opacity 0.3s ease-out, background 0.4s ease-out;
     }
@@ -613,18 +615,24 @@ function getWeightedRandomPlaceholder(): string {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 16px;
   color: $text;
-
+  font-size: 16px;
+  letter-spacing: 1px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   &::placeholder {
     color: rgba($text, 0.5);
+   
   }
   
 }
 .search-input::selection {
-  background: transparent;
-  color: inherit;
+ background: rgba(255, 255, 255, 0.01);
+  color: inherit; 
+  text-shadow: 0 0 4px $text;
+ 
 }
+
+
 .results, .history-results {
   border-top: 2px solid rgba($accent, 0.2);
   padding: 0;
@@ -633,14 +641,14 @@ function getWeightedRandomPlaceholder(): string {
   margin-top: 8px;
   overflow: overlay; 
   padding-right: 8px; 
-  border-radius: 24px; /* Unified border radius */
+  border-radius: 24px; 
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba($accent, 0.2);
   background: linear-gradient(
     to bottom,
     rgba(#1a1a1a, 0.95) 0%,
     rgba(#0d0d0d, 0.98) 100%
-  ); /* Bing-like dark background */
+  ); 
 
   &::before {
     content: '';
@@ -681,7 +689,7 @@ function getWeightedRandomPlaceholder(): string {
     justify-content: center;
     align-items: center;
     padding: 12px 20px;
-    font-size: 13px;
+    font-size: 14px;
     color: rgba($accent-color, 0.9);
     border-bottom: 1px solid rgba($accent-color, 0.15);
     text-transform: uppercase;
@@ -839,7 +847,6 @@ function getWeightedRandomPlaceholder(): string {
   }
 }
 
-/* 搜索结果样式 */
 .result {
   font-size: 16px;
   padding: 14px 20px;

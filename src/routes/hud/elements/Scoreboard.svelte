@@ -16,7 +16,7 @@
   let scoreboard: Scoreboard | null = null;
 
   async function updateEnabledModules() {
-      await document.fonts.load("500 16px 'Product Sans'");
+      await document.fonts.load("500 16px 'Inter'");
 
       const modules = await getModules();
       const visibleModules = modules.filter(m => m.enabled && !m.hidden);
@@ -31,7 +31,7 @@
           const formattedName = $spaceSeperatedNames ? convertToSpacedString(module.name) : module.name;
           const prefix = prefixMap.get(module.name) || "";
           const fullName = `${formattedName} ${prefix}`;
-          const font = "500 16px 'Product Sans', system-ui, sans-serif";
+          const font = "500 16px 'Inter', system-ui, sans-serif";
           const width = getTextWidth(fullName, font);
 
           return {
@@ -138,7 +138,7 @@
       background-color: rgba(0, 0, 0, 0.2);
       color: var(--accent-color);
       text-shadow: var(--accent-color);
-      font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       font-size: 16px;
       padding: 2px 6px;
       width: max-content;
@@ -182,7 +182,9 @@
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.6);
     border-radius: 0;
     display: inline-block; 
-    max-width: 180px; 
+    right: 0;
+    transition: width 0.2s ease;
+    transform: translateX(0);
     margin-left: auto;
 }
 
@@ -206,7 +208,7 @@
     padding: 10px;
     color: $accent-color;
     text-shadow: $base 0px 0px 16px;
-    font-size: 16px;
+    font-size: 20px;
     text-align: center;
     white-space: nowrap; 
     box-sizing: border-box;

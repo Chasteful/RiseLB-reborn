@@ -126,7 +126,7 @@
       background: linear-gradient(135deg, $text, $blue);
       -webkit-background-clip: text;
       background-clip: text;
-      font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       -webkit-text-fill-color: transparent;
       background-size: 200% auto;
       background-position: 0% center;

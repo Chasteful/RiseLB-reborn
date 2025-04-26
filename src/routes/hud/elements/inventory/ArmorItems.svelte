@@ -7,6 +7,7 @@
     import { getPlayerInventory, getPlayerData } from "../../../../integration/rest";
     import { fly } from "svelte/transition";
     import { expoInOut } from "svelte/easing";
+    
     let inventorySlots: ItemStack[] = Array(36).fill({ identifier: "minecraft:air", count: 0 });
 let mainHand: ItemStack | null = null;
 let offHand: ItemStack | null = null;
@@ -98,12 +99,20 @@ onMount(async () => {
     }
   
     .bar {
-      width: 5px;
-      height: 1.2em;
-      background-color: $Items-bar;
-      margin-right: 6px;
-      border-radius: 6px;
-    }
+  width: 5px;
+  height: 1.2em;
+  background: linear-gradient(135deg, $Items-bar, $blue);
+  background-size: 200% auto;
+  background-position: 0% center;
+  animation: gradientShift 2.5s ease infinite;
+  margin-right: 6px;
+  border-radius: 6px;
+}
   
+@keyframes gradientShift {
+      0% { background-position: 0% center; }
+      50% { background-position: 100% center; }
+      100% { background-position: 0% center; }
+  }
   </style>
   

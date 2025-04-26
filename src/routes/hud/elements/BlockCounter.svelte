@@ -115,8 +115,8 @@
 
 
   .icon {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     image-rendering: pixelated;
     z-index: 1;
     margin-bottom: 4px;
@@ -127,20 +127,21 @@
     position: relative;
     width: 80px;
     padding: 8px 0;
-    background: rgba(20, 20, 20, 0.8);
+    background: rgba(20, 20, 20, 0.5);
     border-radius: 8px;
     text-align: center;
     color: #fff;
     font-family: monospace;
     user-select: none;
     box-shadow:
-      0 0 16px rgba(20,20, 20, 0.8);
+      0 0 16px rgba(20,20, 20, 0.6);
     animation: glow 2s infinite alternate;
   }
 
   .count {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   .pointer {
@@ -152,7 +153,7 @@
     height: 0;
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
-    border-top: 6px solid rgba(20, 20, 20, 0.8);
+    border-top: 6px solid rgba(20, 20, 20, 0.5);
   }
 
 </style>
