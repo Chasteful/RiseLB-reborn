@@ -54,6 +54,7 @@
       rgba(20,20, 20, 0.5) 0%,
       rgba(darken($base, 5%), 0.5) 100%
     );
+
     border-radius: 14px;
     width: 320px;
     padding: 16px;
