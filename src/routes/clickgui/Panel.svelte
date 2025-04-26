@@ -24,6 +24,7 @@
     export let category: string;
     export let modules: TModule[];
     export let panelIndex: number;
+    export const saveAnimation = writable<'save' | null>(null);
     export const lockAnimation = writable<'lock' | 'unlock' | null>(null);
     let lastSaveTime = 0;
     let lastLockToggleTime = 0;
@@ -39,8 +40,7 @@
     export function setupGlobalShortcuts() {
         window.addEventListener("keydown", (e) => {
             if ((e.ctrlKey && e.key.toLowerCase() === 'r') || e.key === 'F5') {
-                e.preventDefault();
-                console.log("全局阻止 Ctrl+R / F5 刷新");
+                e.preventDefault()
             }
         }, true);
     }
@@ -322,83 +322,81 @@
         };
     });
     function handleKeydown(e: KeyboardEvent) {
-  console.log(`KEYDOWN: ctrl=${e.ctrlKey}, shift=${e.shiftKey}, key=${e.key}`);
+    console.log(`KEYDOWN: ctrl=${e.ctrlKey}, shift=${e.shiftKey}, key=${e.key}`);
 
-  if (e.key === "Shift") {
-    ignoreGrid = true;
-  }
-
-  const key = e.key.toLowerCase();
-
-  if (e.altKey && !e.ctrlKey && !e.metaKey && ['r', 's', 'l', 'd', 'e', 'a', 'z', 'y', 'n'].includes(key)) {
-    e.preventDefault();
-
-    const now = Date.now();
-
-    switch (key) {
-      case "l": {
-        if (now - lastLockToggleTime < 2000) break;
-        lastLockToggleTime = now;
-
-        locked.update(current => {
-          const next = !current;
-          lockAnimation.set(next ? 'lock' : 'unlock');
-          showLockHint.set(true);
-
-          setTimeout(() => {
-            lockAnimation.set(null);
-            showLockHint.set(false);
-          }, 2000);
-
-          return next;
-        });
-        break;
-      }
-
-      case "s": {
-        if (now - lastSaveTime < 2000) break;
-        lastSaveTime = now;
-
-        savedConfig = JSON.parse(JSON.stringify(panelConfig));
-        console.log("布局参数已保存");
-
-        glowState.set(true);
-        setTimeout(() => glowState.set(false), 1500);
-        break;
-      }
-
-      case "r": {
-        if (savedConfig) {
-          applyPanelConfig(savedConfig);
-          console.log("布局参数已加载");
-        }
-        break;
-      }
-
-      case "n": {
-        localStorage.removeItem(`clickgui.panel.${category}`);
-        const initialConfig = loadPanelConfig();
-        applyPanelConfig(initialConfig, true);
-        console.log("布局已重置为初始状态");
-        break;
-      }
-
-      case "d":
-        filterMode = 'disabled';
-        console.log("只显示未开启模块");
-        break;
-
-      case "e":
-        filterMode = 'enabled';
-        console.log("只显示已开启模块");
-        break;
-
-      case "a":
-        filterMode = 'all';
-        console.log("显示所有模块");
-        break;
+    if (e.key === "Shift") {
+        ignoreGrid = true;
     }
-  }
+
+    const key = e.key.toLowerCase();
+
+    if (e.altKey && !e.ctrlKey && !e.metaKey && ['r', 's', 'l', 'd', 'e', 'a', 'z', 'y', 'n'].includes(key)) {
+        e.preventDefault();
+
+        const now = Date.now();
+
+        switch (key) {
+            case "l": {
+                if (now - lastLockToggleTime < 2000) break;
+                lastLockToggleTime = now;
+
+                locked.update(current => {
+                    const next = !current;
+                    lockAnimation.set(next ? 'lock' : 'unlock');
+                    showLockHint.set(true);
+
+                    setTimeout(() => {
+                        lockAnimation.set(null);
+                        showLockHint.set(false);
+                    }, 2000);
+
+                    return next;
+                });
+                break;
+            }
+
+            case "s": {
+                if (now - lastSaveTime < 2000) break;
+                lastSaveTime = now;
+
+                savedConfig = JSON.parse(JSON.stringify(panelConfig));
+                
+                // 触发保存动画
+                saveAnimation.set('save');
+                setTimeout(() => saveAnimation.set(null), 2000);
+                
+                glowState.set(true);
+                setTimeout(() => glowState.set(false), 1500);
+                break;
+            }
+
+            case "r": {
+                if (savedConfig) {
+                    applyPanelConfig(savedConfig);
+                }
+                break;
+            }
+
+            case "n": {
+                localStorage.removeItem(`clickgui.panel.${category}`);
+                const initialConfig = loadPanelConfig();
+                applyPanelConfig(initialConfig, true);
+                break;
+            }
+
+            case "d":
+                filterMode = 'disabled';
+                break;
+
+            case "e":
+                filterMode = 'enabled';
+                break;
+
+            case "a":
+                filterMode = 'all';
+                break;
+        }
+    }
 }
     function handleKeyup(e: KeyboardEvent) {
         if (e.key === "Shift") {
@@ -417,6 +415,7 @@
   style="opacity: {$indicatorOpacity}"
 ></div>
 <svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove} on:keydown={handleKeydown} on:keyup={handleKeyup}/>
+
 <div class="panel-wrapper"
     class:expanded={panelConfig.expanded}
     style="left: {panelConfig.left}px; top: {panelConfig.top}px; z-index: {panelConfig.zIndex};"
@@ -439,29 +438,40 @@
                 alt="icon" />
             <span class="category">{category === 'Client' ? 'Client' : category}</span>
 
-            <!-- 状态指示器移动到这里 -->
-            {#if $lockAnimation}
+            {#if $lockAnimation || $saveAnimation}
             <div class="status-indicator { $locked ? 'locked' : '' }">
-              <div class="icon-wrapper { $lockAnimation === 'lock' ? 'lock-animation' : '' } { $lockAnimation === 'unlock' ? 'unlock-animation' : '' }">
-                {#if $locked}
-                  <!-- 锁定图标 -->
-                  <svg viewBox="0 0 24 24">
-                    <path d="M12 3a4 4 0 0 1 4 4v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a4 4 0 0 1 4-4m0 2a2 2 0 0 0-2 2v3h4V7a2 2 0 0 0-2-2Z"/>
+              {#if $lockAnimation}
+                <div class="icon-wrapper { $lockAnimation === 'lock' ? 'lock-animation' : '' } { $lockAnimation === 'unlock' ? 'unlock-animation' : '' }">
+                  {#if $locked}
+                    <!-- 锁定图标 -->
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 3a4 4 0 0 1 4 4v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a4 4 0 0 1 4-4m0 2a2 2 0 0 0-2 2v3h4V7a2 2 0 0 0-2-2Z"/>
+                    </svg>
+                  {:else}
+                    <!-- 解锁图标 -->
+                    <svg viewBox="0 0 24 24">
+                      <path d="M18 8h-1V7a5 5 0 0 0-9.9-1.2l2 1.5A3 3 0 0 1 15 7v1H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Z"/>
+                    </svg>
+                  {/if}
+                </div>
+              {:else if $saveAnimation}
+                <div class="icon-wrapper save-animation">
+                  <!-- 保存图标 -->
+                  <svg viewBox="0 0 32 32">
+                    <polygon fill="currentColor" points="26 14 24.59 12.59 17 20.17 17 2 15 2 15 20.17 7.41 12.59 6 14 16 24 26 14"/>
+                    <path fill="currentColor" d="m26,24v4H6v-4h-2v4h0c0,1.1.9,2,2,2h20c1.1,0,2-.9,2-2h0v-4h-2Z"/>
                   </svg>
-                {:else}
-                  <!-- 解锁图标 -->
-                  <svg viewBox="0 0 24 24">
-                    <path d="M18 8h-1V7a5 5 0 0 0-9.9-1.2l2 1.5A3 3 0 0 1 15 7v1H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Z"/>
-                  </svg>
-                {/if}
-              </div>
+                </div>
+              {/if}
             </div>
           {/if}
+          
 
             <!-- svelte-ignore a11y_consider_explicit_label -->
             <button class="expand-toggle" on:click={toggleExpanded}>
                 <div class="icon" class:expanded={panelConfig.expanded || $filteredModules.length > 0}></div>
             </button>
+       
         </div>
 
         <div class="modules"
@@ -496,17 +506,7 @@
   60% { transform: scale(1); }
   100% { opacity: 0; transform: scale(1.2); }
 }
-@keyframes glowPulse {
-    0% {
-        box-shadow: 0 0 0px rgba(0, 255, 128, 0);
-    }
-    50% {
-        box-shadow: 0 0 20px 6px rgba(0, 255, 128, 1);
-    }
-    100% {
-        box-shadow: 0 0 0px rgba(0, 255, 128, 0);
-    }
-}
+
 @keyframes unlockEffect {
   0% { opacity: 1; transform: scale(1) rotate(0deg); }
   60% { transform: scale(1.2) rotate(-30deg); }
@@ -529,6 +529,27 @@
   50% { opacity: 1; transform: scale(1.02); }
   100% { opacity: 0; transform: scale(0.95); }
 }
+@keyframes saveEnter {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+    
+    .save-animation {
+      animation: saveEnter 0.5s ease-out;
+        
+        svg {
+            fill: $accent-color;
+            width: 24px;
+            height: 24px;
+            color: $accent-color;
+        }
+    }
 .panel-wrapper {
   position: absolute;
   border-radius: 12px;
@@ -569,8 +590,7 @@
     opacity: 0;
     pointer-events: none;
   }
-
-.panel {
+  .panel {
     width: 230px;
     max-width: 100%;
     position: relative;
@@ -584,10 +604,48 @@
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease;
+    
+
+    --glow-color-1: #{$accent-color};
+    --glow-color-2: #{lighten($accent-color, 15%)};
+    --glow-opacity: 0.5;
 }
+
 .panel.glowing {
-    box-shadow: 0 0 16px 4px rgba($accent-color, 0.8);
-    animation: glowPulse 1.5s ease-out;
+    isolation: isolate; 
+    &::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 10px;
+        background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--glow-color-1) 50%, transparent),
+    color-mix(in srgb, var(--glow-color-2) 50%, transparent),
+    color-mix(in srgb, var(--glow-color-1) 50%, transparent)
+);
+
+        background-size: 300% 300%;
+        z-index: -1;
+        opacity: 0;
+        animation: 
+            glowGradient 1.5s ease-out,
+            glowMovement 3s linear infinite;
+    }
+}
+
+
+@keyframes glowGradient {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes glowMovement {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 .status-indicator {
       display: flex;
