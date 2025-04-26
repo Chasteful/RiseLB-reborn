@@ -616,7 +616,7 @@ function getWeightedRandomPlaceholder(): string {
   outline: none;
   background: transparent;
   color: $text;
-  font-size: 16px;
+  font-size: 20px;
   letter-spacing: 1px;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   &::placeholder {
