@@ -73,7 +73,7 @@ listen("key", (e: KeyEvent) => {
   transition: box-shadow 0.1s ease;
   background: linear-gradient(
     135deg,
-    rgba($base, 0.6) 0%,
+    rgba(20,20, 20, 0.6) 0%,
     rgba(darken($base, 5%), 0.5) 100%
   );
   backdrop-filter: blur(12px) brightness(1.2);
@@ -111,7 +111,7 @@ listen("key", (e: KeyEvent) => {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba($base, 0.2);
+    background: rgba(20,20, 20, 0.2);
     border-radius: inherit;
     z-index: 0;
   }

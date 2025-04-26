@@ -51,11 +51,9 @@
     gap: 12px;
     background: linear-gradient(
       135deg,
-      rgba($base, 0.6) 0%,
+      rgba(20,20, 20, 0.5) 0%,
       rgba(darken($base, 5%), 0.5) 100%
     );
-    backdrop-filter: blur(12px) brightness(1.1);
-    -webkit-backdrop-filter: blur(12px) brightness(1.1);
     border-radius: 14px;
     width: 320px;
     padding: 16px;
@@ -167,7 +165,6 @@
   height: 12px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 0 0 2px $base;
   transition: transform 0.3s ease, background 0.3s ease;
 
   .enabled & {
@@ -201,7 +198,6 @@
   white-space: pre-wrap;
 }
 
-/* 淡入淡出动画 */
 .fade {
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -214,7 +210,7 @@
   height: 4px;
   width: 100%;
   margin-top: 10px;
-  background: rgba($base, 0.08);
+  background: rgba(20,20, 20, 0.08);
   border-radius: 2px;
   overflow: hidden;
 }

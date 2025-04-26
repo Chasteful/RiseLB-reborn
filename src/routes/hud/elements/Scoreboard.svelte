@@ -179,7 +179,7 @@
     position: relative;
     overflow: hidden;
     font-size: 14px;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.6);
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.5);
     border-radius: 0;
     display: inline-block; 
     right: 0;

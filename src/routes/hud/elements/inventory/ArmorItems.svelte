@@ -56,7 +56,7 @@ onMount(async () => {
     <div class="inventory-hud"></div>
         <div class="title">
           <span class="bar"></span>
-          <span>ARMORITEMS HUD</span>
+          <span>ARMOR HUD</span>
         </div>
       
 
