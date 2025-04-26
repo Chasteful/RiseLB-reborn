@@ -1,11 +1,10 @@
 <script lang="ts">
-    import type {ItemStack, PlayerData} from "../../../../integration/types";
+    import type {ItemStack} from "../../../../integration/types";
     import {REST_BASE} from "../../../../integration/host";
     import {mapToColor} from "../../../../util/color_utils";
-    import {getPlayerData} from "../../../../integration/rest";
-    import { onMount } from "svelte";
+
     export let stack: ItemStack;
-    let playerData: PlayerData | null = null;
+
 
     const {count, damage, identifier, maxDamage, hasEnchantment } = stack;
 
@@ -16,13 +15,8 @@
     
 
 
-onMount(async () => {
-  playerData = await getPlayerData();
-});
 
-function isAir(stack: ItemStack): boolean {
-    return !stack || stack.identifier === "minecraft:air" || stack.count <= 0;
-  }
+
 </script>
   
 
@@ -32,13 +26,6 @@ function isAir(stack: ItemStack): boolean {
     {/if}
     <img class="item-icon" src={itemIconUrl} alt={identifier}/>
 
-    {#if playerData && !isAir(playerData.mainHandStack)}
-    <div class="mainHand-slot"></div>
-  {/if}
-  
-  {#if playerData && !isAir(playerData.offHandStack)}
-    <div class="offhand-slot"></div>
-  {/if}
 
     <div class="durability-bar" class:hidden={damage === 0}>
         <div class="durability"

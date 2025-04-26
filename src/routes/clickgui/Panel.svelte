@@ -206,19 +206,17 @@
     );
 }
 
-    function onMouseDown(e: MouseEvent) {
-        if (e.button !== 0 && e.button !== 1) return;
-
-        moving = true;
-        offsetX = e.clientX * (2 / $scaleFactor) - panelConfig.left;
-        offsetY = e.clientY * (2 / $scaleFactor) - panelConfig.top;
-        panelConfig.zIndex = ++$maxPanelZIndex;
-        $showGrid = $snappingEnabled;
-    }
-
+function onMouseDown(e: MouseEvent) {
+    moving = true;
+    offsetX = e.clientX * (2 / $scaleFactor) - panelConfig.left;
+    offsetY = e.clientY * (2 / $scaleFactor) - panelConfig.top;
+    panelConfig.zIndex = ++$maxPanelZIndex;
+    $showGrid = $snappingEnabled;
+    panelElement.style.transition = "none"; // ← 这里关掉动画
+}
     function onMouseMove(e: MouseEvent) {
         if ($locked) { 
-      console.log("面板已锁定，无法拖动");
+
       e.stopImmediatePropagation();
       return;
     }
@@ -234,12 +232,13 @@
     }
 
     function onMouseUp() {
-        if (moving) {
-            savePanelConfig();
-        }
-        moving = false;
-        $showGrid = false;
+    if (moving) {
+        savePanelConfig();
     }
+    moving = false;
+    $showGrid = false;
+    panelElement.style.transition = "all 0.5s ease"; 
+}
 
     function toggleExpanded() {
         if ($filteredModules.length > 0) return;
@@ -416,7 +415,9 @@
 ></div>
 <svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove} on:keydown={handleKeydown} on:keyup={handleKeyup}/>
 
-<div class="panel-wrapper"
+<div 
+bind:this={panelElement}
+class="panel-wrapper"
     class:expanded={panelConfig.expanded}
     style="left: {panelConfig.left}px; top: {panelConfig.top}px; z-index: {panelConfig.zIndex};"
     in:fly|global={{y: -30, duration: 250, easing: expoInOut}}
@@ -556,7 +557,7 @@
   padding: 4px;
   background:transparent;
   box-shadow: 0 0 10px rgba($base, 0.4);
-  transition: all 0.5s ease;
+
 
  &::before {
     content: '';

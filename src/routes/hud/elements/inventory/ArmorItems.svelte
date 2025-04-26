@@ -72,12 +72,14 @@
   <style lang="scss">
       @import "../../../../colors";
       .armoritems-hud   {
+      position: absolute;
+      min-width: 120px;
       background-color: rgba(0, 0, 0, 0.5);
       border-radius: 6px;
       padding: 6px 10px;
       width: fit-content;
       font-family: sans-serif;
-      color: white;
+      color: white;    
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
       user-select: none;
       flex-direction: column;  
