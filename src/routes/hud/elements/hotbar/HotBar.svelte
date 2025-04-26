@@ -1,14 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
   import { listen } from "../../../../integration/ws";
   import { getPlayerData } from "../../../../integration/rest";
   import type { ClientPlayerDataEvent, OverlayMessageEvent } from "../../../../integration/events";
-  import type {  PlayerData, TextComponent as TTextComponent } from "../../../../integration/types";
-
+  import type { PlayerData, TextComponent as TTextComponent } from "../../../../integration/types";
+  import TextComponent from "../../../menu/common/TextComponent.svelte";
   import Status from "./Status.svelte";
-  import Layer from "./Layer.svelte";
-    import TextComponent from "../../../menu/common/TextComponent.svelte";
-    import { fade } from "svelte/transition";
+  import { TimeoutManager } from "./TimeoutManager";
 
   let playerData: PlayerData | null = null;
   let overlayMessage: OverlayMessageEvent | null = null;
@@ -17,100 +16,78 @@
   let currentSlot = 0;
   let lastSlot = 0;
   let slotsElement: HTMLElement;
-
   let showItemStackName = false;
-  const timeouts = new Map<string | number ,NodeJS.Timeout>();
-  let experienceChange:{ from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
- let airChange: { from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
-  let foodChange:{ from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
 
-  let healthChange: { from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
-  let absorptionChange: { from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
-  let armorChange: { from: number; to: number; max: number; color: string; onDone?: () => void; } | null | undefined = null;
+  const timeouts = new TimeoutManager();
   let maxAbsorption = 0;
 
-  function resetTimeout(type: 'itemName' | 'overlay',) {
-    clearTimeout(timeouts.get(type));
-    timeouts.set(type, setTimeout(() => {
-      if (type === 'itemName') showItemStackName = false;
-      if (type === 'overlay') overlayMessage = null;
-    }, type === 'itemName' ? 2000 : 3000));
+  const ITEM_NAME_TIMEOUT = 2000;
+  const OVERLAY_TIMEOUT = 3000;
+
+  type BarAnimation = {
+    from: number;
+    to: number;
+    max: number;
+    color: string;
+  };
+
+  type BarKey = 'health' | 'absorption' | 'armor' | 'experience' | 'air' | 'food';
+
+  let barAnimations: Record<BarKey, BarAnimation | null> = {
+    health: null,
+    absorption: null,
+    armor: null,
+    experience: null,
+    air: null,
+    food: null
+  };
+
+  const barColors: Record<BarKey, string> = {
+    health: "#FC4130",
+    absorption: "#D4AF37",
+    armor: "#49EAD6",
+    experience: "#88C657",
+    air: "#AAC1E3",
+    food: "#B88458"
+  };
+
+  function maybeAnimateBar(key: BarKey, from: number | undefined, to: number | undefined, max: number | undefined) {
+    if (from !== undefined && to !== undefined && max !== undefined && to < from) {
+      barAnimations[key] = { from, to, max, color: barColors[key] };
+    }
   }
 
   function updatePlayerData(newData: PlayerData) {
     const prev = playerData;
     playerData = newData;
 
-    if (prev) {
-      if (newData.health < prev.health) {
-        healthChange = {
-          from: prev.health,
-          to: newData.health,
-          max: newData.maxHealth,
-          color: "rgba(252, 65, 48, 0.4)",
-        };
+    if (!prev) {
+      if (newData.absorption !== undefined && newData.absorption > 0) {
+        maxAbsorption = newData.absorption;
       }
-
-      if (newData.absorption < prev.absorption) {
-        absorptionChange = {
-          from: prev.absorption,
-          to: newData.absorption,
-          max: Math.max(maxAbsorption, newData.absorption),
-          color: "#D4AF37",
-        };
-      }
-
-      if (newData.armor < prev.armor) {
-        armorChange = {
-          from: prev.armor,
-          to: newData.armor,
-          max: 20,
-          color: "#49EAD6",
-        };
-      }
-     
-    if (newData.experienceProgress < prev.experienceProgress) {
-      experienceChange = {
-        from: prev.experienceProgress,
-        to: newData.experienceProgress ,
-        max:100,
-        color:"#88C657"
-      };
-    }
-    
-         if (newData.air < prev.air) {
-      airChange = {
-        from: prev.air,
-        to: newData.air,
-        max:playerData.maxAir,
-        color:"#AAC1E3"
-      
-      };
+      return;
     }
 
-         if (newData.food < prev.food) {
-      foodChange = {
-        from: prev.food,
-        to: newData.food,
-        max:20,
-         color:"#B88458"
-      };
-    }
-  }
+    maybeAnimateBar("health", prev.health, newData.health, newData.maxHealth);
+    maybeAnimateBar("absorption", prev.absorption, newData.absorption, Math.max(maxAbsorption, newData.absorption ?? 0));
+    maybeAnimateBar("armor", prev.armor, newData.armor, 20);
+    maybeAnimateBar("experience", prev.experienceProgress !== undefined ? prev.experienceProgress * 100 : undefined, 
+                   newData.experienceProgress !== undefined ? newData.experienceProgress * 100 : undefined, 100);
+    maybeAnimateBar("air", prev.air, newData.air, newData.maxAir);
+    maybeAnimateBar("food", prev.food, newData.food, 20);
 
-    
-
-    if (newData.absorption > maxAbsorption) {
+    if (newData.absorption !== undefined && newData.absorption > maxAbsorption) {
       maxAbsorption = newData.absorption;
     }
 
-    if (prev?.selectedSlot !== newData.selectedSlot) {
-      lastSlot = prev?.selectedSlot ?? 0;
+    if (prev.selectedSlot !== newData.selectedSlot) {
+      lastSlot = prev.selectedSlot;
       currentSlot = newData.selectedSlot;
-      if (newData.mainHandStack.identifier !== "minecraft:air") {
-        itemStackName = newData.mainHandStack.displayName;
+
+      if (newData.mainHandStack?.identifier !== "minecraft:air") {
+        itemStackName = newData.mainHandStack?.displayName;
         showItemStackName = true;
-        resetTimeout("itemName");
+        timeouts.set('itemName', () => showItemStackName = false, ITEM_NAME_TIMEOUT);
       }
     }
   }
@@ -121,237 +98,173 @@
 
   listen("overlayMessage", (event: OverlayMessageEvent) => {
     overlayMessage = event;
-    resetTimeout("overlay");
+    timeouts.set('overlay', () => overlayMessage = null, OVERLAY_TIMEOUT);
   });
 
   onMount(async () => {
     updatePlayerData(await getPlayerData());
   });
+
+  type StatusBarConfig = {
+    key: BarKey;
+    condition: () => boolean;
+    max: number | (() => number);
+    value: () => number | undefined;
+    color: string;
+    icon?: string;
+    label?: () => string | undefined;
+    alignRight?: boolean;
+  };
+
+  const statusBars: StatusBarConfig[] = [
+    {
+      key: "armor", 
+      condition: () => playerData?.armor !== undefined && playerData.armor > 0, 
+      max: 20, 
+      value: () => playerData?.armor, 
+      color: barColors.armor,
+      alignRight: false
+    },
+    {
+      key: "air", 
+      condition: () => playerData?.air !== undefined && playerData?.maxAir !== undefined && playerData.air < playerData.maxAir, 
+      max: () => playerData?.maxAir ?? 0, 
+      value: () => playerData?.air, 
+      color: barColors.air,
+      alignRight: false
+    },
+    {
+      key: "absorption", 
+      condition: () => playerData?.absorption !== undefined && playerData.absorption > 0, 
+      max: () => maxAbsorption, 
+      value: () => playerData?.absorption, 
+      color: barColors.absorption,
+      icon: "shield",
+      alignRight: false
+    },
+    {
+      key: "health", 
+      condition: () => playerData?.health !== undefined && playerData.health > 0, 
+      max: () => playerData?.maxHealth ?? 0, 
+      value: () => playerData?.health, 
+      color: barColors.health,
+      icon: "heart",
+      alignRight: false
+    },
+    {
+      key: "food", 
+      condition: () => playerData?.food !== undefined && playerData.food > 0, 
+      max: 20, 
+      value: () => playerData?.food, 
+      color: barColors.food,
+      icon: "food", 
+      alignRight: false
+    },
+    {
+      key: "experience", 
+      condition: () => playerData?.experienceLevel !== undefined && playerData.experienceLevel > 0, 
+      max: 100, 
+      value: () => playerData?.experienceProgress !== undefined ? playerData.experienceProgress * 100 : undefined, 
+      color: barColors.experience,
+      label: () => playerData?.experienceLevel?.toString()
+    }
+  ];
 </script>
 
 {#if playerData && playerData.gameMode !== "spectator"}
   <div class="hotbar">
-    {#if overlayMessage !== null}
-    <div class="overlay-message" out:fade={{duration: 200}}
-         style="max-width: {slotsElement?.offsetWidth ?? 0}px">
+    {#if overlayMessage}
+      <div class="overlay-message" out:fade={{duration: 200}}
+           style="max-width: {slotsElement?.offsetWidth ?? 0}px">
         <TextComponent fontSize={14} textComponent={overlayMessage.text}/>
-    </div>
-{/if}
-{#if showItemStackName && itemStackName !== null}
-    <div class="item-name" out:fade={{duration: 200}}>
+      </div>
+    {/if}
+
+    {#if showItemStackName && itemStackName}
+      <div class="item-name" out:fade={{duration: 200}}>
         <TextComponent fontSize={14} textComponent={itemStackName}/>
-    </div>
-{/if}
-    <div class="status">
-      <div class="pair">
-      {#if playerData.armor > 0}
-        <Status
-          max={20}
-          value={playerData.armor}
-          color="#49EAD6"
-          alignRight={false}
-          enableAnimation={!!armorChange}
-          prevValue={armorChange?.from}
-          onDone={() => (armorChange = null)}>
-          {#if armorChange}
-            <Layer 
-              from={armorChange?.from} 
-              to={armorChange?.to} 
-              max={20} 
-              color="#49EAD6"
-              alignRight={false} 
-              onDone={() => (armorChange = null)} />
-          {/if}
-        </Status>
-      {/if}
-      {#if playerData.air < playerData.maxAir}
-      <Status
-        max={playerData.maxAir}
-        value={playerData.air}
-        color="#AAC1E3"
-        alignRight={true}
-        enableAnimation={!!airChange}
-        prevValue={airChange?.from}
-        onDone={() => {}}>
-        {#if airChange}
-          <Layer
-            from={airChange?.from}
-            to={airChange?.to}
-            max={playerData.maxAir}
-            color="#AAC1E3"
-            alignRight={true}
-            onDone={() => {}} />
-        {/if}
-      </Status>
+      </div>
     {/if}
-  </div>
 
-      {#if playerData.absorption > 0}
+    {#each statusBars as bar (bar.key)}
+      {#if bar.condition()}
         <Status
-          max={maxAbsorption}
-          value={playerData.absorption}
-          color="#D4AF37"
-          alignRight={false}
-          enableAnimation={!!absorptionChange}
-          prevValue={absorptionChange?.from}
-          icon="shield"
-          onDone={() => (absorptionChange = null)}>
-          {#if absorptionChange}
-            <Layer 
-              from={absorptionChange?.from} 
-              to={absorptionChange?.to} 
-              max={maxAbsorption}
-              color="#D4AF37"
-              alignRight={false} 
-              onDone={() => (absorptionChange = null)} />
-          {/if}
-        </Status>
+          max={typeof bar.max === "function" ? bar.max() : bar.max}
+          value={bar.value() ?? 0}
+          color={bar.color}
+          icon={bar.icon}
+          label={bar.label?.()}
+          alignRight={bar.alignRight}
+          animateFrom={barAnimations[bar.key]?.from}
+          onDone={() => barAnimations[bar.key] = null}
+        />
       {/if}
-     
-      {#if playerData.health > 0}
-        <Status
-          max={playerData.maxHealth}
-          value={playerData.health}
-          color="#FC4130"
-          alignRight={false}
-          enableAnimation={!!healthChange}
-          prevValue={healthChange?.from}
-          icon="heart"
-          onDone={() => (healthChange = null)}>
-          {#if healthChange}
-            <Layer 
-              from={healthChange?.from} 
-              to={healthChange?.to} 
-              max={playerData.maxHealth}
-              color="#FC4130"
-              alignRight={false} 
-              onDone={() => (healthChange = null)} />
-          {/if}
-        </Status>
-      {/if}
-      {#if playerData.food > 0}
-      <Status
-        max={20}
-        value={playerData.food}
-        color="#B88458"
-        alignRight={true}
-        icon="food"
-        enableAnimation={!!foodChange}
-        prevValue={foodChange?.from}
-        onDone={() => {}}>
-        {#if foodChange}
-          <Layer
-            from={foodChange?.from}
-            to={foodChange?.to}
-            max={20}
-            color="#B88458"
-            alignRight={true}
-            onDone={() => {}} />
-        {/if}
-      </Status>
-   
-    {/if}
-    
-
-      {#if playerData.experienceLevel > 0}
-      <Status
-        max={100}
-        value={playerData.experienceProgress * 100}
-        color="#88C657"
-        alignRight={false}
-        label={playerData.experienceLevel.toString()}
-        enableAnimation={!!experienceChange}
-        prevValue={experienceChange?.from}
-        onDone={() => (experienceChange = null)}>
-        {#if experienceChange}
-          <Layer
-            from={experienceChange?.from}
-            to={experienceChange?.to}
-            max={100}
-            color="#88C657"
-            alignRight={false}
-            onDone={() => (experienceChange = null)} />
-        {/if}
-      </Status>
-    {/if}
-    </div> <!-- This is the closing div for the "status" div -->
+    {/each}
 
     <div class="hotbar-elements">
-      <div class="slider" style="left: {currentSlot * 45}px"></div>
+      <!-- svelte-ignore element_invalid_self_closing_tag -->
+      <div class="slider" style="left: {currentSlot * 45}px" />
       <div class="slots" bind:this={slotsElement}>
         {#each Array(9) as _, i}
-          <div class="slot"></div>
+          <!-- svelte-ignore element_invalid_self_closing_tag -->
+          <div class="slot" />
         {/each}
       </div>
     </div>
-
-
   </div>
 {/if}
 
+
+
 <style lang="scss">
   @import "../../../../colors.scss";
+
   .hotbar {
 
-}
 
-  .pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 25px;
-  }
-
-  .status {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 5px;
-    row-gap: 5px;
-    column-gap: 20px;
-  }
-
-  .hotbar-elements {
-    background-color: rgba(0, 0, 0, 0.4);
-    position: relative;
-    border-radius: 16px;
-    box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.4);
-    overflow: hidden;
-
-    .slider {
-      height: 45px;
-      width: 45px;
-      position: absolute;
-      border-radius: 16px;
-      transition: ease-in left 0.1s;
+    .hotbar-elements {
       background-color: rgba(0, 0, 0, 0.4);
-      filter: blur(2px);
+      position: relative;
+      border-radius: 16px;
+      box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+
+      .slider {
+        height: 45px;
+        width: 45px;
+        position: absolute;
+        border-radius: 16px;
+        transition: ease-in left 0.1s;
+        background-color: rgba(0, 0, 0, 0.4);
+        filter: blur(2px);
+      }
+
+      .slots {
+        display: flex;
+      }
+
+      .slot {
+        height: 45px;
+        width: 45px;
+      }
     }
 
-    .slots {
-      display: flex;
+    .item-name {
+      color: $hotbar-text-color;
+      font-size: 14px;
+      margin: 0 auto 15px;
+      font-weight: 500;
+      background-color: rgba($hotbar-base-color, 0.68);
+      padding: 5px 8px;
+      border-radius: 16px;
+      width: max-content;
     }
 
-    .slot {
-      height: 45px;
-      width: 45px;
+    .overlay-message {
+      text-align: center;
+      color: $hotbar-text-color;
+      margin-bottom: 15px;
+      overflow: hidden;
     }
-  }
-
-
-  .item-name {
-    color: $hotbar-text-color;
-    font-size: 14px;
-    margin: 0 auto 15px;
-    font-weight: 500;
-    background-color: rgba($hotbar-base-color, 0.68);
-    padding: 5px 8px;
-    border-radius: 16px;
-    width: max-content;
-  }
-
-  .overlay-message {
-    text-align: center;
-    color: $hotbar-text-color;
-    margin-bottom: 15px;
-    overflow: hidden;
   }
 </style>

@@ -21,9 +21,8 @@ onMount(async () => {
 });
 
 function isAir(stack: ItemStack): boolean {
-  return stack.identifier === "minecraft:air" || stack.count <= 0;
-}
-
+    return !stack || stack.identifier === "minecraft:air" || stack.count <= 0;
+  }
 </script>
   
 

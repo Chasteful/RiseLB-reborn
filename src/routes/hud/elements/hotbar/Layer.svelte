@@ -3,9 +3,9 @@
   export let to: number;
   export let max: number;
   export let color: string;
-  export let alignRight: boolean = false;
-  export let duration: number = 450;
-  export let onDone: () => void = () => {};
+  export let alignRight = false;
+  export let duration = 450;
+  export let onDone = () => {};
 
   let progress = from;
   let opacity = 1;
@@ -23,29 +23,26 @@
     if (t < 1) {
       requestAnimationFrame(tick);
     } else {
-      onDone?.();
+      onDone();
     }
   };
 
   tick();
 </script>
 
+<!-- svelte-ignore element_invalid_self_closing_tag -->
 <div
-  class="status-Layer"
+  class="layer"
   class:align-right={alignRight}
-  style="
-    width: {(progress / max) * 100}%;
-    background-color: {color};
-    opacity: {opacity};
-  "
-></div>
+  style="width: {(progress / max) * 100}%; background-color: {color}; opacity: {opacity};"
+/>
 
 <style>
-  .status-Layer {
+  .layer {
     position: absolute;
     top: 0;
     left: 0;
-    height: 20px;
+    height: 100%;
     will-change: width, opacity;
     transition: width 0.2s ease;
     border-radius: 5px;
