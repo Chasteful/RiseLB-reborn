@@ -56,7 +56,7 @@
   let ignoreGrid = false;
   let isScrollMode = false;
   let mouseX = 0;
-
+  let hasMoved = false;
   // Panel config
   interface PanelConfig {
       top: number;
@@ -172,23 +172,27 @@
 
   // Event handlers
   function onMouseDown(e: MouseEvent) {
-      if ($locked) return;
-      
-      moving = true;
-      offsetX = e.clientX * (2 / $scaleFactor) - panelConfig.left;
-      offsetY = e.clientY * (2 / $scaleFactor) - panelConfig.top;
-      panelConfig.zIndex = ++$maxPanelZIndex;
-      $showGrid = $snappingEnabled;
-      panelElement.style.transition = "none";
-  }
+    if ($locked) return;
+    
+    moving = true;
+    hasMoved = false; 
+    offsetX = e.clientX * (2 / $scaleFactor) - panelConfig.left;
+    offsetY = e.clientY * (2 / $scaleFactor) - panelConfig.top;
+    panelConfig.zIndex = ++$maxPanelZIndex;
+    panelElement.style.transition = "none";
+}
+function onMouseMove(e: MouseEvent) {
+    if ($locked || !moving) return;
 
-  function onMouseMove(e: MouseEvent) {
-      if ($locked || !moving) return;
+    if (!hasMoved) {
+        hasMoved = true;
+        if ($snappingEnabled) $showGrid = true;
+    }
 
-      panelConfig.left = snapToGrid(e.clientX * (2 / $scaleFactor) - offsetX);
-      panelConfig.top = snapToGrid(e.clientY * (2 / $scaleFactor) - offsetY);
-      fixPosition();
-  }
+    panelConfig.left = snapToGrid(e.clientX * (2 / $scaleFactor) - offsetX);
+    panelConfig.top = snapToGrid(e.clientY * (2 / $scaleFactor) - offsetY);
+    fixPosition();
+}
 
   function onMouseUp() {
       if (moving) {

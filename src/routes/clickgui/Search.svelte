@@ -9,10 +9,9 @@
   import { quintOut } from 'svelte/easing';
   import { onMount, onDestroy } from "svelte";
   import { showResults } from "./clickgui_store";
-
+  import { get } from "svelte/store";
   import { writable } from 'svelte/store';
   export let modules: Module[];
-  let wrapperRect: DOMRect;
   let isSearchFocused = false;
   let resultElements: HTMLElement[] = [];
   let searchContainerElement: HTMLElement;
@@ -47,7 +46,6 @@ const options = [
   {text: "ねえねえ、今日一緒に図書館で勉強しない？", weight: 2},
   {text: "ちょっと疲れてるみたいだけど、休まない？", weight: 1},
   { text: "呐呐~先輩と一緒に検索しましょうか？♡", weight: 2 },
-  { text: "お兄ちゃん、何を探しているの？", weight: 2 },
   { text: "ククク...この堕天使に検索させてみる？", weight: 1 },
   { text: "あの...一緒に調べ物しませんか？", weight: 2 },
   { text: "んもぉ~早く教えてよ！", weight: 1 },
@@ -73,7 +71,7 @@ const options = [
   { text: "この検索履歴…全部覚えておくから…", weight: 1 },
   { text: "消しちゃダメ…全部私が見てるから…", weight: 2 },
   { text: "間違えたら…どうなるかわかってる？", weight: 1 },
-  { text: "迷える子羊よ、何を求めますか…？", weight: 2 },  
+  { text: "迷子のハッカーよ、あなたは何を探しているのですか…？", weight: 2 },  
   { text: "ククク…悪魔のサジェストを授けてやろう", weight: 1 },
   { text: "神に祈るようにキーワードを入力しなさい", weight: 2 },
   { text: "この堕天使が導いてあげるわ…", weight: 1 },
@@ -104,7 +102,6 @@ const options = [
   { text: "検索は…恋の始まりかもしれませんね", weight: 2 },
   { text: "私がサポートしますから、大丈夫！", weight: 1 },
   { text: "検索バーににんじんを入れないで！", weight: 1 },  
-  { text: "宇宙人があなたのキーワードを監視中…", weight: 2 },
   { text: "このサジェストは量子タペストリーです", weight: 1 },
   { text: "検索するとポケットに謎の小石が…", weight: 2 },
   { text: "入力したら猫耳が生える魔法の検索！", weight: 1 }
@@ -119,21 +116,30 @@ const options = [
   }
     const searchHistory = writable<string[]>([]);
   const maxHistoryItems = 10;   let clickTimeout: ReturnType<typeof setTimeout>;
-    function toggleResultVisibility() {
-        if (query.length > 0) {
-      addToHistory(query);
-    }
-    
-    if (query.length > 0) {
-            forcedShow = !forcedShow;
-      showResults.set(forcedShow);
-      showHistory = false;
-    } else {
-            showHistory = !showHistory;
-      showResults.set(false);
-    }
-    searchInputElement.focus();
+
+function toggleResultVisibility() {
+  const hasQuery = query.length > 0;
+  const hasResults = get(filteredModules).length > 0;
+
+  if (hasQuery) {
+    addToHistory(query);
   }
+
+  if (hasQuery && hasResults) {
+    forcedShow = !forcedShow;
+    showResults.set(true);
+    showHistory = false;
+  } else if (hasQuery && !hasResults) {
+    showResults.set(false); 
+    showHistory = false;
+  } else {
+    showHistory = !showHistory;
+    showResults.set(false);
+  }
+
+  searchInputElement.focus();
+}
+
   function selectFromHistory(historyItem: string) {
     query = historyItem;
     filterModules();
@@ -160,20 +166,7 @@ const options = [
             return newHistory.slice(0, maxHistoryItems);
     });
   }
-function trackMouse(e: MouseEvent) {
-  if (!wrapperRect) {
-    wrapperRect = searchContainerElement.getBoundingClientRect();
-  }
 
-  const x = e.clientX - wrapperRect.left;
-  const y = e.clientY - wrapperRect.top;
-
-  searchContainerElement.style.setProperty("--mouse-x", `${x}px`);
-  searchContainerElement.style.setProperty("--mouse-y", `${y}px`);
-
-  const rand = ["٩(｡•́‿•̀｡)۶", "( •̀ ω •́ )✧", "＼(≧▽≦)／", "૮₍ ´• ˕ •` ₎ა"];
-  console.log(`追踪鼠标中...坐标：(${x}, ${y}) ${rand[Math.floor(Math.random() * rand.length)]}`);
-}
 function filterModules() {
     hasContent = query.length > 0;
     const pureQuery = query.toLowerCase();
@@ -192,15 +185,16 @@ function filterModules() {
   }
 
   function handleInput() {
+    if (query === '0721') {
+    query = 'Ciallo~(∠・ω< )⌒★';
+  }
   filterModules();
   if (query.length > 0) {
     showHistory = false;
   }
 
-  
   placeholder = getWeightedRandomPlaceholder();
 
-  
   if (query.length === 0) {
     errorMessage = "Please type letters (A-Z) to search.";
   }
@@ -391,7 +385,6 @@ function getWeightedRandomPlaceholder(): string {
       class="search-input"
       bind:value={query}
       bind:this={searchInputElement}
-      on:mousemove={trackMouse}
       on:focus={() => isSearchFocused = true}
       on:focus={handleFocus}
       on:blur={() => isSearchFocused = false}

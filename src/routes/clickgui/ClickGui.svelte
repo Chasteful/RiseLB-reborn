@@ -35,8 +35,8 @@
     Module,
     TogglableSetting
   } from "../../integration/types";
+  let showOverlay = writable(false);
 
-  let showOverlay = false;
   let categories: GroupedModules = {};
   let modules: Module[] = [];
 
@@ -60,9 +60,9 @@
     return heightRatio;
   };
   const overlayVisible = derived(showResults, ($s) => {
-    showOverlay = $s;
-    return $s;
-  });
+  showOverlay.set($s);
+  return $s;
+});
   const updateViewport = () => {
     const baseWidth = 1920;
     const baseHeight = 1080;
@@ -149,9 +149,10 @@
 
 <div class={`clickgui ${$showGrid ? 'grid' : ''}`}
      style="transform: scale({clickGuiScaleFactor * $resolutionScale}); transform-origin: top left; background-size: {$gridSize}px {$gridSize}px; position: relative; width: 1920px; height: 1080px;">
-     {#if $overlayVisible}
+     
+     {#if $showResults}
      <!-- svelte-ignore element_invalid_self_closing_tag -->
-     <div class="elegant-overlay" />
+     <div class="elegant-overlay" transition:fade={{ duration: 300 }}/>
    {/if}
 
   {#if !$showSearch}
