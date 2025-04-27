@@ -12,27 +12,21 @@
   let playerData: PlayerData | null = null;
   let overlayMessage: OverlayMessageEvent | null = null;
   let itemStackName: TTextComponent | string | null = null;
-
   let currentSlot = 0;
   let lastSlot = 0;
   let slotsElement: HTMLElement;
   let showItemStackName = false;
-
   const timeouts = new TimeoutManager();
   let maxAbsorption = 0;
-
   const ITEM_NAME_TIMEOUT = 2000;
   const OVERLAY_TIMEOUT = 3000;
-
   type BarAnimation = {
     from: number;
     to: number;
     max: number;
     color: string;
   };
-
   type BarKey = 'health' | 'absorption' | 'armor' | 'experience' | 'air' | 'food';
-
   let barAnimations: Record<BarKey, BarAnimation | null> = {
     health: null,
     absorption: null,
@@ -41,7 +35,6 @@
     air: null,
     food: null
   };
-
   const barColors: Record<BarKey, string> = {
     health: "#FC4130",
     absorption: "#D4AF37",
@@ -50,24 +43,20 @@
     air: "#AAC1E3",
     food: "#B88458"
   };
-
   function maybeAnimateBar(key: BarKey, from: number | undefined, to: number | undefined, max: number | undefined) {
     if (from !== undefined && to !== undefined && max !== undefined && to < from) {
       barAnimations[key] = { from, to, max, color: barColors[key] };
     }
   }
-
   function updatePlayerData(newData: PlayerData) {
     const prev = playerData;
     playerData = newData;
-
     if (!prev) {
       if (newData.absorption !== undefined && newData.absorption > 0) {
         maxAbsorption = newData.absorption;
       }
       return;
     }
-
     maybeAnimateBar("health", prev.health, newData.health, newData.maxHealth);
     maybeAnimateBar("absorption", prev.absorption, newData.absorption, Math.max(maxAbsorption, newData.absorption ?? 0));
     maybeAnimateBar("armor", prev.armor, newData.armor, 20);
@@ -75,15 +64,12 @@
                    newData.experienceProgress !== undefined ? newData.experienceProgress * 100 : undefined, 100);
     maybeAnimateBar("air", prev.air, newData.air, newData.maxAir);
     maybeAnimateBar("food", prev.food, newData.food, 20);
-
     if (newData.absorption !== undefined && newData.absorption > maxAbsorption) {
       maxAbsorption = newData.absorption;
     }
-
     if (prev.selectedSlot !== newData.selectedSlot) {
       lastSlot = prev.selectedSlot;
       currentSlot = newData.selectedSlot;
-
       if (newData.mainHandStack?.identifier !== "minecraft:air") {
         itemStackName = newData.mainHandStack?.displayName;
         showItemStackName = true;
@@ -91,20 +77,16 @@
       }
     }
   }
-
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
     updatePlayerData(event.playerData);
   });
-
   listen("overlayMessage", (event: OverlayMessageEvent) => {
     overlayMessage = event;
     timeouts.set('overlay', () => overlayMessage = null, OVERLAY_TIMEOUT);
   });
-
   onMount(async () => {
     updatePlayerData(await getPlayerData());
   });
-
   type StatusBarConfig = {
     key: BarKey;
     condition: () => boolean;
@@ -115,7 +97,6 @@
     label?: () => string | undefined;
     alignRight?: boolean;
   };
-
   const statusBars: StatusBarConfig[] = [
     {
       key: "armor", 
@@ -169,8 +150,8 @@
       label: () => playerData?.experienceLevel?.toString()
     }
   ];
-</script>
 
+</script>
 {#if playerData && playerData.gameMode !== "spectator"}
   <div class="hotbar">
     {#if overlayMessage}
@@ -179,13 +160,11 @@
         <TextComponent fontSize={14} textComponent={overlayMessage.text}/>
       </div>
     {/if}
-
     {#if showItemStackName && itemStackName}
       <div class="item-name" out:fade={{duration: 200}}>
         <TextComponent fontSize={14} textComponent={itemStackName}/>
       </div>
     {/if}
-
     {#each statusBars as bar (bar.key)}
       {#if bar.condition()}
         <Status
@@ -200,7 +179,6 @@
         />
       {/if}
     {/each}
-
     <div class="hotbar-elements">
       <!-- svelte-ignore element_invalid_self_closing_tag -->
       <div class="slider" style="left: {currentSlot * 45}px" />
@@ -214,21 +192,15 @@
   </div>
 {/if}
 
-
-
 <style lang="scss">
   @import "../../../../colors.scss";
-
   .hotbar {
-
-
     .hotbar-elements {
       background-color: rgba(0, 0, 0, 0.4);
       position: relative;
       border-radius: 16px;
       box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.4);
       overflow: hidden;
-
       .slider {
         height: 45px;
         width: 45px;
@@ -238,17 +210,14 @@
         background-color: rgba(0, 0, 0, 0.4);
         filter: blur(2px);
       }
-
       .slots {
         display: flex;
       }
-
       .slot {
         height: 45px;
         width: 45px;
       }
     }
-
     .item-name {
       color: $hotbar-text-color;
       font-size: 14px;
@@ -259,7 +228,6 @@
       border-radius: 16px;
       width: max-content;
     }
-
     .overlay-message {
       text-align: center;
       color: $hotbar-text-color;

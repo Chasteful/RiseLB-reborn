@@ -1,6 +1,7 @@
 <span class="watermark">Aurora</span>
 
 <style lang="scss">
+
 @import "../../../colors.scss";
 $Speed: 8s;
 .watermark {
@@ -22,5 +23,4 @@ $Speed: 8s;
   animation: flow $Speed ease infinite;
   animation-delay: calc(var(--i, 0) * 0.2s); 
 }
-
 </style>

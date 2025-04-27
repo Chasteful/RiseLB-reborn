@@ -9,32 +9,23 @@
     import { convertToSpacedString, spaceSeperatedNames } from "../../../theme/theme_config";
     import { getPrefixAsync } from "../../../theme/arraylist";
     import { expoInOut } from "svelte/easing"; 
+
     let enabledModules: (Module & { prefix: string; formattedName: string; width: number })[] = [];
-
-
-
-
     async function updateEnabledModules() {
     await document.fonts.load("500 16px 'Product Sans'");
-
     const modules = await getModules();
     const visibleModules = modules.filter(m => m.enabled && !m.hidden);
-
-    // 先异步并发获取所有 prefix
     const prefixMap = new Map<string, string>();
     await Promise.all(visibleModules.map(async module => {
         const prefix = await getPrefixAsync(module.name);
         prefixMap.set(module.name, prefix);
     }));
-
- 
     const modulesWithWidths = visibleModules.map(module => {
         const formattedName = $spaceSeperatedNames ? convertToSpacedString(module.name) : module.name;
         const prefix = prefixMap.get(module.name) || "";
         const fullName = `${formattedName} ${prefix}`;
         const font = "500 16px 'Product Sans', system-ui, sans-serif";
         const width = getTextWidth(fullName, font);
-
         return {
             ...module,
             formattedName,
@@ -42,54 +33,40 @@
             width
         };
     });
-
     modulesWithWidths.sort((a, b) => b.width - a.width);
     enabledModules = modulesWithWidths;
-
     await tick();
-    
     }
-
     spaceSeperatedNames.subscribe(async () => {
         await updateEnabledModules();
     });
-
-
     onMount(async () => {
         await updateEnabledModules();
         setTimeout(() => updateEnabledModules(), 50);
     });
-
-   
     listen("moduleToggle", async () => {
         await updateEnabledModules();
     });
-
          listen("refreshArrayList", async () => {
         await updateEnabledModules();
     });
-</script>
 
+</script>
 <div  class="arraylist" id="arraylist" transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
     {#each enabledModules as { formattedName, prefix, name } (name)}
     <div class="module" id="module-name" animate:flip={{ duration: 200 }} in:fly={{ x: 50, duration: 200 }}>
-
         {formattedName}{#if prefix}&nbsp;<span class="prefix">{prefix}</span>{/if}
-
         <span class="side-bar" id="side-bar"></span>
     </div>
 {/each}
 </div>
 
-
 <style lang="scss">
     @import "../../../colors.scss";
-
     :root {
         --accent-color: #{$accent-color};
         --accent-color-2: #{$accent-color-2};
     }
-
     .arraylist {
         position: fixed;
         top: 10px;
@@ -98,7 +75,6 @@
         will-change: transform;
         font-size: 72px;
     }
-    
     .module {
         position: relative;
         display: flex;
@@ -116,8 +92,6 @@
   font-weight: 500; 
   margin-left: auto;
   text-transform: capitalize;
-  
-
   position: relative;
   &::before {
     content: '';
@@ -126,17 +100,12 @@
     border-radius: inherit;
     z-index: -1;
   }
-  
-
-
-
 &:first-child {
     border-radius: 3px 3px 0 0;
     &::after {
       border-radius: 3px 3px 0 0;
     }
   }
-
   &:last-child {
     border-radius: 0 0 3px 3px;
     &::after {
@@ -144,8 +113,6 @@
     }
   }
 }
-
-
     .prefix {
         color: #AAAAAA;
         text-shadow: 0 0 3px rgba(#AAAAAA,0.9);
@@ -160,6 +127,4 @@
   box-shadow: 0 0 5px currentColor;
   pointer-events: none;
 }
-
-
 </style>

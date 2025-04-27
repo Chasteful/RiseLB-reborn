@@ -4,8 +4,7 @@
     import type { NotificationEvent } from "../../../../integration/events";
     import { Howl } from "howler";
     import { elasticOut } from "svelte/easing";
-  
-  
+    
     interface TNotification {
       animationKey: number;
       id: number;
@@ -15,18 +14,14 @@
       leaving?: boolean;
       remaining?: number;
     }
-  
     let notifications: TNotification[] = [];
-  
     const notification = new Howl({ src: ['audio/notifications/notification.mp3'], preload: true });
     const error = new Howl({ src: ['audio/notifications/error.mp3'], preload: true });
     const info = new Howl({ src: ['audio/notifications/info.mp3'], preload: true });
     const success = new Howl({ src: ['audio/notifications/success.ogg'], preload: true });
-  
     function addNotification(title: string, message: string, severity: string) {
       let animationKey = Date.now();
       const id = animationKey;
-  
       if (severity === "ENABLED" || severity === "DISABLED") {
         const index = notifications.findIndex(
           (n) => n.message === message && (n.severity === "ENABLED" || n.severity === "DISABLED")
@@ -36,7 +31,6 @@
           notifications.splice(index, 1);
         }
       }
-  
       notifications = [
         { animationKey, id, title, message, severity },
         ...notifications,
@@ -56,7 +50,6 @@
           n.id === id ? { ...n, remaining } : n
         );
       }, 100);
-  
       setTimeout(() => {
         clearInterval(interval);
         notifications = notifications.map(n =>
@@ -67,10 +60,8 @@
         }, 300);
       }, 3000);
     }
-  
     listen("notification", (e: NotificationEvent) => {
       addNotification(e.title, e.message, e.severity);
-  
       switch (e.severity) {
         case "ERROR": error.play(); break;
         case "INFO": info.play(); break;
@@ -78,7 +69,6 @@
         default: notification.play(); break;
       }
     });
-  
     function notificationFly(node: Element, { delay = 0, duration = 600 } = {}) {
       return {
         delay,
@@ -111,14 +101,12 @@
       }
     };
   }
-  
    function easeInBack(t: number): number {
     const c1 = 1.5;    const c3 = c1 + 1;
     return c3 * t * t * t - c1 * t * t;
   }
   
   </script>
-  
   <div class="notifications">
     {#each notifications as { title, message, severity, animationKey, leaving, remaining } (animationKey)}
       <div

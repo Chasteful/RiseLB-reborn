@@ -5,25 +5,18 @@
   import { listen } from "../../../integration/ws";
   import { getPlayerData } from "../../../integration/rest";
   import { onMount } from "svelte";
-    import { elasticOut } from "svelte/easing";
 
   let playerData: PlayerData | null = null;
   let count: number | undefined;
-
-
   listen("blockCountChange", (e: BlockCountChangeEvent) => {
     count = e.count;
   });
-
   listen("clientPlayerData", (e: ClientPlayerDataEvent) => {
   playerData = e.playerData;
 });
-
-
   onMount(async () => {
     playerData = await getPlayerData();
   });
-
   function isAirItem(identifier: string): boolean {
     return identifier.includes("air");
   }
@@ -43,7 +36,6 @@
         }
     };
 }
-  
     function FadeOut(node: Element, { delay = 0, duration = 200 } = {}) {
     return {
       delay,
@@ -60,13 +52,11 @@
       }
     };
   }
-  
    function easeInBack(t: number): number {
     const c1 = 1.5;    const c3 = c1 + 1;
     return c3 * t * t * t - c1 * t * t;
   }
 </script>
-
 {#if count !== undefined}
   <div class="hud"
   in:FadeIn|global={{ duration: 200 }}
@@ -90,16 +80,13 @@
     <div class="pointer"></div>
   </div>
 {/if}
-
 <style lang="scss">
   @use "../../../colors.scss" as *;
-
   .item-box {
     display: flex;
     align-items: center;
     justify-content: center;
   }
-
   .content {
     position: relative;
     width: 100%;
@@ -112,8 +99,6 @@
     justify-content: flex-start;
     z-index: 0;
   }
-
-
   .icon {
     width: 32px;
     height: 32px;
@@ -121,8 +106,6 @@
     z-index: 1;
     margin-bottom: 4px;
   }
-
-
   .hud {
     position: relative;
     width: 80px;
@@ -137,13 +120,11 @@
       0 0 16px rgba(20,20, 20, 0.6);
     animation: glow 2s infinite alternate;
   }
-
   .count {
     font-size: 16px;
     font-weight: bold;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
-
   .pointer {
     position: absolute;
     bottom: -6px;
@@ -155,5 +136,4 @@
     border-right: 6px solid transparent;
     border-top: 6px solid rgba(20, 20, 20, 0.3);
   }
-
 </style>

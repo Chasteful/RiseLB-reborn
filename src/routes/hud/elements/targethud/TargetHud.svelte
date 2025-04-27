@@ -34,34 +34,27 @@ interface Particle {
     color: string;
     bornAt: number;
     fadeStart: number;
-
     shadowColor: string;
 }
-
        function animateHealth(targetHealth: number) {
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
         const animate = () => {
             const diff = targetHealth - displayHealth;
-            
                          if (Math.abs(diff) < 0.05) {
                 displayHealth = targetHealth;
                 return;
             }
-            
                          displayHealth += diff * 0.1;
             animationFrameId = requestAnimationFrame(animate);
         };
-        
         animate();
     }
-
          function pop(node: Element, { delay = 0, duration = 400 }) {
         const style = getComputedStyle(node);
         const opacity = +style.opacity;
         const transform = style.transform === 'none' ? '' : style.transform;
-
         return {
             delay,
             duration,
@@ -79,20 +72,17 @@ interface Particle {
     const style = getComputedStyle(node);
     const opacity = +style.opacity;
     const transform = style.transform === 'none' ? '' : style.transform;
-
     return {
         delay,
         duration,
         css: (t: number) => {
                          const progress = 1 - t;
-            
                          const scaleProgress = progress < 0.5 
                 ? easeOutQuad(progress * 2)                        : easeInQuad(1 - (progress - 0.5) * 2);              
             const scale = 1 + scaleProgress * 0.2;              
                          const opacityEased = progress < 0.5 
                 ? 1 
                 : easeInQuad(1 - (progress - 0.5) * 2);
-
             return `
                 transform: ${transform} scale(${scale});
                 opacity: ${opacity * opacityEased};
@@ -100,15 +90,12 @@ interface Particle {
         }
     };
 }
-
  function easeOutQuad(t: number): number {
     return t * (2 - t);
 }
-
 function easeInQuad(t: number): number {
     return t * t;
 }
-
 function getRandomThemeColor() {
     const ratio = Math.random();
     const r = Math.round(themeColor1.r + (themeColor2.r - themeColor1.r) * ratio);
@@ -121,29 +108,24 @@ function spawnParticles(hurtTimeTick = 1) {
     const now = Date.now();
     if (now - lastParticleSpawnTime < PARTICLE_SPAWN_COOLDOWN) return;
     lastParticleSpawnTime = now;
-
     const avatar = document.querySelector('.avatar') as HTMLElement;
     const hud = document.querySelector('.targethud') as HTMLElement;
     if (!avatar || !hud) return;
-
     particles = particles.filter(p => now - p.bornAt < PARTICLE_LIFETIME);
     const availableSlots = MAX_PARTICLES - particles.length;
     if (availableSlots <= 0) return;
-
     const count = Math.min(Math.floor(PARTICLE_COUNT * hurtTimeTick), availableSlots);
     const avatarRect = avatar.getBoundingClientRect();
     const hudRect = hud.getBoundingClientRect();
     const globalOffset = 16;  
          const centerX = avatarRect.left - hudRect.left + avatarRect.width / 2 + globalOffset;
     const centerY = avatarRect.top - hudRect.top + avatarRect.height / 2 + globalOffset;
-
     for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 0.5 + Math.random() * 2 * hurtTimeTick;
         const size = 3 + Math.random() * 7;
         const lifetimeOffset = Math.random() * 500;
         const particleColor = getRandomThemeColor();
-
         particles.push({
             id: particleId++,
             x: centerX,
@@ -161,16 +143,13 @@ function spawnParticles(hurtTimeTick = 1) {
 }
 function updateParticles() {
     const now = Date.now();
-    
     particles = particles.map(p => {
                  const newX = p.x + p.vx;
         const newY = p.y + p.vy;
-        
                  let opacity = p.opacity;
         if (now > p.fadeStart) {
             opacity = 1 - (now - p.fadeStart) / PARTICLE_FADE_TIME;
         }
-        
         return {
             ...p,
             x: newX,
@@ -178,31 +157,20 @@ function updateParticles() {
             opacity: Math.max(opacity, 0)
         };
     }).filter(p => now - p.bornAt < PARTICLE_LIFETIME && p.opacity > 0.01);
-    
     animationFrame = requestAnimationFrame(updateParticles);
 }
-
-
-
-
-
-
 onMount(() => {
     updateParticles();
     spawnParticles(1);
-
-
     hurtTimeTick = setInterval(() => {
         if (simulatedHurtTime > 0) {
             simulatedHurtTime-=1;
         }
     }, 50);
 });
-
 onDestroy(() => {
     cancelAnimationFrame(animationFrame);
     clearInterval(hurtTimeTick);  });
-
     function startHideTimeout() {
         clearTimeout(hideTimeout);
         hideTimeout = setTimeout(() => {
@@ -214,38 +182,32 @@ onDestroy(() => {
     const newTarget = data.target;
     target = newTarget;
     visible = true;
-
     if (newTarget) {
                  if (now - lastAttackTime >= ATTACK_COOLDOWN) {
             attacked = true;
             setTimeout(() => attacked = false, 450);
             lastAttackTime = now;
         }
-
                  if (lastHealth !== null && newTarget.actualHealth < lastHealth) {
             simulatedHurtTime = Math.max(simulatedHurtTime, 10);
-            
                          const avatar = document.querySelector('.avatar') as HTMLElement | null;
             if (avatar) {
                 avatar.classList.remove('hurt');
                 void avatar.offsetWidth;
                 avatar.classList.add('hurt');
             }
-
             const damage = lastHealth - newTarget.actualHealth;
             spawnParticles(Math.min(damage / 3, 5));
         }
-
         animateHealth(newTarget.actualHealth);
     } else {
         displayHealth = 0;
     }
-
     lastHealth = newTarget?.actualHealth ?? null;
     startHideTimeout();
 });
-</script>
 
+</script>
 {#if visible && target}
   <div
     class="targethud"
@@ -261,12 +223,8 @@ onDestroy(() => {
           style="{simulatedHurtTime > 0 ? 'filter: brightness(0.9)' : ''}"
         />
       </div>
-
       <!-- Name -->
-
         <span class="name">Name: {target.username}</span>
-   
-
       <div class="armor-stats">
         {#if target.offHandStack?.identifier && !target.offHandStack.identifier.includes('air')}
         <ArmorStatus itemStack={target.offHandStack} />
@@ -286,8 +244,6 @@ onDestroy(() => {
     {#if target.armorItems[0].count > 0}
         <ArmorStatus itemStack={target.armorItems[0]} />
     {/if}
-
-
       </div>
     </div>
     <div class="health-container">
@@ -296,7 +252,6 @@ onDestroy(() => {
           <div
             class="health-fill"
             style="width: {Math.floor((displayHealth / (target.maxHealth + target.absorption)) * 100)}%;"
-          
             >
             <span 
             class="health-text" 
@@ -309,11 +264,9 @@ onDestroy(() => {
         {/if}
       </div>
     </div>
-  
     <div class="particles-container">
       {#each particles as p (p.id)}
       <div
-
       class="particle {
           p.size <= 3 ? 'small' : 
           p.size <= 5 ? 'medium' : 
@@ -333,7 +286,6 @@ onDestroy(() => {
   </div>
 </div>
 {/if}
-  
 
 <style lang="scss">
 @import "../../../../colors.scss";
@@ -365,7 +317,6 @@ onDestroy(() => {
   animation: shine 6s infinite;
   z-index: 1;
 }
-
 @keyframes shine {
   0%, 100% { opacity: 0; }
   50% { opacity: 0.8; }
@@ -383,10 +334,6 @@ onDestroy(() => {
   border-radius: inherit;
   z-index: 0;
 }
-
-
- 
-
 .main-wrapper {
   position: relative;   
   z-index: 1;
@@ -397,11 +344,8 @@ onDestroy(() => {
   grid-template-columns: 50px 1fr;
   column-gap: 10px;
   row-gap: 4px;
-  
   padding: 10px;
 }
-
-
 .avatar {
   grid-area: avatar;
   height: 50px;
@@ -414,12 +358,9 @@ onDestroy(() => {
   overflow: hidden;
   position: relative;
   transition: all 0.2s ease;
-  
-
   &.attacked {
     animation: hitScale 0.4s ease-out;
   }
-
   &.attacked {
     &::after {
       content: "";
@@ -450,11 +391,6 @@ onDestroy(() => {
       animation: pulseGlow 0.2s ease-out infinite;
     }
   }
-
-  
-
-  
-
   img {
     position: absolute;
     scale: 6.25;
@@ -463,10 +399,8 @@ onDestroy(() => {
     transition: transform 0.2s ease;
     z-index: 1;    }
 }
-
 .name {
   grid-area: name;
-
   padding-left: 0;
   font-size: 14px;
   font-family: 'Inter';
@@ -476,7 +410,6 @@ onDestroy(() => {
   margin-top: -2px;
   letter-spacing: 1px;
 }
-
 .armor-stats {
   grid-area: armor;
   display: flex;
@@ -496,7 +429,6 @@ onDestroy(() => {
   right: 16px;
   height: 16px;
   max-width: 95%; 
-  
 }
 .health-bg {
   position: relative;
@@ -510,8 +442,6 @@ onDestroy(() => {
       0 0 12px rgba(black, 0.3),
       0 0 20px rgba(black, 0.3),
       0 0 24px rgba(black, 0.2);
-
-
 }
 .health-fill {
   transition: width 100ms ease-out;
@@ -527,8 +457,6 @@ onDestroy(() => {
   max-width: 95%;  
   min-width: 50px;
 }
-
-
 .health-fill::before {
   content: "";
   position: absolute;
@@ -540,9 +468,7 @@ onDestroy(() => {
     0 0 10px rgba($accent-color-2, 0.3), 
     0 0 14px rgba($accent-color-2, 0.2);   
   z-index: -1;  
-  
 }
-
 .health-text {
   position: absolute;
   left: 100%; 
@@ -557,11 +483,9 @@ onDestroy(() => {
   text-shadow: 0 0 2px black;
   pointer-events: none;
   opacity: 1; 
-  
   max-width: 60px;
   text-overflow: ellipsis;
   overflow: hidden;
-
 }
 .particles-container {
     position: absolute;
@@ -571,7 +495,6 @@ onDestroy(() => {
     pointer-events: none;
     z-index: 10;
 }
-
 .particle {
     position: absolute;
     border-radius: 50%;
@@ -580,27 +503,20 @@ onDestroy(() => {
     z-index: 20;
     transition: opacity 0.2s linear;
     will-change: transform, opacity;
-     
     box-shadow: 
         0 0 2px 1px color-mix(in srgb, var(--shadow-color) 60%, transparent);
 }
-
 .particle.small {
-     
     box-shadow: 
         0 0 4px 2px color-mix(in srgb, var(--shadow-color) 80%, transparent),
         0 0 8px 3px color-mix(in srgb, var(--shadow-color) 30%, transparent);
 }
-
 .particle.medium {
-     
     box-shadow: 
         0 0 8px 4px color-mix(in srgb, var(--shadow-color) 60%, transparent),
         0 0 16px 6px color-mix(in srgb, var(--shadow-color) 20%, transparent);
 }
-
 .particle.large {
-     
     box-shadow: 
         0 0 12px 6px color-mix(in srgb, var(--shadow-color) 50%, transparent),
         0 0 24px 10px color-mix(in srgb, var(--shadow-color) 15%, transparent);
@@ -626,5 +542,4 @@ onDestroy(() => {
     box-shadow: inset 0 0 10px rgba(255, 50, 50, 0.2);
   }
 }
-
 </style>

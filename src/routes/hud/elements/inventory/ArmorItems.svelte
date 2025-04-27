@@ -18,24 +18,19 @@
   let armorSlots: ItemStack[] = Array(36).fill(EMPTY_SLOT);
   let offHand: ItemStack = EMPTY_SLOT;
   let selectedSlot = 0;
-
   function updatePlayerData(newData: PlayerData) {
     selectedSlot = newData.selectedSlot;
     offHand = newData.offHandStack || EMPTY_SLOT;
   }
-
   function updateInventory(inventory: PlayerInventory) {
     armorSlots = inventory.armor.map(slot => slot || EMPTY_SLOT);
   }
-
   listen("clientPlayerInventory", (event: PlayerInventoryEvent) => {
     updateInventory(event.inventory);
   });
-
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
     updatePlayerData(event.playerData);
   });
-  
   onMount(async () => {
     const [inventory, playerData] = await Promise.all([
       getPlayerInventory(),
@@ -44,31 +39,29 @@
     updateInventory(inventory);
     updatePlayerData(playerData);
   });
-
   function shouldShowSlot(stack: ItemStack): boolean {
     return stack.identifier !== "minecraft:air" && stack.count > 0;
   }
-</script>
 
+</script>
 <div class="armoritems-hud" id="armoritemshud" transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
   <div class="inventory-hud"></div>
   <div class="title">
     <span class="bar"></span>
     <span>ARMOR HUD</span>
   </div>
-
   <div class="armor-items">
     {#each [...armorSlots].reverse() as stack (stack.identifier + stack.count)}
       {#if shouldShowSlot(stack)}
         <ItemStackView {stack} />
       {/if}
     {/each}
-    
     {#if shouldShowSlot(offHand)}
       <ItemStackView stack={offHand} />
     {/if}
   </div>
 </div>
+
   <style lang="scss">
       @import "../../../../colors";
       .armoritems-hud   {
@@ -89,7 +82,6 @@
   gap: 8px;
   padding: 4px 6px;
   border-radius: 6px;
-  
 }
 .title {
       display: flex;
@@ -98,7 +90,6 @@
       font-weight: bold;
       margin-bottom: 6px;
     }
-  
     .bar {
   width: 5px;
   height: 1.2em;
@@ -109,7 +100,6 @@
   margin-right: 6px;
   border-radius: 6px;
 }
-  
 @keyframes gradientShift {
       0% { background-position: 0% center; }
       50% { background-position: 100% center; }

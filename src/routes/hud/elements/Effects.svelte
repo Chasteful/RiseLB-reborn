@@ -4,27 +4,19 @@
   import type { StatusEffect } from "../../../integration/types";
   import { fade, fly } from 'svelte/transition';
   import { expoInOut } from "svelte/easing";
-
-
   let effects: StatusEffect[] = [];
-
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
   effects = [...event.playerData.effects].sort((a, b) => {
-
     const lengthDiff = b.localizedName.length - a.localizedName.length;
     if (lengthDiff !== 0) return lengthDiff;
-
-
     return b.amplifier - a.amplifier;
   });
 });
-
   function formatTime(duration: number): string {
     return new Date(((duration / 20) | 0) * 1000)
       .toISOString()
       .substring(14, 19);
   }
-
   function getWarnClass(ticks: number): string {
     const seconds = ticks / 20;
     if (seconds < 3) return "warn-1";
@@ -33,7 +25,6 @@
     return "";
   }
 </script>
-
 <div class="effects">
   {#each effects as e}
     <div
@@ -58,7 +49,6 @@
 </div>
 <style lang="scss">
   @use "../../../colors.scss" as *;
-
   .effects {
     position: relative;
     display: flex;
@@ -66,9 +56,7 @@
     align-items: flex-end;
     perspective: 1000px; 
     gap: -8px;
-    
   }
-
   .effect {
     font-weight: 600;
     font-size: 18px;
@@ -81,8 +69,6 @@
     transform-origin: right center;
     will-change: transform, opacity; 
     filter: drop-shadow(4px 4px 16px $mantle);
-
-  
   &.warn-1 {
       color: #ff0000; 
       animation: pulse 0.5s infinite alternate;
@@ -93,7 +79,6 @@
         -webkit-text-fill-color: transparent;
       }
     }
-
     &.warn-2 {
       color: #ff5555; 
       .duration {
@@ -103,7 +88,6 @@
         -webkit-text-fill-color: transparent;
       }
     }
-
     &.warn-3 {
       color: #ff8c00; 
       .duration {
@@ -113,8 +97,6 @@
         -webkit-text-fill-color: transparent;
       }
     }
-
-
     &:not(.warn-1):not(.warn-2):not(.warn-3) .duration {
       background: linear-gradient(135deg, $text, $blue);
       background-clip: text;
@@ -125,7 +107,6 @@
       animation: gradientShift 3s ease infinite;
     }
   }
-
   @keyframes gradientShift {
     0% {
       background-position: 0% center;
@@ -137,8 +118,6 @@
       background-position: 0% center;
     }
   }
-
-
   @keyframes pulse {
     from {
       opacity: 1;

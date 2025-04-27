@@ -12,28 +12,24 @@
   import TextComponent from "../../menu/common/TextComponent.svelte";
   import type { PlayerData, Scoreboard } from "../../../integration/types";
   import type {ClientPlayerDataEvent} from "../../../integration/events";
+
   let enabledModules: (Module & { prefix: string; formattedName: string; width: number })[] = [];
   let scoreboard: Scoreboard | null = null;
-
   async function updateEnabledModules() {
       await document.fonts.load("500 16px 'Inter'");
-
       const modules = await getModules();
       const visibleModules = modules.filter(m => m.enabled && !m.hidden);
-
       const prefixMap = new Map<string, string>();
       await Promise.all(visibleModules.map(async module => {
           const prefix = await getPrefixAsync(module.name);
           prefixMap.set(module.name, prefix);
       }));
-
       const modulesWithWidths = visibleModules.map(module => {
           const formattedName = $spaceSeperatedNames ? convertToSpacedString(module.name) : module.name;
           const prefix = prefixMap.get(module.name) || "";
           const fullName = `${formattedName} ${prefix}`;
           const font = "500 16px 'Inter', system-ui, sans-serif";
           const width = getTextWidth(fullName, font);
-
           return {
               ...module,
               formattedName,
@@ -41,36 +37,29 @@
               width
           };
       });
-
       modulesWithWidths.sort((a, b) => b.width - a.width);
       enabledModules = modulesWithWidths;
-
       await tick();
   }
-
   spaceSeperatedNames.subscribe(async () => {
       await updateEnabledModules();
   });
-
   onMount(async () => {
       await updateEnabledModules();
       setTimeout(() => updateEnabledModules(), 50);
   });
-
   listen("moduleToggle", async () => {
       await updateEnabledModules();
   });
-
   listen("refreshArrayList", async () => {
       await updateEnabledModules();
   });
-
   listen("clientPlayerData", (e: ClientPlayerDataEvent) => {
       const playerData: PlayerData = e.playerData;
       scoreboard = playerData.scoreboard;
   });
-</script>
 
+</script>
 <div class="combined-container">
   {#if enabledModules.length > 0}
       <div class="arraylist-section"id="arraylist"transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
@@ -82,11 +71,9 @@
           {/each}
       </div>
   {/if}
-
   {#if scoreboard}
       <div class="scoreboard-section"transition:fly|global={{duration: 500, x: 50, easing: expoInOut}}>
           {#if scoreboard.header}
-    
               <div class="header">
                   <TextComponent fontSize={16} allowPreformatting={true} textComponent={scoreboard.header}/>
               </div>
@@ -104,12 +91,10 @@
 
 <style lang="scss">
   @import "../../../colors.scss";
-
   :root {
       --accent-color: #{$accent-color};
       --accent-color-2: #{$accent-color-2};
   }
-
   .combined-container {
   position: fixed;
   top: 10px;
@@ -120,16 +105,12 @@
   transform: translateZ(0);
   will-change: transform;
 }
-
   .arraylist-section {
       border-radius: 0;
       overflow: visible; 
       margin-bottom: 5px;
       margin-left: auto;
   }
-
-
-
   .module {
       position: relative;
       display: flex;
@@ -146,7 +127,6 @@
       margin-left: auto;
       text-transform: capitalize;
       border-radius: 0;
-
       position: relative;
       &::before {
           content: '';
@@ -156,12 +136,10 @@
           z-index: -1;
       }
   }
-
   .prefix {
       color: #AAAAAA;
       text-shadow: 0 0 3px rgba(#AAAAAA,0.9);
   }
-
   .side-bar {
       position: absolute;
       right: -3px;
@@ -174,7 +152,6 @@
       box-shadow: 0 0 5px currentColor;
       pointer-events: none;
   }
-
   .scoreboard-section {
     position: relative;
     overflow: hidden;
@@ -187,7 +164,6 @@
     transform: translateX(0);
     margin-left: auto;
 }
-
 .entries {
     background-color: rgba($scoreboard-base-color, 0.5);
     padding: 10px;
@@ -199,7 +175,6 @@
     justify-content: space-between;
     white-space: nowrap; 
 }
-
 .header {
     display: flex;
     justify-content: center;

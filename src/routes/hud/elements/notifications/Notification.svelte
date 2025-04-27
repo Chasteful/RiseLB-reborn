@@ -10,6 +10,7 @@
     severity === 'ENABLED' ? `${message} has been enabled! (${remaining.toFixed(1)}s)` :
     severity === 'DISABLED' ? `${message} has been disabled! (${remaining.toFixed(1)}s)` :
     message;
+
 </script>
 <div class="notification {severity.toLowerCase()}" transition:fade>
   <div class="icon-container">
@@ -20,7 +21,6 @@
   {/key}
     {/if}
   </div>
-
   <div class="content">
     <h3 class="title">{severity}</h3> 
     <p class="message">{subtitle}</p> 
@@ -36,16 +36,13 @@
   </div>
 </div>
 
-
 <style lang="scss">
   @import "../../../../colors.scss";
-
 .notification {
   --accent-color: #{$accent-color};
   --success-color: #{mix($green, $text, 70%)};
   --error-color: #{mix($red, $text, 70%)};
   --info-color: #{mix($blue, $text, 70%)};
-  
     display: flex;
     align-items: center;
     gap: 12px;
@@ -54,7 +51,6 @@
       rgba(20,20, 20, 0.5) 0%,
       rgba(darken($base, 5%), 0.5) 100%
     );
-
     border-radius: 14px;
     width: 320px;
     padding: 16px;
@@ -79,9 +75,7 @@
     mix-blend-mode: overlay;
     z-index: 0;
     border-radius: inherit;
-
 }
-
 @keyframes float-particles {
   0%   { transform: translateY(0px) scale(1); }
   50%  { transform: translateY(-8px) scale(1.02); }
@@ -91,37 +85,31 @@
     --accent-color: var(--success-color);
     box-shadow: 0 12px 24px rgba($green, 0.4);
   }
-
   &.error {
     --accent-color: var(--error-color);
     box-shadow: 0 12px 24px rgba($red, 0.4);
   }
-
   &.info {
     --accent-color: var(--info-color);
     box-shadow: 0 12px 24px rgba($blue, 0.4);
   }
-
   &.enabled {
     --accent-color: var(--success-color);
     border-left-color: var(--success-color);
     box-shadow: 0 12px 24px rgba($green, 0.4);
   }
-
   &.disabled {
     --accent-color: var(--error-color);
     border-left-color: var(--error-color);
     box-shadow: 0 12px 24px rgba($red, 0.4);
   }
 }
-
 .icon-container {
   position: relative;
   flex-shrink: 0;
   width: 40px;
   height: 40px;
 }
-
 .icon {
   width: 100%;
   height: 100%;
@@ -130,33 +118,27 @@
   background-size: 24px;
   border-radius: 12px;
   transition: all 0.3s ease;
-  
   &.success {
     background-image: url("/img/hud/notification/icon-success.svg");
     background-color: rgba($green, 0.12);
   }
-  
   &.error {
     background-image: url("/img/hud/notification/icon-error.svg");
     background-color: rgba($red, 0.12);
   }
-  
   &.info {
     background-image: url("/img/hud/notification/icon-info.svg");
     background-color: rgba($blue, 0.12);
   }
-  
   &.double {
     background-image: url("/img/hud/notification/icon-double.svg");
     background-color: rgba($accent-color-2, 0.12);
   }
-  
   &.enabled, &.disabled {
     background-image: url("/img/hud/notification/icon-toggle.svg");
     background-color: rgba(var(--accent-color), 0.12);
   }
 }
-
 .toggle-indicator {
   position: absolute;
   top: 50%;
@@ -167,23 +149,19 @@
   border-radius: 50%;
   background: white;
   transition: transform 0.3s ease, background 0.3s ease;
-
   .enabled & {
     background: $green;
     transform: translate(6px, -50%);
   }
-
   .disabled & {
     background: $red;
     transform: translate(-12px, -50%);
   }
 }
-
 .content {
   flex: 1;
   min-width: 0;
 }
-
 .title {
   font-size: 14px;
   font-weight: 600;
@@ -191,19 +169,16 @@
   margin-bottom: 4px;
   line-height: 1.4;
 }
-
 .message {
   font-size: 13px;
   color: $subtext1;
   line-height: 1.5;
   white-space: pre-wrap;
 }
-
 .fade {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-
 .fade.active {
   opacity: 1;
 }
@@ -215,28 +190,22 @@
   border-radius: 2px;
   overflow: hidden;
 }
-
 .progress-bar {
   height: 100%;
   border-radius: 2px;
   transition: width 0.1s linear;
-
   &.enabled {
     background: linear-gradient(90deg, mix($green,$text, 20%) 0%, $green 100%);
   }
-
   &.disabled {
     background: linear-gradient(90deg, mix($red, $text, 20%) 0%, $red 100%);
   }
-
   &.success {
     background: linear-gradient(90deg, mix($green, $text, 30%) 0%, $green 100%);
   }
-
   &.error {
     background: linear-gradient(90deg, mix($red, $text, 30%) 0%, $red 100%);
   }
-
   &.info {
     background: linear-gradient(90deg, mix($blue, $text, 30%) 0%, $blue 100%);
   }

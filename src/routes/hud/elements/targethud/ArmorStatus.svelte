@@ -3,15 +3,14 @@
   import type { ItemStack } from "../../../../integration/types";
 
   export let itemStack: ItemStack;
-
   const hasDurability = itemStack.maxDamage > 0;
   const isAir = itemStack.identifier.includes("air");
-
+  
   $: value = hasDurability
     ? itemStack.maxDamage - itemStack.damage
     : itemStack.count;
-</script>
 
+</script>
 <div class="item-box">
   <div class="content">
     <!-- svelte-ignore element_invalid_self_closing_tag -->
@@ -29,23 +28,19 @@
 
 <style lang="scss">
   @use "../../../../colors.scss" as *;
-
   .bg {
   position: absolute;
   inset: 0;
   background: transparent;   
   border-radius: 8px;
-   
   box-shadow: none;
   z-index: 0;
 }
-
 .item-box {
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .content {
   position: relative;
   width: 100%;
@@ -58,19 +53,16 @@
   justify-content: flex-start;
   z-index: 0;
 }
-
 .icon {
   width: 24px;
   height: 24px;
   image-rendering: pixelated;
   z-index: 1;
 }
-
 .value {
   font-size: 10px;
   color: white;
   text-shadow: 0 0 2px black;
   z-index: 1;
 }
-
 </style>

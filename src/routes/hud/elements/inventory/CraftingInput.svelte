@@ -7,19 +7,17 @@
     import {getPlayerInventory} from "../../../../integration/rest";
 
     let stacks: ItemStack[] = [];
-
     function updateStacks(inventory: PlayerInventory) {
         stacks = inventory.crafting;
     }
-
     listen("clientPlayerInventory", (data: PlayerInventoryEvent) => {
         updateStacks(data.inventory);
     });
-
     onMount(async () => {
         const inventory = await getPlayerInventory();
         updateStacks(inventory);
     });
+
 </script>
 
 <div class="container">
@@ -27,10 +25,8 @@
         <ItemStackView {stack}/>
     {/each}
 </div>
-
 <style lang="scss">
   @import "../../../../colors";
-
   .container {
     background-color: rgba($hotbar-base-color, 0.5);
     grid-template-columns: repeat(2, 1fr);
@@ -39,4 +35,5 @@
     display: grid;
     gap: 0.5rem;
   }
+  
 </style>
