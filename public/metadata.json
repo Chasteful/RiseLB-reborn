@@ -169,36 +169,7 @@
         }
       ]
     },
-    {
-      "name": "Notifications",
-      "value": [
-        {
-          "name": "Enabled",
-          "value": true
-        },
-        {
-          "name": "Alignment",
-          "value": [
-            {
-              "name": "Horizontal",
-              "value": "Right"
-            },
-            {
-              "name": "HorizontalOffset",
-              "value": 10
-            },
-            {
-              "name": "Vertical",
-              "value": "Bottom"
-            },
-            {
-              "name": "VerticalOffset",
-              "value": 5
-            }
-          ]
-        }
-      ]
-    },
+
     {
       "name": "Hotbar",
       "value": [
@@ -520,6 +491,36 @@
             {
               "name": "HorizontalOffset",
               "value": 5
+            },
+            {
+              "name": "Vertical",
+              "value": "Bottom"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": true
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "Right"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 10
             },
             {
               "name": "Vertical",
