@@ -102,7 +102,7 @@
     
     if (newData.air !== lastAirValue) {
       if (newData.air <= 25 && lastAirValue > 25) {
-        showAlert('air', 'Low Air', `Please emerge as soon as possible!`);
+        showAlert('air', 'Hypoxia', `Please emerge as soon as possible!`);
       }
       lastAirValue = newData.air;
     }
@@ -114,7 +114,7 @@
   } 
   
   else if (newData.food <= 7 && lastFoodValue > 7) {
-    showAlert('saturation', 'LowSaturation',   `Your saturation is critically low(${newData.food}/20)`);
+    showAlert('saturation', 'Hunger',   `Your saturation is critically low(${newData.food}/20)`);
   }
   lastFoodValue = newData.food;
 }
