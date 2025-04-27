@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [svelte()],
   base: './', 
   build: {
-    outDir: path.resolve('E:/Program Files/Minecraft/Modpacks/.minecraft/versions/LiquidBounce Nextgen/LiquidBounce/themes/1.5.6.042625_RC'),
+    outDir: path.resolve('E:/Program Files/Minecraft/Modpacks/.minecraft/versions/LiquidBounce Nextgen/LiquidBounce/themes/1.5.8.042625_RC'),
     emptyOutDir: true,
   },
   css: {
