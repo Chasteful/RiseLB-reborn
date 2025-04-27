@@ -1,16 +1,17 @@
 <script lang="ts">
   import ArrayList from "./elements/ArrayList.svelte";
   import TargetHud from "./elements/targethud/TargetHud.svelte";
-  import Watermark from "./elements/Watermark.svelte";
   import Notifications from "./elements/notifications/Notifications.svelte";
   import TabGui from "./elements/tabgui/TabGui.svelte";
   import HotBar from "./elements/hotbar/HotBar.svelte";
   import Scoreboard from "./elements/Scoreboard.svelte";
+  import Watermark from "./elements/Watermark.svelte";
+  import Logo from "./elements/Logo.svelte";
   import {onMount} from "svelte";
   import {getComponents, getGameWindow} from "../../integration/rest";
   import {listen} from "../../integration/ws";
   import type {Component} from "../../integration/types";
-  import Taco from "./elements/taco/Taco.svelte";
+  import Postion from "./elements/Postion.svelte";
   import type {ComponentsUpdateEvent, ScaleFactorChangeEvent} from "../../integration/events";
   import Keystrokes from "./elements/keystrokes/Keystrokes.svelte";
   import Effects from "./elements/Effects.svelte";
@@ -20,6 +21,7 @@
   import Text from "./elements/Text.svelte";
   import CraftingInput from "./elements/inventory/CraftingInput.svelte";
   import AutoScaler from "../AutoScaler.svelte";
+  import Island from "./elements/Island.svelte";
   
     let components: Component[] = [];
     let manualZoom = 1;
@@ -70,7 +72,11 @@
     {#if c.settings.enabled}
       <div style="{c.settings.alignment}">
         {#if c.name === "Watermark"}
-          <Watermark/>
+        <Watermark/>
+        {:else if c.name === "Island"}
+          <Island/>
+        {:else if c.name === "Logo"}
+          <Logo/>
         {:else if c.name === "ArrayList"}
           <ArrayList/>
         {:else if c.name === "TabGui"}
@@ -89,8 +95,8 @@
           <InventoryContainer/>
         {:else if c.name === "CraftingInventory"}
           <CraftingInput/>
-        {:else if c.name === "Taco"}
-          <Taco/>
+        {:else if c.name === "Postion"}
+          <Postion/>
         {:else if c.name === "Keystrokes"}
           <Keystrokes/>
         {:else if c.name === "Effects"}

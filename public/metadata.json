@@ -24,7 +24,7 @@
       "value": [
         {
           "name": "Enabled",
-          "value": true
+          "value":false
         },
         {
           "name": "Alignment",
@@ -36,6 +36,36 @@
             {
               "name": "HorizontalOffset",
               "value": 15
+            },
+            {
+              "name": "Vertical",
+              "value": "Top"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Logo",
+      "value": [
+        {
+          "name": "Enabled",
+          "value":true
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "Left"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 20
             },
             {
               "name": "Vertical",
@@ -110,6 +140,36 @@
       ]
     },
     {
+      "name": "Scoreboard",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": true
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "Right"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 1
+            },
+            {
+              "name": "Vertical",
+              "value": "Top"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Notifications",
       "value": [
         {
@@ -121,7 +181,7 @@
           "value": [
             {
               "name": "Horizontal",
-              "value": "Left"
+              "value": "Right"
             },
             {
               "name": "HorizontalOffset",
@@ -169,36 +229,7 @@
         }
       ]
     },
-    {
-      "name": "Scoreboard",
-      "value": [
-        {
-          "name": "Enabled",
-          "value": true
-        },
-        {
-          "name": "Alignment",
-          "value": [
-            {
-              "name": "Horizontal",
-              "value": "Right"
-            },
-            {
-              "name": "HorizontalOffset",
-              "value": 1
-            },
-            {
-              "name": "Vertical",
-              "value": "Top"
-            },
-            {
-              "name": "VerticalOffset",
-              "value": 0
-            }
-          ]
-        }
-      ]
-    },
+    
     {
       "name": "ArmorItems",
       "value": [
@@ -443,7 +474,7 @@
       ]
     },
     {
-      "name": "Taco",
+      "name": "Island",
       "value": [
         {
           "name": "Enabled",
@@ -454,7 +485,37 @@
           "value": [
             {
               "name": "Horizontal",
-              "value": "Right"
+              "value": "CenterTranslated"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 0
+            },
+            {
+              "name": "Vertical",
+              "value": "Top"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Postion",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": true
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "Left"
             },
             {
               "name": "HorizontalOffset",
