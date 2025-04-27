@@ -14,6 +14,7 @@
     Session, 
     PlayerData,
   } from "../../../integration/types";
+  
   const CLIENT_NAME = "RiseLB";
   const CLIENT_VERSION = "1.5.8";
   const UPDATE_INTERVAL_MS = 1000;
@@ -44,7 +45,7 @@
     return "Good night";
   }
   function formatTime(hours: number, minutes: number, seconds: number): string {
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   }
   async function checkUsernameVisibility(): Promise<void> {
     const modules = await getModules();
@@ -161,13 +162,13 @@
              out:fade={{ duration: 200 }}>
           <span class="client gradient-text">{CLIENT_NAME}&nbsp;{CLIENT_VERSION}</span>
           <div class="separator"></div>
+          <span class="time gradient-text">{time}</span>
+          <div class="separator"></div>
           {#if session && showUsername}
-            <span class="greeting gradient-text">{timeGreeting}，{session.username}</span>
+            <span class="greeting gradient-text">{timeGreeting}&nbsp;{session.username}~</span>
           {:else}
             <span class="greeting gradient-text">{timeGreeting}</span>
           {/if}
-          <div class="separator"></div>
-          <span class="time gradient-text">{time}</span>
         </div>
       {/if}
     </div>
@@ -271,10 +272,12 @@
       background-image: linear-gradient(90deg, #ffffff, #ffffffb2, #ffffff);
     }
     .separator {
-      width: 1px;
+      width: 3px;
       height: 14px;
-      background: linear-gradient(to bottom, transparent, rgba($text, 0.5), transparent);
+      background: linear-gradient(to bottom, transparent, rgba($text, 0.7), transparent);
       animation: separatorPulse 2s infinite;
+      flex-shrink: 0; 
+      position: relative;
     }
   }
   .notification-content {
