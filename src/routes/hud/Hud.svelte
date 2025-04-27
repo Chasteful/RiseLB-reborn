@@ -11,7 +11,7 @@
   import {getComponents, getGameWindow} from "../../integration/rest";
   import {listen} from "../../integration/ws";
   import type {Component} from "../../integration/types";
-  import Postion from "./elements/Postion.svelte";
+  import Position from "./elements/Position.svelte";
   import type {ComponentsUpdateEvent, ScaleFactorChangeEvent} from "../../integration/events";
   import Keystrokes from "./elements/keystrokes/Keystrokes.svelte";
   import Effects from "./elements/Effects.svelte";
@@ -95,8 +95,8 @@
           <InventoryContainer/>
         {:else if c.name === "CraftingInventory"}
           <CraftingInput/>
-        {:else if c.name === "Postion"}
-          <Postion/>
+        {:else if c.name === "Position"}
+          <Position/>
         {:else if c.name === "Keystrokes"}
           <Keystrokes/>
         {:else if c.name === "Effects"}
