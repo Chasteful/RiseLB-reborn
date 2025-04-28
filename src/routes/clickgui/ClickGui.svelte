@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { writable } from "svelte/store";
-  import { getGameWindow, getModules, getModuleSettings, openScreen } from "../../integration/rest";
+  import { getGameWindow, getModules, getModuleSettings, openScreen, setTyping } from "../../integration/rest";
   import { groupByCategory } from "../../integration/util";
   import Panel from "./Panel.svelte";
   import Description from "./Description.svelte";
@@ -9,19 +9,18 @@
   import { listen } from "../../integration/ws";
   import { cubicOut } from "svelte/easing";
   import Search from './Search.svelte';
-  import { derived } from 'svelte/store';
+  import {ResolutionScaler} from "./ResolutionScaler"
   import { getComponents } from "../../integration/rest";
+  import { debounce } from "lodash";
   let components: Component[] = [];
   import {
-    resolutionScale,
-    viewportOffset,
-    scaleFactor,
     showResults,
   } from "./clickgui_store";
   import {
     gridSize,
     showGrid,
-    snappingEnabled
+    snappingEnabled,
+    scaleFactor,
   } from "./clickgui_store";
 
   import type {
@@ -35,8 +34,10 @@
     Module,
     TogglableSetting
   } from "../../integration/types";
-  let showOverlay = writable(false);
 
+  let resolutionScaler = new ResolutionScaler({
+  baseResolution: { width: 1920, height: 1080 }
+});
   let categories: GroupedModules = {};
   let modules: Module[] = [];
 
@@ -48,41 +49,19 @@
 
   let minecraftScaleFactor = 2;
   let clickGuiScaleFactor = 1;
-
   $: {
-    const scale = $resolutionScale * clickGuiScaleFactor * minecraftScaleFactor;
-    scaleFactor.set(scale);
-  }
+  const resScale = resolutionScaler.getScaleFactor();
+  scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resScale);
+}
 
-  const calculateBaseScale = () => {
-    const baseHeight = 1080;
-    const heightRatio = window.innerHeight / baseHeight;
-    return heightRatio;
-  };
 
-  const updateViewport = () => {
-    const baseWidth = 1920;
-    const baseHeight = 1080;
-    const scale = calculateBaseScale();
-
-    resolutionScale.set(scale);
-    const offsetX = (window.innerWidth - baseWidth * scale) / 2;
-    const offsetY = (window.innerHeight - baseHeight * scale) / 2;
-    viewportOffset.set({ x: offsetX, y: offsetY });
-
-    const wrapper = document.querySelector(".viewport-wrapper") as HTMLElement;
-    if (wrapper) {
-      wrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-    }
-  };
-
+ 
   const applyValues = (configurable: ConfigurableSetting) => {
     clickGuiScaleFactor = configurable.value.find(v => v.name === "Scale")?.value as number ?? 1;
     const snappingValue = configurable.value.find(v => v.name === "Snapping") as TogglableSetting;
     $snappingEnabled = snappingValue?.value.find(v => v.name === "Enabled")?.value as boolean ?? true;
     $gridSize = snappingValue?.value.find(v => v.name === "GridSize")?.value as number ?? 10;
 
-    updateViewport();
   };
 
   const handleKeydown = (event: KeyboardEvent) => {
@@ -106,34 +85,42 @@
     }
   };
 
-
   onMount(async () => {
   const gameWindow = await getGameWindow();
   minecraftScaleFactor = gameWindow.scaleFactor;
 
-  updateViewport();
+  resolutionScaler.updateScaleFactor();
+  scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resolutionScaler.getScaleFactor());
+
   modules = await getModules();
   categories = groupByCategory(modules);
 
   const clickGuiSettings = await getModuleSettings("ClickGUI");
   applyValues(clickGuiSettings);
 
-
   components = await getComponents();
+  await setTyping(false);
 
-  window.addEventListener("resize", updateViewport);
   window.addEventListener("keydown", handleKeydown);
+  window.addEventListener("resize", handleResize);
+  
 });
 
 
-  onDestroy(() => {
-    window.removeEventListener("resize", updateViewport);
-    window.removeEventListener("keydown", handleKeydown);
-  });
+onDestroy(() => {
+  window.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("resize", handleResize); 
+});
+
+
+const handleResize = debounce(() => {
+  resolutionScaler.updateScaleFactor();
+  scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resolutionScaler.getScaleFactor());
+}, 50); 
 
   listen("scaleFactorChange", async (e: ScaleFactorChangeEvent) => {
     minecraftScaleFactor = e.scaleFactor;
-    updateViewport();
+
   });
 
   listen("clickGuiValueChange", (e: ClickGuiValueChangeEvent) => {
@@ -144,9 +131,9 @@
   $: showTip = !$showSearch && isHoveringTip && !tipCooldown;
 </script>
 
-<div class={`clickgui ${$showGrid ? 'grid' : ''}`}
-     style="transform: scale({clickGuiScaleFactor * $resolutionScale}); transform-origin: top left; background-size: {$gridSize}px {$gridSize}px; position: relative; width: 1920px; height: 1080px;">
-     
+<div class="clickgui" class:grid={$showGrid} transition:fade|global={{duration: 200}}
+     style="transform: scale({$scaleFactor * 50}%); width: {2 / $scaleFactor * 100}vw; height: {2 / $scaleFactor * 100}vh;
+     background-size: {$gridSize}px {$gridSize}px;">
      {#if $showResults}
      <!-- svelte-ignore element_invalid_self_closing_tag -->
      <div class="elegant-overlay" transition:fade={{ duration: 300 }}/>
@@ -165,6 +152,8 @@
   {/if}
 
 
+
+
   {#if $showSearch}
     <div transition:fade={{ duration: 300, easing: cubicOut }}>
       <Search modules={structuredClone(modules)} />
@@ -177,9 +166,7 @@
   {/each}
 </div>
 
-
 <Description />
-
 <style lang="scss">
   @use "../../colors.scss" as *;
 
@@ -191,10 +178,7 @@
     will-change: opacity;
     top: 0;
     left: 0;
-    width: 100vw; 
-    height: 100vh;
-    transform-origin: top left;
-  
+    transform-origin: left top;
     &.grid {
       background-image: linear-gradient(to right, $clickgui-grid-color 1px, transparent 1px),
       linear-gradient(to bottom, $clickgui-grid-color 1px, transparent 1px);

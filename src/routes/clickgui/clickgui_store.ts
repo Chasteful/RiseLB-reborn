@@ -28,11 +28,5 @@ export const showResults = writable<boolean>(false);
  
 
 export const filteredModules = writable<Module[]>([]);
-export function physicalToLogical(pos: { x: number; y: number }) {
-    const offset = get(viewportOffset);
-    const scale = get(resolutionScale);
-    return {
-      x: (pos.x - offset.x) / scale,
-      y: (pos.y - offset.y) / scale
-    };
-  }
+
+  

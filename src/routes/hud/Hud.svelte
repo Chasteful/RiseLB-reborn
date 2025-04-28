@@ -17,14 +17,11 @@
   import CraftingInput from "./elements/inventory/CraftingInput.svelte";
   import Text from "./elements/Text.svelte";
   import Island from "./elements/Island.svelte";
-
   import { getComponents, getGameWindow } from "../../integration/rest";
   import { listen } from "../../integration/ws";
   import type { Component } from "../../integration/types";
   import type { ComponentsUpdateEvent, ScaleFactorChangeEvent } from "../../integration/events";
-
   const baseResolution = { width: 1920, height: 1080 };
-
   let hudZoom = 100;     
   let hotbarZoom = 100;   
   let components: Component[] = [];
@@ -39,41 +36,34 @@
       return { width: w, height: w / aspect };
     }
   }
-
   function calcResolutionCoefficient(): number {
     const { width, height } = calcAdjustedResolution();
     const wRatio = width / baseResolution.width;
     const hRatio = height / baseResolution.height;
     return Math.min(1, Math.max(MIN_COEFF, Math.min(wRatio, hRatio)));
   }
-
   async function updateZoom(): Promise<void> {
     const gameWindow = await getGameWindow();
     const gameScale = gameWindow.scaleFactor * 50;
  
     hudZoom = gameScale * calcResolutionCoefficient();
-
     hotbarZoom = gameScale;
   }
-
   onMount(() => {
     updateZoom();
     getComponents().then(data => (components = data));
     window.addEventListener("resize", updateZoom);
     return () => window.removeEventListener("resize", updateZoom);
   });
-
   listen("scaleFactorChange", (e: ScaleFactorChangeEvent) => {
     const gameScale = e.scaleFactor * 50;
     hudZoom = gameScale * calcResolutionCoefficient();
     hotbarZoom = gameScale;
   });
-
   listen("componentsUpdate", (e: ComponentsUpdateEvent) => {
     components = [];
     components = e.components;
   });
-
   $: hotbarEnabled = components.find(c => c.name === "Hotbar")?.settings.enabled ?? false;
 </script>
 
@@ -117,7 +107,6 @@
 
 <style lang="scss">
   @import "../../colors.scss";
-
   .hud {
     height: 100vh;
     width: 100vw;
@@ -125,7 +114,7 @@
   position: fixed;
   left: 50%;
   bottom: 20px;
-
   pointer-events: none;
 }
 </style>
+Footer

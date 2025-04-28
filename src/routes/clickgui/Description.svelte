@@ -1,6 +1,6 @@
 <script lang="ts">
   import {fly} from "svelte/transition";
-  import {description, resolutionScale, type TDescription} from "./clickgui_store";
+  import {description, type TDescription} from "./clickgui_store";
 
   let data: TDescription | null = null;
   let scale: number = 1;
@@ -9,9 +9,7 @@
       data = v;
   });
   
-  resolutionScale.subscribe((v) => {
-      scale = v;
-  });
+
   let element: HTMLElement | null = null;
   let anchor: "right" | "left" = "right";
   let left = 0;
@@ -44,7 +42,7 @@ $: {
 .description-wrapper {
   position: fixed;
   z-index: 999999999999;
-  transform-origin: left center; 
+  transform: translateY(-50%);
 }
 
 .description {
@@ -66,7 +64,14 @@ $: {
     top: 50%;
     transform: translateY(-50%);
   }
-}
+  &.right {
+      &::before {
+        transform: translateY(-50%) rotate(180deg);
+        left: unset;
+        right: -8px;
+      }
+    }
+  }
 
 .text {
   font-size: 12px;

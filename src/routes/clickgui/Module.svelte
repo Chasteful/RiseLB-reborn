@@ -9,7 +9,7 @@
   import GenericSetting from "./setting/common/GenericSetting.svelte";
   import { fade, slide } from "svelte/transition";
   import { quintOut } from "svelte/easing";
-  import { description as descriptionStore, highlightModuleName } from "./clickgui_store";
+  import { description as descriptionStore, highlightModuleName, scaleFactor } from "./clickgui_store";
   import { setItem } from "../../integration/persistent_storage";
   import { convertToSpacedString, spaceSeperatedNames } from "../../theme/theme_config";
   import { getContext } from "svelte";
@@ -51,17 +51,36 @@
   }
 
   function setDescription() {
-    const y = (moduleNameElement?.getBoundingClientRect().top ?? 0) + (moduleNameElement?.clientHeight ?? 0) / 2;
-    const x = moduleNameElement?.getBoundingClientRect().right ?? 0;
-    let moduleDescription = description;
-    if (aliases.length > 0) {
-      moduleDescription += ` (aka ${aliases.map(a => $spaceSeperatedNames ? convertToSpacedString(a) : a).join(", ")})`;
+        if (!moduleNameElement) return;
+
+        const boundingRect = moduleNameElement.getBoundingClientRect();
+        const y = (boundingRect.top + (moduleNameElement.clientHeight / 2)) * (2 / $scaleFactor);
+
+        let moduleDescription = description;
+        if (aliases.length > 0) {
+            moduleDescription += ` (aka ${aliases.map(name => $spaceSeperatedNames ? convertToSpacedString(name) : name).join(", ")})`;
+        }
+
+        // If element is less than 300px from the right, display description on the left
+        if (window.innerWidth - boundingRect.right > 300) {
+            const x = boundingRect.right * (2 / $scaleFactor);
+            descriptionStore.set({
+                x,
+                y,
+                anchor: "right",
+                description: moduleDescription
+            });
+        } else {
+            const x = boundingRect.left * (2 / $scaleFactor);
+
+            descriptionStore.set({
+                x,
+                y,
+                anchor: "left",
+                description: moduleDescription
+            });
+        }
     }
-    descriptionStore.set({
-        x, y, description: moduleDescription,
-        anchor: "left"
-    });
-  }
   
   async function toggleExpanded() {
     expanded = !expanded;
