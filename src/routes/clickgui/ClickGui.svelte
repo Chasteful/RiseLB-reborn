@@ -151,7 +151,7 @@ const handleResize = debounce(() => {
     </div>
   {/if}
 
-
+  <Description />
 
 
   {#if $showSearch}
@@ -166,7 +166,7 @@ const handleResize = debounce(() => {
   {/each}
 </div>
 
-<Description />
+
 <style lang="scss">
   @use "../../colors.scss" as *;
 

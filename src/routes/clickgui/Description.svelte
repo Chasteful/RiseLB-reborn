@@ -26,14 +26,14 @@ $: {
 </script>
 
 {#key data}
-  {#if data !== null}
-      <div transition:fly|global={{duration: 200,  x: anchor === "right" ? -15 : 15}} class="description-wrapper"
-           style="top: {data.y}px; left: {data.x + 20}px; transform: translateY(-50%) scale({scale})"bind:this={element}>
-           <div class="description" class:right={anchor === "left"}>
-              <div class="text">{data.description}</div>
-          </div>
-      </div>
-  {/if}
+    {#if data !== null}
+        <div transition:fly|global={{duration: 200, x: anchor === "right" ? -15 : 15}} class="description-wrapper"
+             style="top: {data.y}px; left: {left}px;" bind:this={element}>
+            <div class="description" class:right={anchor === "left"}>
+                <div class="text">{data.description}</div>
+            </div>
+        </div>
+    {/if}
 {/key}
 
 <style lang="scss">
