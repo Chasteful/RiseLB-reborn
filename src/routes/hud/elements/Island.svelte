@@ -14,6 +14,8 @@
     Session, 
     PlayerData,
   } from "../../../integration/types";
+    import { tweened } from "svelte/motion";
+    import { cubicOut } from "svelte/easing";
   
   const CLIENT_NAME = "RiseLB";
   const CLIENT_VERSION = "1.5.8";
@@ -37,7 +39,16 @@
   let timeGreeting = "";
   let lastHealthValue = 20;
   let lastAirValue = 300;
+  let wrapper: HTMLDivElement|  null = null;
   let lastFoodValue = 20;
+  let initialAnimation = true;
+  let sessionLoaded = false;
+  let initialAnimationDone = false;
+  let initialWidth = tweened(0, { duration: 400, easing: cubicOut });
+  let initialOpacity = tweened(0, { duration: 400, easing: cubicOut });
+  let animationPhase: 'idle' | 'contract' | 'expand' = 'idle';
+  const w = tweened(400, { duration: 300, easing: cubicOut });
+  const h = tweened(40,  { duration: 300, easing: cubicOut });
   function getTimeGreeting(hours: number): string {
     if (hours >= 5 && hours < 12) return "Good morning";
     if (hours >= 12 && hours < 18) return "Good afternoon";
@@ -53,6 +64,7 @@
       module.name === "NameProtect" && !module.enabled
     );
   }
+
   function updateTime(): void {
     const now = new Date();
     const hours = now.getHours();
@@ -61,27 +73,71 @@
     timeGreeting = getTimeGreeting(hours);
     time = formatTime(hours, minutes, seconds);
   }
-  function showAlert(type: AlertType, title: string, message: string): void {
-    if (currentAlert) {
-      alertState = 'hiding';
-      setTimeout(() => {
-        currentAlert = { type, title, message };
-        alertState = 'showing';
-      }, ANIMATION_DURATION_MS); 
-    } else {
-      currentAlert = { type, title, message };
-      alertState = 'showing';
-    }
-    setTimeout(() => {
-      if (alertState === 'showing') {
-        alertState = 'hiding';
-        setTimeout(() => {
-          currentAlert = null;
-          alertState = 'hidden';
-        }, ANIMATION_DURATION_MS);
-      }
-    }, ALERT_DISPLAY_DURATION_MS);
+  
+  $: {
+  if (!initialAnimationDone) {
+    w.set($initialWidth); 
+    h.set(40);
+  } else if (animationPhase === 'contract') {
+    w.set(100); 
+    h.set(40);
+  } else if (animationPhase === 'expand') {
+    
+    w.set(currentAlert ? 280 : (wrapper?.scrollWidth || 290) + 32);
+    h.set(currentAlert ? 60 : 40);
+  } else {
+    
+    w.set(currentAlert ? 280 : (wrapper?.scrollWidth || 290) + 32);
+    h.set(currentAlert ? 60 : 40);
   }
+}
+
+function showAlert(type: AlertType, title: string, message: string): void {
+  if (currentAlert) {
+    
+    animationPhase = 'contract';
+
+    setTimeout(() => {
+      
+      animationPhase = 'expand';
+
+      setTimeout(() => {
+        
+        currentAlert = { type, title, message };
+        animationPhase = 'idle';
+        alertState = 'showing';
+
+        setTimeout(() => hideAlert(), ALERT_DISPLAY_DURATION_MS);
+      }, ANIMATION_DURATION_MS);
+
+    }, ANIMATION_DURATION_MS);
+
+  } else {
+    
+    currentAlert = { type, title, message };
+    animationPhase = 'expand';
+
+    setTimeout(() => {
+      animationPhase = 'idle';
+      alertState = 'showing';
+
+      setTimeout(() => hideAlert(), ALERT_DISPLAY_DURATION_MS);
+    }, ANIMATION_DURATION_MS);
+  }
+}
+
+function hideAlert(): void {
+  if (alertState !== 'showing') return;
+  alertState = 'hiding';
+  animationPhase = 'contract';
+  setTimeout(() => {
+    currentAlert = null;
+    alertState = 'hidden';
+    animationPhase = 'idle';
+  }, ANIMATION_DURATION_MS);
+}
+
+
   function checkHealthAlert(newHealth: number): void {
     if (newHealth > 0 && newHealth <= 5 && lastHealthValue > 5) {
       showAlert('health', 'Low Health', 'Your health is severely inadequate!');
@@ -103,8 +159,9 @@
     lastFoodValue = newFood;
   }
   async function updateSession() {
-    session = await getSession();
-  }
+  session = await getSession();
+  sessionLoaded = true;  
+}
   async function updatePlayerData(): Promise<void> {
     const newData = await getPlayerData();
     if (!newData) return;
@@ -113,14 +170,31 @@
     checkFoodAlert(newData.food);
     playerData = newData;
   }
-  async function updateAllData(): Promise<void> {
-    clientInfo = await getClientInfo();
-    updateTime();
-    session = await getSession();
-    await checkUsernameVisibility();
-    await updatePlayerData();
+
+let timeLoaded = false;
+
+async function updateAllData(): Promise<void> {
+  clientInfo = await getClientInfo();
+  updateTime();  
+  session = await getSession();
+  sessionLoaded = true;  
+  await checkUsernameVisibility();
+  await updatePlayerData();
+  timeLoaded = true;
+  if (!currentAlert && wrapper) {
+    w.set(wrapper.scrollWidth + 32);
   }
+} 
+
   onMount(() => {
+    initialWidth.set((wrapper?.scrollWidth || 290) + 32);
+    initialOpacity.set(1);
+  setTimeout(() => {
+    initialAnimation = false;
+    initialAnimationDone = true;
+ 
+    w.set((wrapper?.scrollWidth || 290) + 32);
+  }, 1500);
   let isMounted = true;
   updateAllData().catch(console.error);
   const interval = setInterval(() => {
@@ -135,12 +209,21 @@
 });
   listen("session", updateSession);
   listen("playerData", (event: ClientPlayerDataEvent) => {
-    playerData = event.playerData;
-    updatePlayerData();
-  });
+  checkHealthAlert(event.playerData.actualHealth);
+  checkAirAlert(event.playerData.air);
+  checkFoodAlert(event.playerData.food);
+  playerData = event.playerData;
+});
+
 </script>
 <div class="dynamic-island-container">
-  <div class="dynamic-island {alertState}" class:expanded={currentAlert !== null}>
+  <div class="dynamic-island {alertState}"
+       class:contract={animationPhase === 'contract'}
+       class:expand={animationPhase === 'expand'}
+       class:initial={initialAnimation}
+       style="width: {initialAnimation ? $initialWidth : $w}px; 
+              height: {initialAnimation ? 40 : $h}px;
+              opacity: {$initialOpacity};">
     <div class="content-wrapper">
       {#if currentAlert}
         <div class="notification-content {currentAlert.type}"
@@ -157,23 +240,34 @@
           </div>
         </div>
       {:else}
-        <div class="watermark-content"
-             in:fade={{ duration: 20 }}
+        <div class="watermark-content" bind:this={wrapper}
+             class:fade={!initialAnimation}
+             in:fade={{ duration: initialAnimation ? 500 : 20 }}
              out:fade={{ duration: 200 }}>
-          <span class="client gradient-text">{CLIENT_NAME}&nbsp;{CLIENT_VERSION}</span>
-          <div class="separator"></div>
-          <span class="time gradient-text">{time}</span>
-          <div class="separator"></div>
-          {#if session && showUsername}
-            <span class="greeting gradient-text">{timeGreeting}&nbsp;{session.username}~</span>
-          {:else}
+          <!-- 初始阶段显示问候和用户名 -->
+          {#if initialAnimation && session && showUsername}
             <span class="greeting gradient-text">{timeGreeting}</span>
+            {#if sessionLoaded}
+              <span class="greeting gradient-text">&nbsp;{session.username}~</span>
+            {/if}
+          {:else}
+            <!-- 后续阶段显示客户端名字、时间和用户名 -->
+            {#if timeLoaded} <!-- 确保时间数据加载完成 -->
+              <span class="client gradient-text">{CLIENT_NAME}&nbsp;{CLIENT_VERSION}</span>
+              <div class="separator"></div>
+              <span class="time gradient-text">{time}</span>
+              <div class="separator"></div>
+            {/if}
+            {#if session && showUsername}
+              <span class="greeting gradient-text">User: {session.username}</span>
+            {/if}
           {/if}
         </div>
       {/if}
     </div>
   </div>
 </div>
+
   <style lang="scss">
   @import "../../../colors.scss";
   @mixin text-ellipsis {
@@ -181,9 +275,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
   .dynamic-island-container {
     position: fixed;
-    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
@@ -194,33 +288,27 @@
     perspective: 1000px;
   }
   .dynamic-island {
-    --base-width: 125px;  
-    --expanded-width: 280px;
-    --height: 40px;
-    --expanded-height: 60px;
-    --radius: 999px;
+  
+    overflow: hidden;
+    border-radius: 20px;
     background: rgba(20, 20, 20, 0.5);
     backdrop-filter: blur(12px) brightness(1.1);
     color: rgba($text, 0.9);
-    border-radius: var(--radius);
-    height: var(--height);
+
     padding: 0 16px;
-    min-width: 125px;
-    max-width: 400px;
     display: flex;
     align-items: center;
     transition: 
-      width 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-      height 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
       border-radius 0.3s 0.1s cubic-bezier(0.4, 0, 0.2, 1),
-      transform 0.3s ease,
       box-shadow 0.3s ease;
     transform-style: preserve-3d;
     box-shadow: 
       0 4 16px rgba(0, 0, 0, 0.6),
       inset 0 0 10px rgba(255, 255, 255, 0.05);
     &.expanded {
-      height: var(--expanded-height);
+
       border-radius: 16px;
       padding: 0 20px;
       box-shadow: 
@@ -228,15 +316,23 @@
         inset 0 0 15px rgba(255, 255, 255, 0.1);
     }
     &.showing {
-      animation: 
-        expand 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-        pulse 2s infinite alternate;
+
+      transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
     }
     &.hiding {
-      animation: 
-        collapse 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    &.initial {
+    transform-origin: center;
+    animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+    
+    .watermark-content {
+      justify-content: center;
+      opacity: 0;
+      animation: fadeIn 0.4s 0.3s forwards;
     }
   }
+}
   .content-wrapper {
     width: 100%;
     display: flex;
@@ -255,6 +351,7 @@
       font-weight: 600;
       letter-spacing: -0.25px;
       background-clip: text;
+      flex-shrink: 0; 
       -webkit-background-clip: text;
       color: transparent;
       animation: gradientFlow 6s linear infinite;
@@ -404,30 +501,26 @@
     from { transform: scaleX(1); }
     to { transform: scaleX(0); }
   }
-  @keyframes expand {
-    from {
-      width: var(--base-width);
-      height: var(--height);
-      border-radius: var(--radius);
-    }
-    to {
-      width: var(--expanded-width);
-      height: var(--expanded-height);
-      border-radius: 16px;
-    }
+  @keyframes initialExpand {
+  0% {
+    width: 0;
+    opacity: 0;
+    transform: scaleX(0.1);
   }
-  @keyframes collapse {
-    from {
-      width: var(--expanded-width);
-      height: var(--expanded-height);
-      border-radius: 16px;
-    }
-    to {
-      width: var(--base-width);
-      height: var(--height);
-      border-radius: var(--radius);
-    }
+  70% {
+    opacity: 1;
+    transform: scaleX(1.1);
   }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
   @keyframes pulse {
     0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
     100% { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
