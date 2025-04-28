@@ -39,11 +39,11 @@
             },
             {
               "name": "Vertical",
-              "value": "Bottom"
+              "value": "Top"
             },
             {
               "name": "VerticalOffset",
-              "value": 780
+              "value": 300
             }
           ]
         }
@@ -219,11 +219,11 @@
             },
             {
               "name": "Vertical",
-              "value": "Bottom"
+              "value": "Top"
             },
             {
               "name": "VerticalOffset",
-              "value": 800
+              "value": 150
             }
           ]
         }
@@ -279,11 +279,11 @@
             },
             {
               "name": "Vertical",
-              "value": "Bottom"
+              "value": "Center"
             },
             {
               "name": "VerticalOffset",
-              "value": 444
+              "value": 50
             }
           ]
         }
