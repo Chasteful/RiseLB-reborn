@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { fade } from "svelte/transition";
   import { 
     getClientInfo, 
@@ -73,54 +73,57 @@
     timeGreeting = getTimeGreeting(hours);
     time = formatTime(hours, minutes, seconds);
   }
-  
   $: {
-  if (!initialAnimationDone) {
+  if (!initialAnimationDone && !currentAlert) {  
     w.set($initialWidth); 
     h.set(40);
   } else if (animationPhase === 'contract') {
     w.set(100); 
     h.set(40);
   } else if (animationPhase === 'expand') {
-    
     w.set(currentAlert ? 280 : (wrapper?.scrollWidth || 290) + 32);
     h.set(currentAlert ? 60 : 40);
   } else {
-    
     w.set(currentAlert ? 280 : (wrapper?.scrollWidth || 290) + 32);
     h.set(currentAlert ? 60 : 40);
   }
 }
-
 function showAlert(type: AlertType, title: string, message: string): void {
+
+  if (initialAnimation && !initialAnimationDone) {
+    const waitForInitialAnimation = async () => {
+   
+      while (initialAnimation && !initialAnimationDone) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+ 
+      doShowAlert(type, title, message);
+    };
+    waitForInitialAnimation();
+  } else {
+
+    doShowAlert(type, title, message);
+  }
+}
+
+function doShowAlert(type: AlertType, title: string, message: string): void {
   if (currentAlert) {
-    
     animationPhase = 'contract';
-
     setTimeout(() => {
-      
       animationPhase = 'expand';
-
       setTimeout(() => {
-        
         currentAlert = { type, title, message };
         animationPhase = 'idle';
         alertState = 'showing';
-
         setTimeout(() => hideAlert(), ALERT_DISPLAY_DURATION_MS);
       }, ANIMATION_DURATION_MS);
-
     }, ANIMATION_DURATION_MS);
-
   } else {
-    
     currentAlert = { type, title, message };
     animationPhase = 'expand';
-
     setTimeout(() => {
       animationPhase = 'idle';
       alertState = 'showing';
-
       setTimeout(() => hideAlert(), ALERT_DISPLAY_DURATION_MS);
     }, ANIMATION_DURATION_MS);
   }
@@ -186,22 +189,49 @@ async function updateAllData(): Promise<void> {
   }
 } 
 
-  onMount(() => {
+onMount(() => {
+  let isMounted = true;
+
+  (async () => {
+    await tick();
+
     initialWidth.set((wrapper?.scrollWidth || 290) + 32);
     initialOpacity.set(1);
-  setTimeout(() => {
+
+    await updateAllData().catch(console.error);
+
+    const waitUntilNoAlert = async () => {
+      return new Promise<void>((resolve) => {
+        const check = () => {
+          if (!currentAlert) {
+            resolve();
+          } else {
+            setTimeout(check, 100);
+          }
+        };
+        check();
+      });
+    };
+
+    await waitUntilNoAlert();
+
+    if (!isMounted) return;
+
+    await new Promise((res) => setTimeout(res, 1500));
+
+    if (!isMounted) return;
+
     initialAnimation = false;
     initialAnimationDone = true;
- 
     w.set((wrapper?.scrollWidth || 290) + 32);
-  }, 1500);
-  let isMounted = true;
-  updateAllData().catch(console.error);
+  })();
+
   const interval = setInterval(() => {
     if (isMounted) {
       updateAllData().catch(console.error);
     }
   }, UPDATE_INTERVAL_MS);
+
   return () => {
     isMounted = false;
     clearInterval(interval);
@@ -244,15 +274,15 @@ async function updateAllData(): Promise<void> {
              class:fade={!initialAnimation}
              in:fade={{ duration: initialAnimation ? 500 : 20 }}
              out:fade={{ duration: 200 }}>
-          <!-- 初始阶段显示问候和用户名 -->
+
           {#if initialAnimation && session && showUsername}
             <span class="greeting gradient-text">{timeGreeting}</span>
             {#if sessionLoaded}
               <span class="greeting gradient-text">&nbsp;{session.username}~</span>
             {/if}
           {:else}
-            <!-- 后续阶段显示客户端名字、时间和用户名 -->
-            {#if timeLoaded} <!-- 确保时间数据加载完成 -->
+       
+            {#if timeLoaded} 
               <span class="client gradient-text">{CLIENT_NAME}&nbsp;{CLIENT_VERSION}</span>
               <div class="separator"></div>
               <span class="time gradient-text">{time}</span>
@@ -278,6 +308,7 @@ async function updateAllData(): Promise<void> {
 
   .dynamic-island-container {
     position: fixed;
+    top: 5px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
@@ -325,7 +356,10 @@ async function updateAllData(): Promise<void> {
     &.initial {
     transform-origin: center;
     animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
-    
+    &:not(.showing):not(.hiding) {
+      transform-origin: center;
+      animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+    }
     .watermark-content {
       justify-content: center;
       opacity: 0;
@@ -369,7 +403,7 @@ async function updateAllData(): Promise<void> {
       background-image: linear-gradient(90deg, #ffffff, #ffffffb2, #ffffff);
     }
     .separator {
-      width: 3px;
+      width: 2px;
       height: 14px;
       background: linear-gradient(to bottom, transparent, rgba($text, 0.7), transparent);
       animation: separatorPulse 2s infinite;
@@ -511,6 +545,7 @@ async function updateAllData(): Promise<void> {
     opacity: 1;
     transform: scaleX(1.1);
   }
+
   100% {
     transform: scaleX(1);
     opacity: 1;
