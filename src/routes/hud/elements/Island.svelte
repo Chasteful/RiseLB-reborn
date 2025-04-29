@@ -47,6 +47,19 @@
   let initialWidth = tweened(0, { duration: 400, easing: cubicOut });
   let initialOpacity = tweened(0, { duration: 400, easing: cubicOut });
   let animationPhase: 'idle' | 'contract' | 'expand' = 'idle';
+  let isMounted = true;
+  const waitUntilNoAlert = async () => {
+    return new Promise<void>((resolve) => {
+      const check = () => {
+        if (!currentAlert) {
+          resolve();
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
+    });
+  };
   const w = tweened(400, { duration: 300, easing: cubicOut });
   const h = tweened(40,  { duration: 300, easing: cubicOut });
   
@@ -77,20 +90,20 @@
     time = formatTime(hours, minutes, seconds);
   }
   $: {
-  if (!initialAnimationDone && !currentAlert) {  
-    w.set($initialWidth); 
-    h.set(40);
-  } else if (animationPhase === 'contract') {
-    w.set(100); 
-    h.set(40);
-  } else if (animationPhase === 'expand') {
-    w.set(currentAlert ? 280 : (wrapper?.scrollWidth || 290) + 32);
-    h.set(currentAlert ? 60 : 40);
-  } else {
-    w.set(currentAlert ? 280 : (wrapper?.scrollWidth || 290) + 32);
-    h.set(currentAlert ? 60 : 40);
+    if (!initialAnimationDone && !currentAlert) {
+      w.set($initialWidth);
+      h.set(40);
+    } else if (animationPhase === 'contract') {
+      w.set(100);
+      h.set(40);
+    } else if (animationPhase === 'expand') {
+      w.set(calculateContentWidth(currentContent));
+      h.set(currentAlert ? 60 : 40);
+    } else {
+      w.set(calculateContentWidth(currentContent));
+      h.set(currentAlert ? 60 : 40);
+    }
   }
-}
 function showAlert(type: AlertType, title: string, message: string): void {
 
   if (initialAnimation && !initialAnimationDone) {
@@ -191,55 +204,71 @@ async function updateAllData(): Promise<void> {
     w.set(wrapper.scrollWidth + 32);
   }
 } 
-
-onMount(() => {
-  let isMounted = true;
-
-  (async () => {
-    await tick();
-
-    initialWidth.set((wrapper?.scrollWidth || 290) + 32);
-    initialOpacity.set(1);
-
-    await updateAllData().catch(console.error);
-
-    const waitUntilNoAlert = async () => {
-      return new Promise<void>((resolve) => {
-        const check = () => {
-          if (!currentAlert) {
-            resolve();
-          } else {
-            setTimeout(check, 100);
-          }
-        };
-        check();
-      });
-    };
-
+function calculateContentWidth(type: ContentType): number {
+    if (!wrapper) return 290;
+    const basePadding = 32;
+    
+    // 根据不同的内容类型返回不同宽度
+    switch(type) {
+      case 'alert':
+        return 280;
+      case 'greeting':
+        // 问候语内容宽度计算
+        const greetingEl = wrapper.querySelector('.greeting-content');
+        return greetingEl ? greetingEl.scrollWidth + basePadding : 290;
+      case 'status':
+        // 状态信息宽度计算
+        const statusEl = wrapper.querySelector('.status-content');
+        return statusEl ? statusEl.scrollWidth + basePadding : 290;
+    }
+  }
+  async function handleInitialAnimationEnd() {
     await waitUntilNoAlert();
-
     if (!isMounted) return;
-
+    
     await new Promise((res) => setTimeout(res, 1500));
-
-    if (!isMounted) return;
-
+    
     initialAnimation = false;
     initialAnimationDone = true;
-    w.set((wrapper?.scrollWidth || 290) + 32);
-  })();
+    currentContent = 'status';
+    w.set(calculateContentWidth('status'));
+  }
+  onMount(() => {
+    let isMounted = true;
 
-  const interval = setInterval(() => {
-    if (isMounted) {
-      updateAllData().catch(console.error);
-    }
-  }, UPDATE_INTERVAL_MS);
+    (async () => {
+      await tick();
 
-  return () => {
-    isMounted = false;
-    clearInterval(interval);
-  };
-});
+      initialWidth.set((wrapper?.scrollWidth || 290) + 32);
+      initialOpacity.set(1);
+
+      await updateAllData().catch(console.error);
+
+      // 替换原来的等待逻辑为这个函数
+      await handleInitialAnimationEnd();
+
+      if (!isMounted) return;
+
+      // 删除下面这两行，因为它们已经被移到 handleInitialAnimationEnd 中
+      // initialAnimation = false;
+      // initialAnimationDone = true;
+      // w.set((wrapper?.scrollWidth || 290) + 32);
+    })();
+
+    const interval = setInterval(() => {
+      if (isMounted) {
+        updateAllData().catch(console.error);
+      }
+    }, UPDATE_INTERVAL_MS);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  });
+
+  // 新函数应该放在 onMount 外部，script 标签内的顶层作用域
+ 
   listen("session", updateSession);
   listen("playerData", (event: ClientPlayerDataEvent) => {
   checkHealthAlert(event.playerData.actualHealth);
@@ -257,7 +286,7 @@ onMount(() => {
        style="width: {initialAnimation ? $initialWidth : $w}px; 
               height: {initialAnimation ? 40 : $h}px;
               opacity: {$initialOpacity};">
-    <div class="content-wrapper">
+    <div class="content-wrapper" bind:this={wrapper}>
       {#if currentAlert}
         <div class="notification-content {currentAlert.type}"
              in:fade={{ duration: 150 }}>
@@ -272,27 +301,23 @@ onMount(() => {
             <div class="progress-bar {currentAlert.type}"></div>
           </div>
         </div>
-      {:else}
-        <div class="watermark-content" bind:this={wrapper}
-             class:fade={!initialAnimation}
-             in:fade={{ duration: initialAnimation ? 500 : 20 }}
-             out:fade={{ duration: 200 }}>
 
-          {#if initialAnimation && session && showUsername}
-            <span class="greeting gradient-text">{timeGreeting}</span>
-            {#if sessionLoaded}
-              <span class="greeting gradient-text">&nbsp;{session.username}~</span>
-            {/if}
-          {:else}
-       
-            {#if timeLoaded} 
-              <span class="client gradient-text">{CLIENT_NAME}&nbsp;{CLIENT_VERSION}</span>
-              <div class="separator"></div>
-              <span class="time gradient-text">{time}</span>
-              <div class="separator"></div>
-            {/if}
+        {:else if currentContent === 'greeting'}
+        <div class="greeting-content" in:fade={{ duration: 150 }}>
+          <span class="greeting gradient-text">{timeGreeting}</span>
+          {#if sessionLoaded && session && showUsername}
+            <span class="username gradient-text">&nbsp;{session.username}~</span>
+          {/if}
+        </div>
+      {:else}
+        <div class="status-content" in:fade={{ duration: 150 }}>
+          {#if timeLoaded}  <!-- 添加这个条件判断 -->
+            <span class="client gradient-text">{CLIENT_NAME}&nbsp;{CLIENT_VERSION}</span>
+            <div class="separator"></div>
+            <span class="time gradient-text">{time}</span>
             {#if session && showUsername}
-              <span class="greeting gradient-text">User: {session.username}</span>
+              <div class="separator"></div>
+              <span class="username gradient-text">User: {session.username}</span>
             {/if}
           {/if}
         </div>
@@ -300,7 +325,6 @@ onMount(() => {
     </div>
   </div>
 </div>
-
   <style lang="scss">
   @import "../../../colors.scss";
   @mixin text-ellipsis {
@@ -308,114 +332,126 @@ onMount(() => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.dynamic-island-container {
+  position: fixed;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  filter: 
+    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2))
+    drop-shadow(0 16px 48px rgba(0, 0, 0, 0.15));
+  perspective: 1000px;
+}
 
-  .dynamic-island-container {
-    position: fixed;
-    top: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    filter: 
-      drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
-      drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2))
-      drop-shadow(0 16px 48px rgba(0, 0, 0, 0.15));
-    perspective: 1000px;
-  }
-  .dynamic-island {
-  
-    overflow: hidden;
-    border-radius: 20px;
-    background: rgba(20, 20, 20, 0.5);
-    backdrop-filter: blur(12px) brightness(1.1);
-    color: rgba($text, 0.9);
-
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    transition: 
+.dynamic-island {
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(20, 20, 20, 0.5);
+  backdrop-filter: blur(12px) brightness(1.1);
+  color: rgba(var(--text), 0.9);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  transition: 
     width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
     height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-      border-radius 0.3s 0.1s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow 0.3s ease;
-    transform-style: preserve-3d;
+    border-radius 0.3s 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.6),
+    inset 0 0 10px rgba(255, 255, 255, 0.05);
+
+  &.expand {
+    border-radius: 16px;
+    padding: 0 16px;
     box-shadow: 
-      0 4 16px rgba(0, 0, 0, 0.6),
-      inset 0 0 10px rgba(255, 255, 255, 0.05);
-    &.expanded {
+      0 0 20px rgba(255, 255, 255, 0.15),
+      inset 0 0 15px rgba(255, 255, 255, 0.1);
+  }
 
-      border-radius: 16px;
-      padding: 0 16px;
-      box-shadow: 
-        0 0 20px rgba(255, 255, 255, 0.15),
-        inset 0 0 15px rgba(255, 255, 255, 0.1);
-    }
-    &.showing {
+  &.showing {
+    transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+  }
 
-      transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
-    }
-    &.hiding {
-      transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
-    }
-    &.initial {
+  &.hiding {
+    transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  &.initial {
     transform-origin: center;
     animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+
     &:not(.showing):not(.hiding) {
       transform-origin: center;
       animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
     }
-    .watermark-content {
+
+    .greeting-content {
       justify-content: center;
       opacity: 0;
       animation: fadeIn 0.4s 0.3s forwards;
     }
   }
 }
-  .content-wrapper {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
+
+.content-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.greeting-content,
+.status-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-size: 14px;
+  white-space: nowrap;
+
+  .client, 
+  .greeting, 
+  .time,
+  .username {
+    font-size: 20px;
+    letter-spacing: -0.25px;
+    background-clip: text;
+    flex-shrink: 0; 
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: gradientFlow 6s linear infinite;
+    background-size: 200% 200%;
+    font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
+    font-weight: bold;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+  }
+
+  .client {
+    background-image: linear-gradient(90deg,  $text, $accent-color,$text);
+  }
+
+  .greeting,
+  .time,
+  .username {
+    background-image: linear-gradient(90deg, #ffffff, #ffffffb2, #ffffff);
+  }
+
+  .separator {
+    width: 2px;
+    height: 14px;
+    background: linear-gradient(to bottom, transparent, rgba(($text), 0.7), transparent);
+    animation: separatorPulse 2s infinite;
+    flex-shrink: 0; 
     position: relative;
   }
-  .watermark-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    font-size: 14px;
-    white-space: nowrap;
-    .client, .greeting, .time{
-      font-size: 20px;
-      letter-spacing: -0.25px;
-      background-clip: text;
-      flex-shrink: 0; 
-      -webkit-background-clip: text;
-      color: transparent;
-      animation: gradientFlow 6s linear infinite;
-      background-size: 200% 200%;
-      font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
-      font-weight: bold;
-      font-feature-settings: "tnum";
-      font-variant-numeric: tabular-nums;
-    }
-    .client {
-      background-image: linear-gradient(90deg,  $text, $accent-color,$text);
-    }
-    .greeting{
-      background-image: linear-gradient(90deg, #ffffff, #ffffffb2, #ffffff);
-    }
-    .time {
-      background-image: linear-gradient(90deg, #ffffff, #ffffffb2, #ffffff);
-    }
-    .separator {
-      width: 2px;
-      height: 14px;
-      background: linear-gradient(to bottom, transparent, rgba($text, 0.7), transparent);
-      animation: separatorPulse 2s infinite;
-      flex-shrink: 0; 
-      position: relative;
-    }
-  }
+}
+
   .notification-content {
     display: flex;
     align-items: center;
