@@ -199,29 +199,21 @@
 
   background-color: transparent;
   position: relative;
-
-  border-radius: 0;
   box-shadow: none;
   overflow: visible; 
 
   .slider {
-
     display: none;
   }
 
   .slots {
     display: flex;
-
     opacity: 0;
-
   }
 
   .slot {
     height: 45px;
     width: 45px;
-
-    background-color: transparent;
-    border: none;
   }
 }
     .item-name {
