@@ -1,0 +1,91 @@
+<script lang="ts">
+    import { onMount } from "svelte";
+    import type { ClientPlayerDataEvent, PlayerInventory, PlayerInventoryEvent } from "../../../../integration/events";
+    import type { ItemStack, PlayerData } from "../../../../integration/types";
+    import { listen } from "../../../../integration/ws";
+    import { getPlayerData, getPlayerInventory } from "../../../../integration/rest";
+    import ItemStackView from "../inventory/ItemStackView.svelte";
+
+
+
+  
+    let lastSlot = 0;
+  let currentSlot = 0;
+  let playerData: PlayerData | null = null;
+  let slotsElement: HTMLElement | undefined;
+  let hotbar: ItemStack[] = [];
+
+function updateStacks(inventory: PlayerInventory) {
+  hotbar = inventory.main.slice(0, 9); // Hotbar 是前 9 格
+}
+
+
+  function updatePlayerData(s: PlayerData) {
+      playerData = s;
+
+      currentSlot = playerData.selectedSlot;
+      if (currentSlot !== lastSlot) {
+          lastSlot = currentSlot;
+     
+          
+      }
+  }
+  let stacks: ItemStack[] = [];
+
+listen("clientPlayerInventory", (data: PlayerInventoryEvent) => {
+  stacks = data.inventory.main.slice(0, 9); 
+});
+listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
+    updatePlayerData(event.playerData);
+  });
+onMount(async () => {
+  const inventory = await getPlayerInventory();
+  stacks = inventory.main.slice(0, 9);
+  updateStacks(inventory);
+  updatePlayerData(await getPlayerData());
+  });
+  </script>
+  
+  <div class="item-column">
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
+
+    <div class="slider" style="left: {currentSlot * 45}px"></div>
+    <div class="slots">
+        {#each hotbar as stack}
+          <div class="slot">
+            <ItemStackView {stack} />
+          </div>
+        {/each}
+      </div>
+    </div>
+  <style lang="scss">
+    .item-column {
+      position: relative;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 16px;
+      box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+  
+      .slider {
+        height: 45px;
+        width: 45px;
+        position: absolute;
+        border-radius: 16px;
+        transition: ease-in left 0.1s;
+        background-color: rgba(0, 0, 0, 0.4);
+        filter: blur(2px);
+      }
+  
+      .slots {
+        display: flex;
+      }
+  
+      .slot {
+  height: 45px;
+  width: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+    }
+  </style>

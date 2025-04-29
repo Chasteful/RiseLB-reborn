@@ -4,11 +4,12 @@
   import TargetHud from "./elements/targethud/TargetHud.svelte";
   import Notifications from "./elements/notifications/Notifications.svelte";
   import TabGui from "./elements/tabgui/TabGui.svelte";
-  import HotBar from "./elements/hotbar/HotBar.svelte";
+  import HotBar from "./elements/hotbar/LayerList.svelte";
   import Scoreboard from "./elements/Scoreboard.svelte";
   import Watermark from "./elements/Watermark.svelte";
   import Logo from "./elements/Logo.svelte";
   import Position from "./elements/Position.svelte";
+  import ItemColumn from "./elements/hotbar/ItemColumn.svelte"
   import Keystrokes from "./elements/keystrokes/Keystrokes.svelte";
   import Effects from "./elements/Effects.svelte";
   import BlockCounter from "./elements/BlockCounter.svelte";
@@ -21,6 +22,7 @@
   import { listen } from "../../integration/ws";
   import type { Component } from "../../integration/types";
   import type { ComponentsUpdateEvent, ScaleFactorChangeEvent } from "../../integration/events";
+    import LayerList from "./elements/hotbar/LayerList.svelte";
   const baseResolution = { width: 1920, height: 1080 };
   let hudZoom = 100;     
   let hotbarZoom = 100;   
@@ -61,10 +63,10 @@
     hotbarZoom = gameScale;
   });
   listen("componentsUpdate", (e: ComponentsUpdateEvent) => {
-    components = [];
+    components = [];2
     components = e.components;
   });
-  $: hotbarEnabled = components.find(c => c.name === "Hotbar")?.settings.enabled ?? false;
+
 </script>
 
 <div class="hud" style="zoom: {hudZoom}%">
@@ -87,6 +89,8 @@
           {:else if c.name === "Position"}    <Position/>
           {:else if c.name === "Keystrokes"}  <Keystrokes/>
           {:else if c.name === "Effects"}     <Effects/>
+          {:else if c.name === "Layer"}       <LayerList/>
+          {:else if c.name === "ItemColumn"}  <ItemColumn/>
           {:else if c.name === "Text"}        <Text settings={c.settings}/>
           {:else if c.name === "Image"}       <img alt="" src="{c.settings.src}" style="scale: {c.settings.scale};"/>
           {/if}
@@ -96,25 +100,12 @@
   </div>
 </div>
 
-{#if hotbarEnabled}
-  <div
-    class="hotbar-wrapper"
-    style="transform: translateX(-50%) scale({hotbarZoom / 100}); transform-origin: center bottom;"
-  >
-    <HotBar/>
-  </div>
-{/if}
 
 <style lang="scss">
   @import "../../colors.scss";
   .hud {
     height: 100vh;
     width: 100vw;
-  }.hotbar-wrapper {
-  position: fixed;
-  left: 50%;
-  bottom: 20px;
-  pointer-events: none;
-}
+  }
 </style>
-Footer
+

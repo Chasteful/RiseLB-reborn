@@ -196,28 +196,34 @@
   @import "../../../../colors.scss";
   .hotbar {
     .hotbar-elements {
-      background-color: rgba(0, 0, 0, 0.4);
-      position: relative;
-      border-radius: 16px;
-      box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.4);
-      overflow: hidden;
-      .slider {
-        height: 45px;
-        width: 45px;
-        position: absolute;
-        border-radius: 16px;
-        transition: ease-in left 0.1s;
-        background-color: rgba(0, 0, 0, 0.4);
-        filter: blur(2px);
-      }
-      .slots {
-        display: flex;
-      }
-      .slot {
-        height: 45px;
-        width: 45px;
-      }
-    }
+
+  background-color: transparent;
+  position: relative;
+
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible; 
+
+  .slider {
+
+    display: none;
+  }
+
+  .slots {
+    display: flex;
+
+    opacity: 0;
+
+  }
+
+  .slot {
+    height: 45px;
+    width: 45px;
+
+    background-color: transparent;
+    border: none;
+  }
+}
     .item-name {
       color: $hotbar-text-color;
       font-size: 14px;

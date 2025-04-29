@@ -170,7 +170,7 @@
       ]
     },
     {
-      "name": "Hotbar",
+      "name": "Layer",
       "value": [
         {
           "name": "Enabled",
@@ -193,7 +193,7 @@
             },
             {
               "name": "VerticalOffset",
-              "value": 15
+              "value": 20
             }
           ]
         }
@@ -224,6 +224,36 @@
             {
               "name": "VerticalOffset",
               "value": 150
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ItemColumn",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": true
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "CenterTranslated"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 0
+            },
+            {
+              "name": "Vertical",
+              "value": "Bottom"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 15
             }
           ]
         }
