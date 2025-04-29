@@ -158,23 +158,23 @@ function hideAlert(): void {
 
 function checkHealthAlert(newHealth: number): void {
   if (newHealth > 0 && newHealth <= 5 && lastHealthValue > 5) {
-    showAlert('health', 'Low Health', 'Your health is severely inadequate!');
+    showAlert('health', 'Low Health', 'Your health is severely inadequate !');
   }
   lastHealthValue = newHealth;
 }
 
 function checkAirAlert(newAir: number): void {
   if (newAir <= 15 && lastAirValue > 15) {
-    showAlert('air', 'Hypoxia', 'Please emerge as soon as possible!');
+    showAlert('air', 'Hypoxia', 'Please emerge as soon as possible !');
   }
   lastAirValue = newAir;
 }
 
 function checkFoodAlert(newFood: number): void {
   if (newFood < 20 && lastFoodValue === 20) {
-    showAlert('hunger', 'Cannot Heal', `Stop combat/food recovery shortly (${newFood}/20)`);
+    showAlert('hunger', 'Cannot Heal', `Stop combat/food recovery shortly !`);
   } else if (newFood <= 7 && lastFoodValue > 7) {
-    showAlert('saturation', 'Hunger', `Your saturation is critically low (${newFood}/20)`);
+    showAlert('saturation', 'Hunger',  `Your saturation is critically low (${newFood}/20)`);
   }
   lastFoodValue = newFood;
 }
