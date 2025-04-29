@@ -53,19 +53,26 @@ onDestroy(() => {
 
 <div class="header">
 
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="logo-container" on:click={handleClick} on:click={toggleBackgroundShaderEnabled}>
-    <!-- 主图层只是透明，仍然占位 -->
+  <button class="logo-container reset-button " on:click={() => {
+    handleClick();
+    toggleBackgroundShaderEnabled();
+  }}>
     <img class="logo {glitchActive ? 'transparent' : ''}"      
-     src="img/lb-logo{$currentLogo}.svg"  alt="logo" />
+     src="img/lb-logo{$currentLogo}.svg"  alt="logo" 
+     draggable="false"/>
     
 
-    <img bind:this={redLayer} class="logo glitch-layer red {glitchActive ? 'visible' : ''}"      
-     src="img/lb-logo{$currentLogo}.svg" alt="logo" />
-    <img bind:this={blueLayer} class="logo glitch-layer blue {glitchActive ? 'visible' : ''}"     
-      src="img/lb-logo{$currentLogo}.svg"  alt="logo" />
-  </div>
-
+    <img bind:this={redLayer} 
+    class="logo glitch-layer red 
+    {glitchActive ? 'visible' : ''}"      
+     src="img/lb-logo{$currentLogo}.svg" 
+     alt="logo" />
+    <img bind:this={blueLayer} 
+    class="logo glitch-layer blue 
+    {glitchActive ? 'visible' : ''}"     
+      src="img/lb-logo{$currentLogo}.svg"  alt="logo" 
+      />
+    </button>
   <Notifications />
   <Account />
 </div>
@@ -94,6 +101,7 @@ onDestroy(() => {
 
 .logo.transparent {
   opacity: 0; 
+
 }
 .glitch-layer {
 position: absolute;
@@ -103,6 +111,7 @@ height: 125px;
 pointer-events: none;
 mix-blend-mode: lighten;
 opacity: 0;
+pointer-events: none;
 transition: opacity 0.1s ease;
 }
 .glitch-layer.visible {

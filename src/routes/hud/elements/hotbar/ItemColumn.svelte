@@ -16,7 +16,7 @@
   let hotbar: ItemStack[] = [];
 
 function updateStacks(inventory: PlayerInventory) {
-  hotbar = inventory.main.slice(0, 9); // Hotbar 是前 9 格
+  hotbar = [...inventory.main.slice(0, 9)]; 
 }
 
 
@@ -30,17 +30,15 @@ function updateStacks(inventory: PlayerInventory) {
           
       }
   }
-  let stacks: ItemStack[] = [];
 
-listen("clientPlayerInventory", (data: PlayerInventoryEvent) => {
-  stacks = data.inventory.main.slice(0, 9); 
+  listen("clientPlayerInventory", (data: PlayerInventoryEvent) => {
+    updateStacks(data.inventory);
 });
 listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
     updatePlayerData(event.playerData);
   });
 onMount(async () => {
-  const inventory = await getPlayerInventory();
-  stacks = inventory.main.slice(0, 9);
+  const inventory = await getPlayerInventory();;
   updateStacks(inventory);
   updatePlayerData(await getPlayerData());
   });
@@ -51,7 +49,7 @@ onMount(async () => {
 
     <div class="slider" style="left: {currentSlot * 45}px"></div>
     <div class="slots">
-        {#each hotbar as stack}
+        {#each hotbar as stack (stack)}
           <div class="slot">
             <ItemStackView {stack} />
           </div>

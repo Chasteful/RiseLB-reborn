@@ -1,88 +1,93 @@
 <script lang="ts">
-  import { listen } from "../../../integration/ws";
-  import { getClientInfo, getSession } from "../../../integration/rest";
-  import type { ClientPlayerDataEvent } from "../../../integration/events";
-  import type { ClientInfo, PlayerData, Session} from "../../../integration/types";
-  import { onMount } from "svelte";
-  import { tweened } from 'svelte/motion';
-  import { cubicOut, expoInOut } from 'svelte/easing';
-  import { writable } from 'svelte/store';
-  import { fly } from "svelte/transition";
-
-  let playerData: PlayerData | null = {
+    import { listen } from "../../../integration/ws";
+    import { getClientInfo, getSession } from "../../../integration/rest";
+    import type { ClientPlayerDataEvent } from "../../../integration/events";
+    import type { ClientInfo, PlayerData, Session } from "../../../integration/types";
+    import { onMount } from "svelte";
+    import { tweened } from "svelte/motion";
+    import { cubicOut, expoInOut } from "svelte/easing";
+    import { writable } from "svelte/store";
+    import { fly } from "svelte/transition";
+  
+    let playerData: PlayerData | null = {
       position: { x: 0, y: 0, z: 0 },
-  } as PlayerData;
-  let clientInfo: ClientInfo | null = null;
-  let lastX = 0;
-  let lastZ = 0;
-  let session: Session | null = null;
-  const fpsAnimated = tweened(0, { duration: 500, easing: cubicOut });
-  const fps = writable(0);
-  const bps = tweened(0, { duration: 500, easing: cubicOut });
-  const xPos = tweened(0, { duration: 500, easing: cubicOut });
-  const yPos = tweened(0, { duration: 500, easing: cubicOut });
-  const zPos = tweened(0, { duration: 500, easing: cubicOut });
-  function roundToDecimal(value: number, decimal: number) {
-  const rounded = Math.round(value * Math.pow(10, decimal)) / Math.pow(10, decimal);
-  return rounded.toFixed(decimal);
-}
-  function formatCoordinate(value: number): string {
-      return value.toFixed(1);
-  }
-  function getBPS(
-      lastX: number,
-      currentX: number,
-      lastZ: number,
-      currentZ: number,
-      tickrate: number
-  ): number {
-      const deltaX = currentX - lastX;
-      const deltaZ = currentZ - lastZ;
-      const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-      return distanceMoved * tickrate;
-  }
-  async function updateClientInfo() {
-  clientInfo = await getClientInfo();
-  if (clientInfo) {
-      
-      if (clientInfo) {
-      const floored = Math.floor(clientInfo.fps);
-      fps.set(floored);
-      fpsAnimated.set(floored);
-  }
-  }}
-  async function updateSession() {
-      session = await getSession();
-  }
-  onMount(async () => {
-      updateClientInfo();
-      updateSession();
-      setInterval(async () => {
-          updateClientInfo();
-          updateSession();
-      }, 1000);
-  });
-  listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
-  if (playerData) {
-    lastX = playerData.position.x;
-    lastZ = playerData.position.z;
-  }
-  playerData = event.playerData;
-  if (playerData) {
-    xPos.set(playerData.position.x);
-    yPos.set(playerData.position.y);
-    zPos.set(playerData.position.z);
-    const calculatedBps = getBPS(lastX, playerData.position.x, lastZ, playerData.position.z, 20);
-    if (calculatedBps <= 200) {
-      bps.set(calculatedBps);
+    } as PlayerData;
+  
+    let clientInfo: ClientInfo | null = null;
+    let session: Session | null = null;
+  
+    let lastX = 0, lastZ = 0;
+    const fpsAnimated = tweened(0, { duration: 500, easing: cubicOut });
+    const fps = writable(0);
+    const bps = tweened(0, { duration: 500, easing: cubicOut });
+    const xPos = tweened(0, { duration: 500, easing: cubicOut });
+    const yPos = tweened(0, { duration: 500, easing: cubicOut });
+    const zPos = tweened(0, { duration: 500, easing: cubicOut });
+  
+    const roundToDecimal = (value: number, decimal: number) =>
+      (Math.round(value * 10 ** decimal) / 10 ** decimal).toFixed(decimal);
+  
+    const formatCoordinate = (value: number) => value.toFixed(1);
+  
+    const getBPS = (lx: number, cx: number, lz: number, cz: number, tickrate: number) => {
+      const dx = cx - lx;
+      const dz = cz - lz;
+      return Math.sqrt(dx * dx + dz * dz) * tickrate;
+    };
+  
+    async function updateClientInfo() {
+      const info = await getClientInfo();
+      if (info) {
+        clientInfo = info;
+        const newFps = Math.floor(info.fps);
+        fps.update((current) => {
+          if (current !== newFps) {
+            fpsAnimated.set(newFps);
+            return newFps;
+          }
+          return current;
+        });
+      }
     }
-  }
-});
-  listen("session", async () => {
-      await updateSession();
-  });
-
-</script>
+  
+    async function initSession() {
+      session = await getSession();
+    }
+  
+    onMount(() => {
+      updateClientInfo();
+      initSession();
+  
+      const interval = setInterval(() => {
+        updateClientInfo(); // FPS 需要每秒刷新
+      }, 1000);
+  
+      return () => clearInterval(interval);
+    });
+  
+    listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
+      if (playerData) {
+        lastX = playerData.position.x;
+        lastZ = playerData.position.z;
+      }
+      playerData = event.playerData;
+  
+      const { x, y, z } = playerData.position;
+      xPos.set(x);
+      yPos.set(y);
+      zPos.set(z);
+  
+      const speed = getBPS(lastX, x, lastZ, z, 20);
+      if (speed <= 200) {
+        bps.set(speed);
+      }
+    });
+  
+    listen("session", async () => {
+      session = await getSession();
+    });
+  </script>
+  
 <style lang="scss">
   @use "../../../colors.scss" as *;
   .stats-container {
