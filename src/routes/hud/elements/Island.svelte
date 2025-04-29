@@ -14,21 +14,26 @@
     Session, 
     PlayerData,
   } from "../../../integration/types";
-    import { tweened } from "svelte/motion";
-    import { cubicOut } from "svelte/easing";
+  import { tweened } from "svelte/motion";
+  import { cubicOut } from "svelte/easing";
   
   const CLIENT_NAME = "RiseLB";
   const CLIENT_VERSION = "1.5.8";
   const UPDATE_INTERVAL_MS = 1000;
   const ALERT_DISPLAY_DURATION_MS = 3000;
   const ANIMATION_DURATION_MS = 300;
+  
   type AlertType = 'health' | 'air' | 'hunger' | 'saturation' | null;
   type AlertState = 'hidden' | 'showing' | 'hiding';
+  type ContentType = 'alert' | 'greeting' | 'status';
+  
   interface Alert {
     type: AlertType;
     title: string;
     message: string;
   }
+
+  
   let alertState: AlertState = 'hidden';
   let clientInfo: ClientInfo | null = null;
   let session: Session | null = null;
@@ -39,15 +44,58 @@
   let timeGreeting = "";
   let lastHealthValue = 20;
   let lastAirValue = 300;
-  let wrapper: HTMLDivElement|  null = null;
   let lastFoodValue = 20;
   let initialAnimation = true;
   let sessionLoaded = false;
   let initialAnimationDone = false;
-  let initialWidth = tweened(0, { duration: 400, easing: cubicOut });
-  let initialOpacity = tweened(0, { duration: 400, easing: cubicOut });
-  let animationPhase: 'idle' | 'contract' | 'expand' = 'idle';
+  let timeLoaded = false;
   let isMounted = true;
+  let currentContent: ContentType = 'greeting';
+  let nextContent: ContentType | null = null;
+  let nextContentWidth = 0;
+  let animationPhase: 'idle' | 'contract' | 'expand' = 'idle';
+
+  
+  let wrapper: HTMLDivElement | null = null;
+  const contentRefs = {
+    alert: null as HTMLDivElement | null,
+    greeting: null as HTMLDivElement | null,
+    status: null as HTMLDivElement | null
+  };
+
+  
+  const initialWidth = tweened(0, { duration: 400, easing: cubicOut });
+  const initialOpacity = tweened(0, { duration: 400, easing: cubicOut });
+  const w = tweened(400, { duration: 300, easing: cubicOut });
+  const h = tweened(40, { duration: 300, easing: cubicOut });
+
+  
+  function getTimeGreeting(hours: number): string {
+    if (hours >= 5 && hours < 12) return "Good morning";
+    if (hours >= 12 && hours < 18) return "Good afternoon";
+    if (hours >= 18 && hours < 22) return "Good evening";
+    return "Good night";
+  }
+
+  function formatTime(hours: number, minutes: number): string {
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  }
+
+  async function checkUsernameVisibility(): Promise<void> {
+    const modules = await getModules();
+    showUsername = modules.some(module => 
+      module.name === "NameProtect" && !module.enabled
+    );
+  }
+
+  function updateTime(): void {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    timeGreeting = getTimeGreeting(hours);
+    time = formatTime(hours, minutes);
+  }
+
   const waitUntilNoAlert = async () => {
     return new Promise<void>((resolve) => {
       const check = () => {
@@ -60,115 +108,74 @@
       check();
     });
   };
-  const w = tweened(400, { duration: 300, easing: cubicOut });
-  const h = tweened(40,  { duration: 300, easing: cubicOut });
-  
-  type ContentType = 'alert' | 'greeting' | 'status';
-  let currentContent: ContentType = 'greeting';
-  function getTimeGreeting(hours: number): string {
-    if (hours >= 5 && hours < 12) return "Good morning";
-    if (hours >= 12 && hours < 18) return "Good afternoon";
-    if (hours >= 18 && hours < 22) return "Good evening";
-    return "Good night";
-  }
-  function formatTime(hours: number, minutes: number, seconds: number): string {
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  }
-  async function checkUsernameVisibility(): Promise<void> {
-    const modules = await getModules();
-    showUsername = modules.some(module => 
-      module.name === "NameProtect" && !module.enabled
-    );
-  }
 
-  function updateTime(): void {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-    timeGreeting = getTimeGreeting(hours);
-    time = formatTime(hours, minutes, seconds);
-  }
-  $: {
-    if (!initialAnimationDone && !currentAlert) {
-      w.set($initialWidth);
-      h.set(40);
-    } else if (animationPhase === 'contract') {
-      w.set(100);
-      h.set(40);
-    } else if (animationPhase === 'expand') {
-      w.set(calculateContentWidth(currentContent));
-      h.set(currentAlert ? 60 : 40);
+  
+  function showAlert(type: AlertType, title: string, message: string): void {
+    if (initialAnimation && !initialAnimationDone) {
+      const waitForInitialAnimation = async () => {
+        while (initialAnimation && !initialAnimationDone) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        doShowAlert(type, title, message);
+      };
+      waitForInitialAnimation();
     } else {
-      w.set(calculateContentWidth(currentContent));
-      h.set(currentAlert ? 60 : 40);
+      doShowAlert(type, title, message);
     }
   }
-function showAlert(type: AlertType, title: string, message: string): void {
 
-  if (initialAnimation && !initialAnimationDone) {
-    const waitForInitialAnimation = async () => {
-   
-      while (initialAnimation && !initialAnimationDone) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
- 
-      doShowAlert(type, title, message);
-    };
-    waitForInitialAnimation();
-  } else {
-
-    doShowAlert(type, title, message);
-  }
-}
-
-function doShowAlert(type: AlertType, title: string, message: string): void {
-  if (currentAlert) {
-    animationPhase = 'contract';
-    setTimeout(() => {
+  function doShowAlert(type: AlertType, title: string, message: string): void {
+    if (currentAlert) {
+      animationPhase = 'contract';
+      setTimeout(() => {
+        animationPhase = 'expand';
+        setTimeout(() => {
+          currentAlert = { type, title, message };
+          currentContent = 'alert';
+          animationPhase = 'idle';
+          alertState = 'showing';
+          setTimeout(() => hideAlert(), ALERT_DISPLAY_DURATION_MS);
+        }, ANIMATION_DURATION_MS);
+      }, ANIMATION_DURATION_MS);
+    } else {
+      currentAlert = { type, title, message };
+      currentContent = 'alert';
       animationPhase = 'expand';
       setTimeout(() => {
-        currentAlert = { type, title, message };
         animationPhase = 'idle';
         alertState = 'showing';
         setTimeout(() => hideAlert(), ALERT_DISPLAY_DURATION_MS);
       }, ANIMATION_DURATION_MS);
-    }, ANIMATION_DURATION_MS);
-  } else {
-    currentAlert = { type, title, message };
-    animationPhase = 'expand';
+    }
+  }
+
+  function hideAlert(): void {
+    if (alertState !== 'showing') return;
+    alertState = 'hiding';
+    animationPhase = 'contract';
     setTimeout(() => {
+      currentAlert = null;
+      alertState = 'hidden';
       animationPhase = 'idle';
-      alertState = 'showing';
-      setTimeout(() => hideAlert(), ALERT_DISPLAY_DURATION_MS);
+      switchContent('status');
     }, ANIMATION_DURATION_MS);
   }
-}
 
-function hideAlert(): void {
-  if (alertState !== 'showing') return;
-  alertState = 'hiding';
-  animationPhase = 'contract';
-  setTimeout(() => {
-    currentAlert = null;
-    alertState = 'hidden';
-    animationPhase = 'idle';
-  }, ANIMATION_DURATION_MS);
-}
-
-
+  
   function checkHealthAlert(newHealth: number): void {
     if (newHealth > 0 && newHealth <= 5 && lastHealthValue > 5) {
       showAlert('health', 'Low Health', 'Your health is severely inadequate!');
     }
     lastHealthValue = newHealth;
   }
+
   function checkAirAlert(newAir: number): void {
     if (newAir <= 15 && lastAirValue > 15) {
       showAlert('air', 'Hypoxia', 'Please emerge as soon as possible!');
     }
     lastAirValue = newAir;
   }
+
   function checkFoodAlert(newFood: number): void {
     if (newFood < 20 && lastFoodValue === 20) {
       showAlert('hunger', 'Cannot Heal', `Stop combat/food recovery shortly (${newFood}/20)`);
@@ -177,10 +184,13 @@ function hideAlert(): void {
     }
     lastFoodValue = newFood;
   }
+
+  
   async function updateSession() {
-  session = await getSession();
-  sessionLoaded = true;  
-}
+    session = await getSession();
+    sessionLoaded = true;  
+  }
+
   async function updatePlayerData(): Promise<void> {
     const newData = await getPlayerData();
     if (!newData) return;
@@ -190,38 +200,49 @@ function hideAlert(): void {
     playerData = newData;
   }
 
-let timeLoaded = false;
-
-async function updateAllData(): Promise<void> {
-  clientInfo = await getClientInfo();
-  updateTime();  
-  session = await getSession();
-  sessionLoaded = true;  
-  await checkUsernameVisibility();
-  await updatePlayerData();
-  timeLoaded = true;
-  if (!currentAlert && wrapper) {
-    w.set(wrapper.scrollWidth + 32);
-  }
-} 
-function calculateContentWidth(type: ContentType): number {
-    if (!wrapper) return 290;
-    const basePadding = 32;
-    
-    // 根据不同的内容类型返回不同宽度
-    switch(type) {
-      case 'alert':
-        return 280;
-      case 'greeting':
-        // 问候语内容宽度计算
-        const greetingEl = wrapper.querySelector('.greeting-content');
-        return greetingEl ? greetingEl.scrollWidth + basePadding : 290;
-      case 'status':
-        // 状态信息宽度计算
-        const statusEl = wrapper.querySelector('.status-content');
-        return statusEl ? statusEl.scrollWidth + basePadding : 290;
+  async function updateAllData(): Promise<void> {
+    clientInfo = await getClientInfo();
+    updateTime();  
+    session = await getSession();
+    sessionLoaded = true;  
+    await checkUsernameVisibility();
+    await updatePlayerData();
+    timeLoaded = true;
+    if (!currentAlert && wrapper) {
+      w.set(wrapper.scrollWidth + 32);
     }
   }
+
+  
+  async function switchContent(type: ContentType) {
+    if (currentContent === type) return;
+    
+    
+    nextContent = type;
+    await tick();
+    const targetEl = contentRefs[type];
+    nextContentWidth = targetEl ? targetEl.scrollWidth + (type === 'status' ? 32 : 0) : 
+    (type === 'alert' ? 280 : 300);
+  
+    
+    animationPhase = 'contract';
+    await tick();
+    
+    
+    currentContent = type;
+    w.set(nextContentWidth);
+    h.set(type === 'alert' ? 50 : 40);
+    
+    
+    animationPhase = 'expand';
+    await tick();
+    
+    
+    animationPhase = 'idle';
+    nextContent = null;
+  }
+
+
   async function handleInitialAnimationEnd() {
     await waitUntilNoAlert();
     if (!isMounted) return;
@@ -230,11 +251,30 @@ function calculateContentWidth(type: ContentType): number {
     
     initialAnimation = false;
     initialAnimationDone = true;
-    currentContent = 'status';
-    w.set(calculateContentWidth('status'));
+    await switchContent('status');
   }
+
+  
+  $: {
+    if (nextContent) {
+    w.set(nextContentWidth);
+    h.set(nextContent === 'alert' ? 50 : 40);
+  } else if (initialAnimation) {
+    } else {
+      const widthMap = {
+        alert: 280,
+        greeting: contentRefs.greeting?.scrollWidth || 0 + 32,
+        status: contentRefs.status?.scrollWidth || 0 + 64
+        
+      };
+      w.set(widthMap[currentContent]);
+      h.set(currentContent === 'alert' ? 50 : 40);
+    }
+  }
+
+  
   onMount(() => {
-    let isMounted = true;
+    isMounted = true;
 
     (async () => {
       await tick();
@@ -243,16 +283,7 @@ function calculateContentWidth(type: ContentType): number {
       initialOpacity.set(1);
 
       await updateAllData().catch(console.error);
-
-      // 替换原来的等待逻辑为这个函数
       await handleInitialAnimationEnd();
-
-      if (!isMounted) return;
-
-      // 删除下面这两行，因为它们已经被移到 handleInitialAnimationEnd 中
-      // initialAnimation = false;
-      // initialAnimationDone = true;
-      // w.set((wrapper?.scrollWidth || 290) + 32);
     })();
 
     const interval = setInterval(() => {
@@ -267,29 +298,30 @@ function calculateContentWidth(type: ContentType): number {
     };
   });
 
-  // 新函数应该放在 onMount 外部，script 标签内的顶层作用域
- 
+  
   listen("session", updateSession);
   listen("playerData", (event: ClientPlayerDataEvent) => {
-  checkHealthAlert(event.playerData.actualHealth);
-  checkAirAlert(event.playerData.air);
-  checkFoodAlert(event.playerData.food);
-  playerData = event.playerData;
-});
-
+    checkHealthAlert(event.playerData.actualHealth);
+    checkAirAlert(event.playerData.air);
+    checkFoodAlert(event.playerData.food);
+    playerData = event.playerData;
+  });
 </script>
+
 <div class="dynamic-island-container">
   <div class="dynamic-island {alertState}"
+  class:notification-active={currentAlert !== null}
        class:contract={animationPhase === 'contract'}
        class:expand={animationPhase === 'expand'}
        class:initial={initialAnimation}
        style="width: {initialAnimation ? $initialWidth : $w}px; 
-              height: {initialAnimation ? 40 : $h}px;
-              opacity: {$initialOpacity};">
+       height: {initialAnimation ? 40 : ($h + (currentAlert ? 10 : 0))}px;
+       opacity: {$initialOpacity};">
     <div class="content-wrapper" bind:this={wrapper}>
       {#if currentAlert}
         <div class="notification-content {currentAlert.type}"
-             in:fade={{ duration: 150 }}>
+             in:fade={{ duration: 150 }} 
+             bind:this={contentRefs.alert}>
           <div class="icon">
             <img src="img/hud/island.svg" alt="icon" />
           </div>
@@ -301,17 +333,20 @@ function calculateContentWidth(type: ContentType): number {
             <div class="progress-bar {currentAlert.type}"></div>
           </div>
         </div>
-
-        {:else if currentContent === 'greeting'}
-        <div class="greeting-content" in:fade={{ duration: 150 }}>
+      {:else if currentContent === 'greeting'}
+        <div class="greeting-content" 
+             in:fade={{ duration: 150 }} 
+             bind:this={contentRefs.greeting}>
           <span class="greeting gradient-text">{timeGreeting}</span>
           {#if sessionLoaded && session && showUsername}
             <span class="username gradient-text">&nbsp;{session.username}~</span>
           {/if}
         </div>
       {:else}
-        <div class="status-content" in:fade={{ duration: 150 }}>
-          {#if timeLoaded}  <!-- 添加这个条件判断 -->
+        <div class="status-content" 
+             in:fade={{ duration: 150 }} 
+             bind:this={contentRefs.status}>
+          {#if timeLoaded}
             <span class="client gradient-text">{CLIENT_NAME}&nbsp;{CLIENT_VERSION}</span>
             <div class="separator"></div>
             <span class="time gradient-text">{time}</span>
@@ -367,10 +402,9 @@ function calculateContentWidth(type: ContentType): number {
   &.expand {
     border-radius: 16px;
     padding: 0 16px;
-    box-shadow: 
-      0 0 20px rgba(255, 255, 255, 0.15),
-      inset 0 0 15px rgba(255, 255, 255, 0.1);
+
   }
+
 
   &.showing {
     transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
