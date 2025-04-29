@@ -61,7 +61,7 @@
             moduleDescription += ` (aka ${aliases.map(name => $spaceSeperatedNames ? convertToSpacedString(name) : name).join(", ")})`;
         }
 
-        // If element is less than 300px from the right, display description on the left
+        
         if (window.innerWidth - boundingRect.right > 300) {
             const x = boundingRect.right * (2 / $scaleFactor);
             descriptionStore.set({

@@ -70,7 +70,7 @@
     grid-template-columns: 1fr max-content;
     column-gap: 5px;
 
-    /* animation fix */
+    
     min-height: 46px;
   }
 

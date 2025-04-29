@@ -1,5 +1,5 @@
 <script lang="ts">
-  // 保持原有的脚本部分不变
+  
   import ToolTip from "../ToolTip.svelte";
   import {getSession, openScreen} from "../../../../integration/rest";
   import {onMount} from "svelte";

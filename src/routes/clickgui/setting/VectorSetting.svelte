@@ -78,7 +78,7 @@
         background-color: transparent;
       }
 
-      /* Hide the number input spinner buttons */
+      
       &::-webkit-outer-spin-button,
       &::-webkit-inner-spin-button {
         -webkit-appearance: none;

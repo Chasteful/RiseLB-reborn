@@ -473,7 +473,7 @@ function getWeightedRandomPlaceholder(): string {
 }
 .search {
   position: fixed;
-  top: 60px; /* Moved down slightly */
+  top: 60px; 
   left: 50%;
   transform: translateX(-50%);
   width: 600px;

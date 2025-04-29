@@ -18,7 +18,7 @@ export interface ResolutionScalerOptions {
       this.minCoeff = options.minCoeff ?? 0.1337;
     }
   
-    // 计算调整后的分辨率，保持 16:9 比例
+    
     private calcAdjustedResolution(): { width: number; height: number } {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -30,7 +30,7 @@ export interface ResolutionScalerOptions {
       }
     }
   
-    // 计算分辨率系数
+    
     private calcResolutionCoefficient(): number {
       const { width, height } = this.calcAdjustedResolution();
       const wRatio = width / this.baseResolution.width;
@@ -38,17 +38,17 @@ export interface ResolutionScalerOptions {
       return Math.min(1, Math.max(this.minCoeff, Math.min(wRatio, hRatio)));
     }
   
-    // 更新缩放因子
+    
     public updateScaleFactor(): void {
       this.scaleFactor = this.calcResolutionCoefficient();
     }
   
-    // 获取当前的缩放因子
+    
     public getScaleFactor(): number {
       return this.scaleFactor;
     }
   
-    // 监听窗口大小变化
+    
     public listenResize(callback: () => void): void {
       window.addEventListener("resize", callback);
     }

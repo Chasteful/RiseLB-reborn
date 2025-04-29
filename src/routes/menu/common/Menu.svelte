@@ -127,7 +127,7 @@
       will-change: transform;
   }
 
-  /* 原有媒体查询保持不变 */
+  
   @media screen and (max-width: 1366px) {
       .menu {
           zoom: 0.8;

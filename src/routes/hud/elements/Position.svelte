@@ -44,7 +44,7 @@
   async function updateClientInfo() {
   clientInfo = await getClientInfo();
   if (clientInfo) {
-      // 使用 Math.floor 确保 FPS 是整数
+      
       if (clientInfo) {
       const floored = Math.floor(clientInfo.fps);
       fps.set(floored);

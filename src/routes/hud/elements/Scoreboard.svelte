@@ -101,7 +101,7 @@
   right: 10px;
   display: flex;
   flex-direction: column;
-  gap: 5px; /* 直接在 arraylist 与 scoreboard 之间留 5px */
+  gap: 5px; 
   transform: translateZ(0);
   will-change: transform;
 }

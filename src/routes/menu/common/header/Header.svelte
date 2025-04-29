@@ -17,7 +17,7 @@
         clearTimeout(timeoutId);
         glitchActive = true;
 
-        // 切换logo
+        
         currentLogo = currentLogo % logoVariants + 1;
 
         const layers = [redLayer, blueLayer].filter(Boolean) as HTMLImageElement[];

@@ -22,12 +22,12 @@
       filteredModules
   } from "./clickgui_store";
 
-  // Constants
+  
   const EDGE_THRESHOLD = 50;
   const UNDO_STACK_LIMIT = 100;
   const ANIMATION_DURATION = 2000;
 
-  // Stores
+  
   export const locked = writable(false);
   export const showLockHint = writable(false);
   export const saveAnimation = writable<'save' | null>(null);
@@ -35,12 +35,12 @@
   const glowState = writable(false);
   const indicatorOpacity = tweened(0, { duration: 150, easing: cubicOut });
 
-  // Props
+  
   export let category: string;
   export let modules: TModule[];
   export let panelIndex: number;
 
-  // Local state
+  
   let panelElement: HTMLElement;
   let modulesElement: HTMLElement;
   let filterMode: 'all' | 'enabled' | 'disabled' = 'all';
@@ -57,7 +57,7 @@
   let isScrollMode = false;
   let mouseX = 0;
   let hasMoved = false;
-  // Panel config
+  
   interface PanelConfig {
       top: number;
       left: number;
@@ -68,7 +68,7 @@
 
   const panelConfig = loadPanelConfig();
 
-  // Computed values
+  
   $: renderedModules = $filteredModules.length > 0
       ? modules.filter(module => 
           $filteredModules.some(fm => fm.name === module.name)
@@ -80,7 +80,7 @@
           return true;
       });
 
-  // Utility functions
+  
   function clamp(number: number, min: number, max: number): number {
       return Math.max(min, Math.min(number, max));
   }
@@ -95,7 +95,7 @@
           : Math.round(value / $gridSize) * $gridSize;
   }
 
-  // Panel config management
+  
   function loadPanelConfig(): PanelConfig {
       const localStorageItem = localStorage.getItem(`clickgui.panel.${category}`);
 
@@ -161,7 +161,7 @@
       });
   }
 
-  // Undo/redo functionality
+  
   function pushUndoState() {
       undoStack.push(clonePanelConfig(panelConfig));
       if (undoStack.length > UNDO_STACK_LIMIT) {
@@ -170,7 +170,7 @@
       redoStack = [];
   }
 
-  // Event handlers
+  
   function onMouseDown(e: MouseEvent) {
     if ($locked) return;
     
@@ -225,7 +225,7 @@ function onMouseMove(e: MouseEvent) {
       }, 500);
   }
 
-  // Scroll mode functionality
+  
   const toggleScrollMode = (enabled: boolean) => {
       isScrollMode = enabled;
       indicatorOpacity.set(enabled ? 1 : 0);
@@ -258,7 +258,7 @@ function onMouseMove(e: MouseEvent) {
       }
   }
 
-  // Keyboard handlers
+  
   function handleKeydown(e: KeyboardEvent) {
       if (e.key === "Shift") {
           ignoreGrid = true;
@@ -354,7 +354,7 @@ function onMouseMove(e: MouseEvent) {
       }, true);
   }
 
-  // Lifecycle
+  
   onMount(() => {
       setupGlobalShortcuts();
       fixPosition();
@@ -379,7 +379,7 @@ function onMouseMove(e: MouseEvent) {
       };
   });
 
-  // Store subscriptions
+  
   highlightModuleName.subscribe((name) => {
       const index = modules.findIndex((m) => m.name === name);
       if (index === -1) return;
