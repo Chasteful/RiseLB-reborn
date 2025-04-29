@@ -49,6 +49,9 @@
   let animationPhase: 'idle' | 'contract' | 'expand' = 'idle';
   const w = tweened(400, { duration: 300, easing: cubicOut });
   const h = tweened(40,  { duration: 300, easing: cubicOut });
+  
+  type ContentType = 'alert' | 'greeting' | 'status';
+  let currentContent: ContentType = 'greeting';
   function getTimeGreeting(hours: number): string {
     if (hours >= 5 && hours < 12) return "Good morning";
     if (hours >= 12 && hours < 18) return "Good afternoon";
@@ -341,7 +344,7 @@ onMount(() => {
     &.expanded {
 
       border-radius: 16px;
-      padding: 0 20px;
+      padding: 0 16px;
       box-shadow: 
         0 0 20px rgba(255, 255, 255, 0.15),
         inset 0 0 15px rgba(255, 255, 255, 0.1);
@@ -382,7 +385,7 @@ onMount(() => {
     font-size: 14px;
     white-space: nowrap;
     .client, .greeting, .time{
-      font-weight: 600;
+      font-size: 20px;
       letter-spacing: -0.25px;
       background-clip: text;
       flex-shrink: 0; 
@@ -390,6 +393,8 @@ onMount(() => {
       color: transparent;
       animation: gradientFlow 6s linear infinite;
       background-size: 200% 200%;
+      font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
+      font-weight: bold;
       font-feature-settings: "tnum";
       font-variant-numeric: tabular-nums;
     }

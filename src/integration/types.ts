@@ -215,6 +215,7 @@ export interface PlayerData {
 }
 
 export interface StatusEffect {
+    id: any;
     effect: string;
     localizedName: string;
     duration: number;

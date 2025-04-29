@@ -98,26 +98,9 @@
       }
     }
     &:not(.warn-1):not(.warn-2):not(.warn-3) .duration {
-      background: linear-gradient(135deg, $text, $blue);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-size: 200% auto;
-      background-position: 0% center;
-      animation: gradientShift 3s ease infinite;
-    }
-  }
-  @keyframes gradientShift {
-    0% {
-      background-position: 0% center;
-    }
-    50% {
-      background-position: 100% center;
-    }
-    100% {
-      background-position: 0% center;
-    }
-  }
+      color: rgba(255, 255, 255, 0.8);
+      text-shadow:0 2px 8px rgba($base,0.7);
+    }}
   @keyframes pulse {
     from {
       opacity: 1;

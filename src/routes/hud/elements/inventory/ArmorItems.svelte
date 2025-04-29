@@ -71,7 +71,8 @@
       border-radius: 6px;
       padding: 6px 10px;
       width: fit-content;
-      font-family: sans-serif;
+      font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
+      font-weight: bold;
       color: white;    
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
       user-select: none;
@@ -89,21 +90,16 @@
       font-size: 0.85rem;
       font-weight: bold;
       margin-bottom: 6px;
+      filter: drop-shadow( 0 0 4px white);
     }
     .bar {
   width: 5px;
   height: 1.2em;
   background: linear-gradient(135deg, $Items-bar, $blue);
-  background-size: 200% auto;
-  background-position: 0% center;
-  animation: gradientShift 2.5s ease infinite;
+  box-shadow: 2x 2px 4x $text;
   margin-right: 6px;
   border-radius: 6px;
 }
-@keyframes gradientShift {
-      0% { background-position: 0% center; }
-      50% { background-position: 100% center; }
-      100% { background-position: 0% center; }
-  }
+
   </style>
   

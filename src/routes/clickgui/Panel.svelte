@@ -729,7 +729,8 @@ bind:this={panelElement}
   cursor: grab;
   text-align: center;
   text-shadow: 0 0 10px rgba($accent-color, 0.3);
-  backdrop-filter: blur(2px);    border-radius: 8px 8px 0 0;
+  backdrop-filter: blur(2px);  
+  border-radius: 8px 8px 0 0;
   transition: all 0.3s ease;
   position: relative; 
   padding-right: 80px;
