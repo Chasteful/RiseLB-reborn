@@ -10,7 +10,7 @@
   import type { ModuleToggleEvent } from "../../integration/events";
   import { listen } from "../../integration/ws";
   import { setItem } from "../../integration/persistent_storage";
-  
+
   import Module from "./Module.svelte";
   import {
       gridSize,
@@ -734,7 +734,7 @@ bind:this={panelElement}
   position: relative; 
   padding-right: 80px;
   .panel:not(.expanded) & {
-    background: rgba($base, 0.8);
+    background: rgba($mantle, 0.6);
     box-shadow: inset 0 0 10px rgba($accent-color, 0.2);
     text-shadow: 0 0 5px rgba($accent-color, 0.2);
   }

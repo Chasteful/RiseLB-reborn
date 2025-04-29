@@ -5,7 +5,7 @@
   import type { KeyboardKeyEvent, ModuleToggleEvent } from "../../integration/events";
   import { highlightModuleName, filteredModules } from "./clickgui_store";
   import { convertToSpacedString, spaceSeperatedNames } from "../../theme/theme_config";
-  import { fade, fly, scale } from 'svelte/transition';
+  import { fly } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';
   import { onMount, onDestroy } from "svelte";
   import { showResults } from "./clickgui_store";

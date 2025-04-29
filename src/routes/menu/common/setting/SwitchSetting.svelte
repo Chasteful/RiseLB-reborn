@@ -47,7 +47,7 @@
     position: relative;
     width: 32px;
     height: 32px;
-    background-color: rgba($crust, 0.8);
+    background-color: rgba($base, 0.5);
     border-radius: 10px;
     border: 2px solid rgba(white, 0.1);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -60,15 +60,39 @@
   }
 
   input:checked + .checkbox {
-    background-color: $accent;
-    box-shadow: 0 0 8px 2px $accent;
+    background-color: $text;
+    box-shadow: 
+    0 0 12px 3px rgba($text , 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+    animation: pulse 0.5s ease-out;
   }
 
   .switch:hover .checkbox {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+      0 0 12px 3px rgba($text, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1); 
   }
 
   .switch:focus-within .checkbox {
-    outline: 2px solid $accent;
+    outline: 2px solid $text;
   }
+  @keyframes pulse {
+  0% { 
+    box-shadow: 
+      0 0 12px 3px rgba($text, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1),
+      0 0 0 0 rgba($text, 0.7); 
+  }
+  70% { 
+    box-shadow: 
+      0 0 12px 3px rgba($text, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1),
+      0 0 0 8px rgba($text, 0); 
+  }
+  100% { 
+    box-shadow: 
+      0 0 12px 3px rgba($text, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1); 
+  }
+}
 </style>

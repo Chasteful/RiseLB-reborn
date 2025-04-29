@@ -66,11 +66,11 @@
         bottom: 10px;
         left: 10px;
         right: 10px;
-        background-color: $base;
+        background-color: rgba($base, 0.5);
         padding: 10px;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba($crust, 0.4);
-        border: 2px solid ($accent-mix,0.6);
+        border: 2px solid ($accent-color,0.6);
     }
 
     .address-bar {

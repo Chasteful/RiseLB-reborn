@@ -1,6 +1,5 @@
 <script lang="ts">
     import { toggleBackgroundShaderEnabled } from "../../../../integration/rest";
-  import Account from "./Account.svelte";
   import Notifications from "./Notifications.svelte";
   import { onDestroy } from "svelte";
 
@@ -54,7 +53,7 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="logo-container" on:click={handleClick} on:click={toggleBackgroundShaderEnabled}>
-    <!-- 主图层只是透明，仍然占位 -->
+
     <img class="logo {glitchActive ? 'transparent' : ''}" src="img/lb-logo.svg" alt="logo" />
     
 
@@ -63,7 +62,6 @@
   </div>
 
   <Notifications />
-  <Account />
 </div>
 
 <style lang="scss">

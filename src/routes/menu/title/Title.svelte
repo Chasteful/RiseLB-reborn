@@ -72,9 +72,7 @@
         </div>
         <div class="additional-buttons" transition:fly|global={{duration: 300, y: 100}}>
             <ButtonContainer>
-                <IconTextButton icon="icon-exit.svg" title="Exit" on:click={exitClient}/>
-                <IconTextButton icon="icon-change-background.svg" title="Toggle Shader"
-                                on:click={toggleBackgroundShaderEnabled}/>
+
             </ButtonContainer>
         </div>
 

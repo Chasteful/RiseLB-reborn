@@ -40,7 +40,7 @@
 
   .option {
     font-weight: 500;
-    color: $overlay0;
+    color: rgba($text ,0.5);
     font-size: 20px;
     padding: 15px 20px;
     transition: ease color .2s;

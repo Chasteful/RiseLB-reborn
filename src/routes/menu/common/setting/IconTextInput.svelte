@@ -36,7 +36,7 @@
   .icon {
     height: 64px;
     width: 64px;
-    background: rgba($base, 0.75);
+    background: rgba($base, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;

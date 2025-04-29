@@ -44,7 +44,7 @@
   }
 
   .title {
-    color: $accent;
+    color: $text;
     font-weight: 600;
     font-size: 16px;
     transition: ease color 0.2s;

@@ -11,7 +11,7 @@
     import SwitchSetting from "../common/setting/SwitchSetting.svelte";
     import OptionBar from "../common/optionbar/OptionBar.svelte";
     import MenuListItem from "../common/menulist/MenuListItem.svelte";
-    import Menu from "../common/Menu.svelte";
+    import Menu from "../common/AccountMenu.svelte";
     import ButtonContainer from "../common/buttons/ButtonContainer.svelte";
     import MenuListItemTag from "../common/menulist/MenuListItemTag.svelte";
     import MenuList from "../common/menulist/MenuList.svelte";

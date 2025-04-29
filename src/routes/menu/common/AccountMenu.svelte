@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Header from "./header/Header.svelte";
+  import  Logo from "./header/Header.svelte";
   import { fly, fade } from "svelte/transition";
   import { onMount } from "svelte";
 
@@ -34,7 +34,7 @@
   <div class="menu">
       {#if ready}
           <div transition:fly|global={{ duration: 300, y: -100 }}>
-              <Header />
+              <Logo />
           </div>
 
           <div class="menu-wrapper">

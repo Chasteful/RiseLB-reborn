@@ -7,7 +7,7 @@ export interface TDescription {
   x: number;
   y: number;
 }
-
+export const activePanelId = writable<string | null>(null); 
 export const resolutionScale = writable(1);
 export const viewportOffset = writable({ x: 0, y: 0 });
 export const description: Writable<TDescription | null> = writable(null);

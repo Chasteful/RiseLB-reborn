@@ -9,7 +9,7 @@
   @import "../../../colors";
 
   .lds-ripple {
-    color: $accent;
+    color: $text;
   }
 
   .lds-ripple,

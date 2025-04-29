@@ -11,7 +11,7 @@
     @import "../../../../colors";
 
     .option-bar {
-      background-color: rgba($base, 0.68);
+      background-color: rgba($base, 0.5);
       padding: 15px 30px;
       display: flex;
       border-radius: 5px;

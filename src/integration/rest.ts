@@ -108,11 +108,11 @@ export async function setPersistentStorageItems(items: PersistentStorageItem[]) 
     })
 }
 
-export async function getVirtualScreen(): Promise<VirtualScreen> {
+export async function getVirtualScreen(): Promise<{ showingSplash: boolean; name: string | null }> {
     const response = await fetch(`${API_BASE}/client/virtualScreen`);
-    const data: VirtualScreen = await response.json();
+    const data = await response.json();
 
-    return data;
+    return data as { showingSplash: boolean; name: string | null };
 }
 
 export async function confirmVirtualScreen(name: string) {

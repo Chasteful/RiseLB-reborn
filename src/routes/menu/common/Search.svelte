@@ -15,13 +15,13 @@
   @use "../../../colors.scss" as *;
 
   .search {
-    background-color: rgba($base, 0.8);
+    background-color: rgba($base, 0.5);
     color: $text;
     font-family: "Inter", sans-serif;
     font-size: 20px;
     border-radius: 12px;
     border: none;
-    border-bottom: solid 4px $accent;
+    border-bottom: solid 4px rgba($text,0.7);
     background-image: url("/img/menu/icon-search.svg");
     background-repeat: no-repeat;
     background-position: 20px center;

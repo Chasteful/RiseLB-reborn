@@ -86,7 +86,13 @@
     border-radius: 0 0 12px 12px;
     max-height: 250px;
     overflow: auto;
-    background-color: rgba($mantle, 0.9);
-    border-left: $accent;
+    color: $text;
+    background-color: rgba($base, 0.5);
+    border-left: $text;
+    &:hover {
+      color: $text;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
   }
 </style>

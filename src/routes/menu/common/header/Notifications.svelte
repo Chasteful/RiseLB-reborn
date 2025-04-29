@@ -126,7 +126,7 @@
       position: relative;
       display: flex;
       align-items: center;
-      background-color: rgba($base, 0.68);
+      background-color: rgba($base, 0.5);
       height: 100%;
       width: 100%;
       padding: 0 20px;
@@ -180,7 +180,7 @@
         }
   
         .message {
-          color: $overlay0;
+          color: rgba($text , 0.7);
           font-size: 13px;
           white-space: nowrap;
           overflow: hidden;

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { writable } from "svelte/store";
-  import { getGameWindow, getModules, getModuleSettings, openScreen, setTyping } from "../../integration/rest";
+  import { getGameWindow, getModules, getModuleSettings,  setTyping } from "../../integration/rest";
   import { groupByCategory } from "../../integration/util";
   import Panel from "./Panel.svelte";
   import Description from "./Description.svelte";
@@ -10,9 +10,8 @@
   import { cubicOut } from "svelte/easing";
   import Search from './Search.svelte';
   import {ResolutionScaler} from "./ResolutionScaler"
-  import { getComponents } from "../../integration/rest";
   import { debounce } from "lodash";
-  let components: Component[] = [];
+  import { highlightModuleName, filteredModules } from "./clickgui_store";
   import {
     showResults,
   } from "./clickgui_store";
@@ -28,7 +27,7 @@
     ScaleFactorChangeEvent
   } from "../../integration/events";
   import type {
-    Component,
+
     ConfigurableSetting,
     GroupedModules,
     Module,
@@ -53,8 +52,23 @@
   const resScale = resolutionScaler.getScaleFactor();
   scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resScale);
 }
+function resetSearchState() {
+    highlightModuleName.set(null);
+    filteredModules.set([]);
+    $showResults = false;
+    isHoveringTip = false;
+  }
+
+  $: if (!$showSearch) {
+    resetSearchState();
+  }
 
 
+  // 在点击CTRL+F提示时也确保状态正确
+  function handleTipClick() {
+    $showSearch = true;
+    resetSearchState();
+  }
  
   const applyValues = (configurable: ConfigurableSetting) => {
     clickGuiScaleFactor = configurable.value.find(v => v.name === "Scale")?.value as number ?? 1;
@@ -70,7 +84,7 @@
 
       showSearch.update(current => {
         const next = !current;
-        if (!next) {
+        if (!next) resetSearchState(); {
           isHoveringTip = false;
           hoverSearchTip.set(false);
           tipCooldown = true;
@@ -98,7 +112,6 @@
   const clickGuiSettings = await getModuleSettings("ClickGUI");
   applyValues(clickGuiSettings);
 
-  components = await getComponents();
   await setTyping(false);
 
   window.addEventListener("keydown", handleKeydown);
@@ -146,7 +159,8 @@ const handleResize = debounce(() => {
          class:visible={showTip}
          on:mouseenter={() => isHoveringTip = true}
          on:mouseleave={() => isHoveringTip = false}
-         on:click={() => $showSearch = true}>
+         on:click={() => $showSearch = true}
+         on:click={handleTipClick}>
       Press CTRL+F to open search bar
     </div>
   {/if}

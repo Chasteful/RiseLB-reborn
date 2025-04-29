@@ -1,9 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, onDestroy, afterUpdate } from "svelte";
   import { convertToSpacedString, spaceSeperatedNames } from "../../../../theme/theme_config";
-  import { fade, fly } from "svelte/transition";
+  import { writable } from 'svelte/store';
   import { flip } from "svelte/animate";
-
   export let name: string | null;
   export let options: string[];
   export let value: string;
@@ -17,18 +16,53 @@
   let optionRefs: HTMLElement[] = [];
   let optionOpacities: number[] = [];
   let isScrolling = false;
-
+  function updateValue(v: string) {
+    value = v;
+    dispatch("change");
+  }
   function windowClickHide(e: MouseEvent) {
     if (!dropdownHead.contains(e.target as Node)) {
       expanded = false;
     }
   }
 
-  function updateValue(v: string) {
-    value = v;
-    dispatch("change");
-  }
+  function FadeIn(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = {}) {
+    return {
+        delay,
+        duration,
+        css: (t: number) => {
+            const eased = easeInBack(t);
+            return `
+                transform: scale(${1 - (1 - t) * 0.5});
+                opacity: ${eased};
+                backdrop-filter: blur(${(1 - t) * blurAmount}px);
+                transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+                transform-origin: center;
+            `;
+        }
+    };
+}
 
+function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = {}) {
+    return {
+        delay,
+        duration,
+        css: (t: number) => {
+            const eased = easeInBack(1 - t);        
+            return `
+                transform: scale(${1 - eased * 0.5});
+                opacity: ${1 - eased};
+                backdrop-filter: blur(${t * blurAmount}px);
+                transition-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+                transform-origin: center;
+            `;
+        }
+    };
+}
+   function easeInBack(t: number): number {
+    const c1 = 1.5;    const c3 = c1 + 1;
+    return c3 * t * t * t - c1 * t * t;
+  }
   function handleScroll() {
     if (!overlayElement || !expanded || !optionsElement || optionRefs.length === 0) return;
 
@@ -37,7 +71,7 @@
 
     requestAnimationFrame(() => {
       const optionsRect = optionsElement.getBoundingClientRect();
-      const optionsScrollTop = optionsElement.scrollTop;
+
 
       optionOpacities = optionRefs.map((option) => {
         const rect = option.getBoundingClientRect();
@@ -85,13 +119,15 @@
   </div>
 
   {#if expanded}
-    <div class="overlay" bind:this={overlayElement} on:click={() => (expanded = false)}>
+  <div class="overlay" bind:this={overlayElement} on:click={() => (expanded = false)}>
+    <!-- svelte-ignore element_invalid_self_closing_tag -->
+
       <div
         class="options"
         bind:this={optionsElement}
         on:scroll={handleScroll}
-        in:fly={{ y: 20, duration: 200 }}
-        out:fade={{ duration: 150 }}
+        in:FadeIn={{ duration: 200 }}
+        out:FadeOut={{ duration: 200 }}
       >
         {#each options as o, index (o)}
           <div
@@ -179,9 +215,10 @@
   }
 }
 
-  
-  .overlay {
-    position: fixed;
+
+
+.overlay {
+  position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
@@ -190,189 +227,169 @@
     align-items: center;
     z-index: 9999;
     transition: z-index 0s linear 300ms; 
-    .options {
-  background: linear-gradient(
-    145deg,
-    rgba($base, 0.82) 0%,
-    rgba(darken($base, 8%), 0.78) 100%
-  );
-  backdrop-filter: blur(32px);
-  scroll-snap-type: y mandatory;
-  scroll-padding-top: 8px;
-  scroll-behavior: smooth;
-  -webkit-backdrop-filter: blur(32px);
-  border-radius: 14px;
-  padding: 8px;
-  
-  width: min(90%, 420px);
-  max-height: calc(25vh + 200px);
-  overflow-y: auto;
-  box-shadow: 
-    0 16px 64px rgba(0, 0, 0, 0.32),
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-    0 0 0 2px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-
-  &::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-&::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    to bottom,
-    rgba($text, 0.15) 0%,
-    rgba($text, 0.2) 50%,
-    rgba($text, 0.15) 100%
-  );
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  -webkit-backface-visibility: hidden;
-  -webkit-transform: translateZ(0);
-  transform: translate3d(0,0,0);
-  will-change: transform;
-  contain: content;
-  transition: 
-    background 0.3s ease-out,
-    border-color 0.2s linear;
-  
-  /* 禁用可能引起问题的效果 */
-  backdrop-filter: none;
-}
-&::-webkit-scrollbar-track {
-  background: rgba($base, 0.1);
-  border-radius: 0 4px 4px 0;
-  -webkit-transform: translateZ(0);
-}
-&::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    rgba($text, 0.3) 0%,
-    rgba($text, 0.45) 50%,
-    rgba($text, 0.3) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.1),
-              0 0 6px rgba($text, 0.3);
-  cursor: pointer;
-}
-
-&::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-/* Add arrows to the scrollbar */
-&::-webkit-scrollbar-button {
-  background-color: rgba(255, 255, 255, 0.2);
-  width: 16px; /* Adjust to fit your design */
-  height: 16px; /* Adjust to fit your design */
-  display: inline-block;
-}
-&::-webkit-scrollbar-button:vertical:decrement {
-  background: transparent;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-&::-webkit-scrollbar-button:vertical:increment {
-    background: transparent;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-    }
-.option {
-  padding: 14px 24px;
-  margin: 2px 4px;
-  border-radius: 8px;
-  color: rgba($text, 0.85);
-  font-size: 15px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: all 0.28s cubic-bezier(0.33, 1, 0.68, 1);
-  position: relative;
-  overflow: hidden;
-  z-index:9999999999999 ;
-  /* Subtle pinstripe effect */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(255,255,255,0.03) 20%,
-      rgba(255,255,255,0.05) 50%,
-      rgba(255,255,255,0.03) 80%,
-      transparent 100%
-    );
-  }
-
-  &:hover {
-    background: rgba($text, 0.08);
-    color: $text;
-    transform: translateX(4px);
-    
-    &::after {
-      opacity: 0.06;
-    }
-  }
-
-  &.active {
-    color: $accent-color;
-    transform: translateX(4px) scale(0.98);
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    background: linear-gradient(
-      to right,
-      rgba($accent-color, 0.08) 0%,
-      rgba($accent-color, 0.12) 100%
-    );
-    box-shadow: 
-      0 2px 8px rgba($accent-color, 0.1),
-      0 0 0 1px rgba($accent-color, 0.15);
-  }
-
-  /* Sophisticated hover effect */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-        circle at center,
-        rgba($accent-color, 0.2) 0%,
-        transparent 80%
-      );
-      opacity: 0.4;
-      transition: opacity 0.3s ease, background 0.3s ease;
-    pointer-events: none;
-  }
-
-  .option-content {
+  .options {
     position: relative;
-    z-index: 1;
-    letter-spacing: 0.02em;
+
+    background: linear-gradient(
+      145deg,
+      rgba($base, 0.82) 0%,
+      rgba(darken($base, 8%), 0.78) 100%
+    );
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 8px;
+    scroll-behavior: smooth;
+    border-radius: 14px;
+    padding: 8px;
+    width: min(90%, 420px);
+    backdrop-filter: blur(32px) ;
+    -webkit-backdrop-filter: blur(32px);
+    max-height: calc(25vh + 200px);
+    overflow-y: auto;
+    box-shadow: 
+      0 16px 64px rgba(0, 0, 0, 0.32),
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+      0 0 0 2px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(
+        to bottom,
+        rgba($text, 0.15) 0%,
+        rgba($text, 0.2) 50%,
+        rgba($text, 0.15) 100%
+      );
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      -webkit-backface-visibility: hidden;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+      contain: content;
+      transition: background 0.3s ease-out, border-color 0.2s linear;
+      backdrop-filter: none;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba($base, 0.1);
+      border-radius: 0 4px 4px 0;
+      transform: translateZ(0);
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(
+        180deg,
+        rgba($text, 0.3) 0%,
+        rgba($text, 0.45) 50%,
+        rgba($text, 0.3) 100%
+      );
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.1),
+                  0 0 6px rgba($text, 0.3);
+      cursor: pointer;
+    }
+
+    &::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-button {
+      background-color: rgba(255, 255, 255, 0.2);
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+    }
+
+    &::-webkit-scrollbar-button:vertical:decrement,
+    &::-webkit-scrollbar-button:vertical:increment {
+      background: transparent;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .option {
+      padding: 14px 24px;
+      margin: 2px 4px;
+      border-radius: 8px;
+      color: rgba($text, 0.85);
+      font-size: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+      position: relative;
+      overflow: hidden;
+      z-index: 9999999999999;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255,255,255,0.03) 20%,
+          rgba(255,255,255,0.05) 50%,
+          rgba(255,255,255,0.03) 80%,
+          transparent 100%
+        );
+      }
+
+      &:hover {
+        background: rgba($text, 0.08);
+        color: $text;
+        transform: translateX(4px);
+
+        &::after {
+          opacity: 0.06;
+        }
+      }
+
+      &.active {
+        color: $accent-color;
+        transform: translateX(4px) scale(0.98);
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        background: linear-gradient(
+          to right,
+          rgba($accent-color, 0.08) 0%,
+          rgba($accent-color, 0.12) 100%
+        );
+        box-shadow: 
+          0 2px 8px rgba($accent-color, 0.1),
+          0 0 0 1px rgba($accent-color, 0.15);
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+          circle at center,
+          rgba($accent-color, 0.2) 0%,
+          transparent 80%
+        );
+        opacity: 0.4;
+        transition: opacity 0.3s ease, background 0.3s ease;
+        pointer-events: none;
+      }
+
+      .option-content {
+        position: relative;
+        z-index: 1;
+        letter-spacing: 0.02em;
+      }
+    }
   }
 }
 
-
-/* Refined animations */
-@keyframes optionEnter {
-  0% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-  }
   </style>
