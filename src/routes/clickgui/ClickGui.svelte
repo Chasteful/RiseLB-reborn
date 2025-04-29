@@ -64,7 +64,7 @@ function resetSearchState() {
   }
 
 
-  // 在点击CTRL+F提示时也确保状态正确
+  
   function handleTipClick() {
     $showSearch = true;
     resetSearchState();

@@ -243,7 +243,7 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
     width: min(90%, 420px);
     backdrop-filter: blur(32px) ;
     -webkit-backdrop-filter: blur(32px);
-    max-height: calc(25vh + 200px);
+    max-height: calc(75vh );
     overflow-y: auto;
     box-shadow: 
       0 16px 64px rgba(0, 0, 0, 0.32),

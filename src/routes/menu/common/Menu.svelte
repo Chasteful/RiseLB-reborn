@@ -2,20 +2,23 @@
   import Header from "./header/Header.svelte";
   import { fly, fade } from "svelte/transition";
   import { onMount } from "svelte";
-
+  import { location } from "svelte-spa-router";
+  
   const transitionDuration = 700;
   let ready = false;
   let showShadow = false;
-
+  const noAccountPaths = ["/altmanager"];
   onMount(() => {
       setTimeout(() => {
           ready = true;
           showShadow = true;
       }, transitionDuration);
   });
+  $: showAccount = !noAccountPaths.includes($location);
 </script>
 
 <div class="menu-container">
+
   <!-- 四边阴影层 -->
   {#if showShadow}
       <div class="edge-shadows" transition:fade|global={{ duration: 500 }}>
@@ -34,7 +37,7 @@
   <div class="menu">
       {#if ready}
           <div transition:fly|global={{ duration: 300, y: -100 }}>
-              <Header />
+            <Header showAccount={showAccount} />
           </div>
 
           <div class="menu-wrapper">

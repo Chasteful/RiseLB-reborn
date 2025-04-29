@@ -3,67 +3,73 @@
   import Account from "./Account.svelte";
   import Notifications from "./Notifications.svelte";
   import { onDestroy } from "svelte";
-
+  export let showAccount: boolean = true; 
   let glitchActive = false;
-  let intervalId: ReturnType<typeof setInterval>;
-  let timeoutId: ReturnType<typeof setTimeout>;
-  let redLayer: HTMLImageElement;
-  let blueLayer: HTMLImageElement;
+    let intervalId: ReturnType<typeof setInterval>;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let redLayer: HTMLImageElement;
+    let blueLayer: HTMLImageElement;
+    let currentLogo = 1; 
+    const logoVariants = 2; 
 
-  function startGlitch() {
-    clearInterval(intervalId);
-    clearTimeout(timeoutId);
-    glitchActive = true;
+    function startGlitch() {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+        glitchActive = true;
 
-    const layers = [redLayer, blueLayer].filter(Boolean) as HTMLImageElement[];
-    intervalId = setInterval(() => {
-      layers.forEach((layer) => {
-        const tx = Math.random() * 20 - 10;
-        const ty = Math.random() * 20 - 10;
-        layer.style.transform = `translate(${tx}px, ${ty}px)`;
+        // 切换logo
+        currentLogo = currentLogo % logoVariants + 1;
 
-        const x = Math.random() * 100;
-        const y = Math.random() * 100;
-        const w = Math.random() * 20 + 20;
-        const h = Math.random() * 20 + 20;
-        layer.style.clipPath = `polygon(${x}% ${y}%, ${x + w}% ${y}%, ${x + w}% ${y + h}%, ${x}% ${y + h}%)`;
-      });
-    }, 30);
+        const layers = [redLayer, blueLayer].filter(Boolean) as HTMLImageElement[];
+        intervalId = setInterval(() => {
+            layers.forEach((layer) => {
+                const tx = Math.random() * 20 - 10;
+                const ty = Math.random() * 20 - 10;
+                layer.style.transform = `translate(${tx}px, ${ty}px)`;
 
-    timeoutId = setTimeout(() => {
-      clearInterval(intervalId);
-      layers.forEach((layer) => {
-        layer.style.transform = '';
-        layer.style.clipPath = '';
-      });
-      glitchActive = false;
-    }, 1000);
-  }
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const w = Math.random() * 20 + 20;
+                const h = Math.random() * 20 + 20;
+                layer.style.clipPath = `polygon(${x}% ${y}%, ${x + w}% ${y}%, ${x + w}% ${y + h}%, ${x}% ${y + h}%)`;
+            });
+        }, 30);
 
-  function handleClick() {
-    startGlitch();
-  }
+        timeoutId = setTimeout(() => {
+            clearInterval(intervalId);
+            layers.forEach((layer) => {
+                layer.style.transform = '';
+                layer.style.clipPath = '';
+            });
+            glitchActive = false;
+        }, 1000);
+    }
 
-  onDestroy(() => {
-    clearInterval(intervalId);
-    clearTimeout(timeoutId);
-  });
+    function handleClick() {
+        startGlitch();
+        toggleBackgroundShaderEnabled();
+    }
+
+    onDestroy(() => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+    });
 </script>
 
 <div class="header">
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="logo-container" on:click={handleClick} on:click={toggleBackgroundShaderEnabled}>
-    <!-- 主图层只是透明，仍然占位 -->
-    <img class="logo {glitchActive ? 'transparent' : ''}" src="img/lb-logo.svg" alt="logo" />
-    
-
-    <img bind:this={redLayer} class="logo glitch-layer red {glitchActive ? 'visible' : ''}" src="img/lb-logo.svg" alt="logo" />
-    <img bind:this={blueLayer} class="logo glitch-layer blue {glitchActive ? 'visible' : ''}" src="img/lb-logo.svg" alt="logo" />
+  <div class="logo-container" on:click={handleClick}>
+    <img class="logo {glitchActive ? 'transparent' : ''}" src="img/lb-logo{currentLogo}.svg" alt="logo" />
+    <img bind:this={redLayer} class="logo glitch-layer red {glitchActive ? 'visible' : ''}" src="img/lb-logo{currentLogo}.svg" alt="logo" />
+    <img bind:this={blueLayer} class="logo glitch-layer blue {glitchActive ? 'visible' : ''}" src="img/lb-logo{currentLogo}.svg" alt="logo" />
   </div>
-
   <Notifications />
-  <Account />
+  <div class="header-right">
+    {#if showAccount}
+    <Account />
+  {/if}
+</div>
 </div>
 
 <style lang="scss">
@@ -75,7 +81,11 @@
     align-items: center;
     margin-bottom: 60px;
   }
-
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
   .logo-container {
     position: relative;
     cursor: pointer;

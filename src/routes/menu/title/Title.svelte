@@ -71,9 +71,6 @@
             {/if}
         </div>
         <div class="additional-buttons" transition:fly|global={{duration: 300, y: 100}}>
-            <ButtonContainer>
-
-            </ButtonContainer>
         </div>
 
         <div class="social-buttons" transition:fly|global={{duration: 300, y: 100}}>
