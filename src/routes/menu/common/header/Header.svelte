@@ -3,14 +3,14 @@
   import Account from "./Account.svelte";
   import Notifications from "./Notifications.svelte";
   import { onDestroy } from "svelte";
+  import { currentLogo, logoVariants } from './logoStore';
   export let showAccount: boolean = true; 
   let glitchActive = false;
     let intervalId: ReturnType<typeof setInterval>;
     let timeoutId: ReturnType<typeof setTimeout>;
     let redLayer: HTMLImageElement;
     let blueLayer: HTMLImageElement;
-    let currentLogo = 1; 
-    const logoVariants = 2; 
+
 
     function startGlitch() {
         clearInterval(intervalId);
@@ -18,32 +18,32 @@
         glitchActive = true;
 
         
-        currentLogo = currentLogo % logoVariants + 1;
+        currentLogo.update(n => n % logoVariants + 1);
 
         const layers = [redLayer, blueLayer].filter(Boolean) as HTMLImageElement[];
         intervalId = setInterval(() => {
-            layers.forEach((layer) => {
-                const tx = Math.random() * 20 - 10;
-                const ty = Math.random() * 20 - 10;
-                layer.style.transform = `translate(${tx}px, ${ty}px)`;
+      layers.forEach(layer => {
+        const tx = Math.random() * 20 - 10;
+        const ty = Math.random() * 20 - 10;
+        layer.style.transform = `translate(${tx}px, ${ty}px)`;
 
-                const x = Math.random() * 100;
-                const y = Math.random() * 100;
-                const w = Math.random() * 20 + 20;
-                const h = Math.random() * 20 + 20;
-                layer.style.clipPath = `polygon(${x}% ${y}%, ${x + w}% ${y}%, ${x + w}% ${y + h}%, ${x}% ${y + h}%)`;
-            });
-        }, 30);
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const w = Math.random() * 20 + 20;
+        const h = Math.random() * 20 + 20;
+        layer.style.clipPath = `polygon(${x}% ${y}%, ${x + w}% ${y}%, ${x + w}% ${y + h}%, ${x}% ${y + h}%)`;
+      });
+    }, 30);
 
-        timeoutId = setTimeout(() => {
-            clearInterval(intervalId);
-            layers.forEach((layer) => {
-                layer.style.transform = '';
-                layer.style.clipPath = '';
-            });
-            glitchActive = false;
-        }, 1000);
-    }
+    timeoutId = setTimeout(() => {
+      clearInterval(intervalId);
+      layers.forEach(layer => {
+        layer.style.transform = '';
+        layer.style.clipPath = '';
+      });
+      glitchActive = false;
+    }, 1000);
+  }
 
     function handleClick() {
         startGlitch();
@@ -60,10 +60,25 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="logo-container" on:click={handleClick}>
-    <img class="logo {glitchActive ? 'transparent' : ''}" src="img/lb-logo{currentLogo}.svg" alt="logo" />
-    <img bind:this={redLayer} class="logo glitch-layer red {glitchActive ? 'visible' : ''}" src="img/lb-logo{currentLogo}.svg" alt="logo" />
-    <img bind:this={blueLayer} class="logo glitch-layer blue {glitchActive ? 'visible' : ''}" src="img/lb-logo{currentLogo}.svg" alt="logo" />
-  </div>
+    <img 
+    class="logo {glitchActive ? 'transparent' : ''}" 
+    src="img/lb-logo{$currentLogo}.svg" 
+    alt="logo" 
+  />
+  <img 
+  bind:this={redLayer} 
+  class="logo glitch-layer red {glitchActive ? 'visible' : ''}" 
+  src="img/lb-logo{$currentLogo}.svg" 
+  alt="glitch-red" 
+/>
+<img 
+  bind:this={blueLayer} 
+  class="logo glitch-layer blue {glitchActive ? 'visible' : ''}" 
+  src="img/lb-logo{$currentLogo}.svg" 
+  alt="glitch-blue" 
+/>
+</div>
+
   <Notifications />
   <div class="header-right">
     {#if showAccount}
@@ -99,7 +114,7 @@
   }
 
   .logo.transparent {
-    opacity: 0; 
+    opacity: 0;
   }
   .glitch-layer {
   position: absolute;

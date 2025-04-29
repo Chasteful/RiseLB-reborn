@@ -19,7 +19,7 @@
 
 <div class="menu-container">
 
-  <!-- 四边阴影层 -->
+
   {#if showShadow}
       <div class="edge-shadows" transition:fade|global={{ duration: 500 }}>
           <!-- svelte-ignore element_invalid_self_closing_tag -->
