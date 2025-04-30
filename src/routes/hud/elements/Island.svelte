@@ -263,7 +263,7 @@ onMount(() => {
   (async () => {
     await tick();
 
-    initialWidth.set((wrapper?.scrollWidth || 290) + 32);
+    initialWidth.set((wrapper?.scrollWidth || 290) + 64);
     initialOpacity.set(1);
 
     await updateAllData().catch(console.error);
@@ -429,10 +429,7 @@ width: 100%;
 font-size: 14px;
 white-space: nowrap;
 
-.client, 
-.greeting, 
-.time,
-.username {
+.client, .greeting, .time,.username {
   font-size: 20px;
   letter-spacing: -0.25px;
   background-clip: text;
@@ -441,7 +438,6 @@ white-space: nowrap;
   color: transparent;
   animation: gradientFlow 6s linear infinite;
   background-size: 200% 200%;
-  font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
   font-weight: bold;
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
@@ -451,9 +447,7 @@ white-space: nowrap;
   background-image: linear-gradient(90deg,  $text, $accent-color,$text);
 }
 
-.greeting,
-.time,
-.username {
+.greeting,.time,.username {
   background-image: linear-gradient(90deg, #ffffff, #ffffffb2, #ffffff);
 }
 
@@ -534,6 +528,7 @@ white-space: nowrap;
   .text {
     flex: 1;
     min-width: 0;
+    
     .title {
       font-weight: 700;
       font-size: 14px;

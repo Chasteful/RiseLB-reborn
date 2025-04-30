@@ -139,7 +139,7 @@
     .name {
         cursor: pointer;
         text-align: center;
-        font-size: 13px;
+        font-size: 16px;
         font-weight: 500;
         padding: 10px;
         font-family: "Product Sans";
