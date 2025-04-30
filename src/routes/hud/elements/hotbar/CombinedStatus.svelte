@@ -87,15 +87,23 @@ $: barStyle = `linear-gradient(to right,
 
 <style lang="scss">
 .bar {
-  width: 400px; height: 12px;
-  border-radius: 3px; overflow: hidden;
-  position: relative; box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  width: 400px; 
+  height: 12px;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative; 
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
 }
 
 .text {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: bold; color: #fff;
+  position: absolute; 
+  inset: 0;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
   z-index: 1;
 }
