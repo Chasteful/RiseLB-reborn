@@ -8,12 +8,7 @@
 
     let playerData: PlayerData | null = null;
 
-    // 新增响应式血量文本计算
-    $: healthText = playerData ? 
-      `${playerData.health}${playerData.absorption > 0 ? `+${playerData.absorption}` : ''}/${playerData.maxHealth}` 
-      : '0/0';
 
-    // 更新playerData并刷新 maxAbsorption
     function updatePlayerData(s: PlayerData) {
         playerData = s;
     }
@@ -29,7 +24,7 @@
 {#if playerData && playerData.gameMode !== "spectator"}
     <div class="hotbar">
         {#if playerData.gameMode !== "creative"}
-            <!-- 整合后的血条区域 -->
+        
             <div class="status-container">
                 <div class="status-row-group">
                     <div class="level-stat">

@@ -82,7 +82,7 @@
           {:else if c.name === "TabGui"}      <TabGui/>
           {:else if c.name === "Notifications"}<Notifications/>
           {:else if c.name === "TargetHud"}   <TargetHud/>
-  
+          {:else if c.name === "HealthBar"}    <HealthBar/>
           {:else if c.name === "BlockCounter"}<BlockCounter/>
           {:else if c.name === "Scoreboard"}  <Scoreboard/>
           {:else if c.name === "ArmorItems"}  <ArmorItems/>
@@ -91,7 +91,7 @@
           {:else if c.name === "Position"}    <Position/>
           {:else if c.name === "Keystrokes"}  <Keystrokes/>
           {:else if c.name === "Effects"}     <Effects/>
-          {:else if c.name === "Layer"}    <HealthBar/>
+          {:else if c.name === "Layer"}        <LayerList/>
           {:else if c.name === "ItemColumn"}  <ItemColumn/>
           {:else if c.name === "Text"}        <Text settings={c.settings}/>
           {:else if c.name === "Image"}       <img alt="" src="{c.settings.src}" style="scale: {c.settings.scale};"/>

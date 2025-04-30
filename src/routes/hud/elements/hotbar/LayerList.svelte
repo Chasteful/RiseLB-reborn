@@ -91,6 +91,14 @@
   };
   const statusBars: StatusBarConfig[] = [
     {
+      key: "air", 
+      condition: () => playerData?.air !== undefined && playerData?.maxAir !== undefined && playerData.air < playerData.maxAir, 
+      max: () => playerData?.maxAir ?? 0, 
+      value: () => playerData?.air, 
+      color: barColors.air,
+      alignRight: false
+    },
+    {
       key: "armor", 
       condition: () => playerData?.armor !== undefined && playerData.armor > 0, 
       max: 20, 
@@ -99,16 +107,6 @@
       icon: "shield", 
       alignRight: false
     },
-    {
-      key: "air", 
-      condition: () => playerData?.air !== undefined && playerData?.maxAir !== undefined && playerData.air < playerData.maxAir, 
-      max: () => playerData?.maxAir ?? 0, 
-      value: () => playerData?.air, 
-      color: barColors.air,
-      alignRight: false
-    },
-    
-    
     {
       key: "food", 
       condition: () => playerData?.food !== undefined && playerData.food > 0, 
