@@ -26,20 +26,15 @@
     max: number;
     color: string;
   };
-  type BarKey = 'health' | 'absorption' | 'armor' | 'experience' | 'air' | 'food';
+  type BarKey =  | 'armor'  | 'air' | 'food';
   let barAnimations: Record<BarKey, BarAnimation | null> = {
-    health: null,
-    absorption: null,
+
     armor: null,
-    experience: null,
     air: null,
     food: null
   };
   const barColors: Record<BarKey, string> = {
-    health: "#FC4130",
-    absorption: "#D4AF37",
     armor: "#49EAD6",
-    experience: "#88C657",
     air: "#AAC1E3",
     food: "#B88458"
   };
@@ -57,11 +52,8 @@
       }
       return;
     }
-    maybeAnimateBar("health", prev.health, newData.health, newData.maxHealth);
-    maybeAnimateBar("absorption", prev.absorption, newData.absorption, Math.max(maxAbsorption, newData.absorption ?? 0));
+  
     maybeAnimateBar("armor", prev.armor, newData.armor, 20);
-    maybeAnimateBar("experience", prev.experienceProgress !== undefined ? prev.experienceProgress * 100 : undefined, 
-                   newData.experienceProgress !== undefined ? newData.experienceProgress * 100 : undefined, 100);
     maybeAnimateBar("air", prev.air, newData.air, newData.maxAir);
     maybeAnimateBar("food", prev.food, newData.food, 20);
     if (newData.absorption !== undefined && newData.absorption > maxAbsorption) {
@@ -104,6 +96,7 @@
       max: 20, 
       value: () => playerData?.armor, 
       color: barColors.armor,
+      icon: "shield", 
       alignRight: false
     },
     {
@@ -114,24 +107,8 @@
       color: barColors.air,
       alignRight: false
     },
-    {
-      key: "absorption", 
-      condition: () => playerData?.absorption !== undefined && playerData.absorption > 0, 
-      max: () => maxAbsorption, 
-      value: () => playerData?.absorption, 
-      color: barColors.absorption,
-      icon: "shield",
-      alignRight: false
-    },
-    {
-      key: "health", 
-      condition: () => playerData?.health !== undefined && playerData.health > 0, 
-      max: () => playerData?.maxHealth ?? 0, 
-      value: () => playerData?.health, 
-      color: barColors.health,
-      icon: "heart",
-      alignRight: false
-    },
+    
+    
     {
       key: "food", 
       condition: () => playerData?.food !== undefined && playerData.food > 0, 
@@ -141,14 +118,6 @@
       icon: "food", 
       alignRight: false
     },
-    {
-      key: "experience", 
-      condition: () => playerData?.experienceLevel !== undefined && playerData.experienceLevel > 0, 
-      max: 100, 
-      value: () => playerData?.experienceProgress !== undefined ? playerData.experienceProgress * 100 : undefined, 
-      color: barColors.experience,
-      label: () => playerData?.experienceLevel?.toString()
-    }
   ];
 
 </script>

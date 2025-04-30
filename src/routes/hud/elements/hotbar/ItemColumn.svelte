@@ -6,14 +6,10 @@
     import { getPlayerData, getPlayerInventory } from "../../../../integration/rest";
     import ItemStackView from "../inventory/ItemStackView.svelte";
 
-
-
-  
     let lastSlot = 0;
-  let currentSlot = 0;
-  let playerData: PlayerData | null = null;
-  let slotsElement: HTMLElement | undefined;
-  let hotbar: ItemStack[] = [];
+    let currentSlot = 0;
+    let playerData: PlayerData | null = null;
+    let hotbar: ItemStack[] = [];
 
 function updateStacks(inventory: PlayerInventory) {
   hotbar = [...inventory.main.slice(0, 9)]; 

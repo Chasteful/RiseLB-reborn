@@ -47,7 +47,7 @@
     border-radius: 5px;
     box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.4);
     background-color: rgba($hotbar-base-color, 0.68);
-    height: 20px;
+    height: 12px;
     margin-bottom: 6px;
     .label {
       color: $hotbar-text-color;
