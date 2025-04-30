@@ -42,6 +42,7 @@
       padding: 6px 10px;
       width: fit-content;
       font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
+      letter-spacing: 2px;
       font-weight: bold;
       color: white;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
