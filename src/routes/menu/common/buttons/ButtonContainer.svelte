@@ -6,8 +6,8 @@
     @use "../../../../colors.scss" as *;
 
     .button-container {
-      background-color: rgba($base, 0.2);
-      padding: 12px 30px;
+      background-color: rgba($base, 0.3);
+      padding: 10px 24px;
       width: max-content;
       border-radius: 16px;
       display: flex;

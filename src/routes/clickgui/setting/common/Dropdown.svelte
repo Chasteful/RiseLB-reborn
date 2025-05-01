@@ -1,8 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, onDestroy, afterUpdate } from "svelte";
   import { convertToSpacedString, spaceSeperatedNames } from "../../../../theme/theme_config";
-  import { writable } from 'svelte/store';
   import { flip } from "svelte/animate";
+  import { fade } from 'svelte/transition';
+  import { cubicOut } from "svelte/easing";
   export let name: string | null;
   export let options: string[];
   export let value: string;
@@ -15,7 +16,6 @@
   let optionsElement: HTMLDivElement;
   let optionRefs: HTMLElement[] = [];
   let optionOpacities: number[] = [];
-  let isScrolling = false;
   function updateValue(v: string) {
     value = v;
     dispatch("change");
@@ -63,41 +63,20 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
     const c1 = 1.5;    const c3 = c1 + 1;
     return c3 * t * t * t - c1 * t * t;
   }
-  function handleScroll() {
-    if (!overlayElement || !expanded || !optionsElement || optionRefs.length === 0) return;
 
-    if (isScrolling) return;
-    isScrolling = true;
-
-    requestAnimationFrame(() => {
-      const optionsRect = optionsElement.getBoundingClientRect();
-
-
-      optionOpacities = optionRefs.map((option) => {
-        const rect = option.getBoundingClientRect();
-        const visibleHeight = Math.min(rect.bottom, optionsRect.bottom) - Math.max(rect.top, optionsRect.top);
-        const visibleRatio = Math.min(1, Math.max(0, visibleHeight / rect.height));
-        return Math.pow(visibleRatio, 0.5);
-      });
-
-      isScrolling = false;
-    });
-  }
 
   onMount(() => {
     optionOpacities = Array(options.length).fill(1); 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+  
   });
 
   afterUpdate(() => {
     if (expanded && optionRefs.length > 0) {
-      handleScroll(); 
+
     }
   });
 
-  onDestroy(() => {
-    window.removeEventListener("scroll", handleScroll);
-  });
+ 
 </script>
 
 
@@ -119,25 +98,24 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
   </div>
 
   {#if expanded}
-  <div class="overlay" bind:this={overlayElement} on:click={() => (expanded = false)}>
+  <div class="overlay" transition:fade={{ duration: 100, easing: cubicOut }} bind:this={overlayElement} on:click={() => (expanded = false)}>
     <!-- svelte-ignore element_invalid_self_closing_tag -->
 
       <div
         class="options"
         bind:this={optionsElement}
-        on:scroll={handleScroll}
         in:FadeIn={{ duration: 200 }}
         out:FadeOut={{ duration: 200 }}
       >
         {#each options as o, index (o)}
-          <div
-            class="option"
-            class:active={o === value}
-            on:click={() => updateValue(o)}
-            bind:this={optionRefs[index]}
-            style="opacity: {optionOpacities[index] ?? 1};" 
-            animate:flip={{ duration: 200 }}
-          >
+        <div
+        class="option"
+        class:active={o === value}
+        on:click={() => updateValue(o)}
+        bind:this={optionRefs[index]}
+        animate:flip={{ duration: 200 }}
+      >
+      
             <span class="option-content">
               {$spaceSeperatedNames ? convertToSpacedString(o) : o}
             </span>
@@ -226,6 +204,7 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    will-change: opacity, transform;
     transition: z-index 0s linear 300ms; 
   .options {
     position: relative;
@@ -235,22 +214,23 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
       rgba($base, 0.82) 0%,
       rgba(darken($base, 8%), 0.78) 100%
     );
-    scroll-snap-type: y mandatory;
-    scroll-padding-top: 8px;
-    scroll-behavior: smooth;
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
     border-radius: 14px;
     padding: 8px;
     width: min(90%, 420px);
     backdrop-filter: blur(32px) ;
     -webkit-backdrop-filter: blur(32px);
-    max-height: calc(75vh );
+    max-height: calc(25vh + 250px );
     overflow-y: auto;
     box-shadow: 
       0 16px 64px rgba(0, 0, 0, 0.32),
       0 0 0 1px rgba(255, 255, 255, 0.08) inset,
       0 0 0 2px rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.12);
-
+    will-change: opacity, transform;
     &::-webkit-scrollbar {
       width: 8px;
       height: 8px;

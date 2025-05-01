@@ -60,8 +60,8 @@
   }
 
   .header {
-    background: rgba($mantle, 0.5);
-    box-shadow: 0px 0px 8px $mantle;
+    background: rgba($base, 0.5);
+    box-shadow: 0px 0px 8px rgba($base, 0.5);
     border-bottom: 1px solid rgba(white, 0.1);
     padding: 20px;
     display: flex;

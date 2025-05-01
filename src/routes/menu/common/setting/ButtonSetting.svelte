@@ -33,34 +33,45 @@
   @use "sass:color";
   @use "../../../../colors.scss" as *;
 
-  .button-setting {
-    position: relative;
+.button-setting {
+  position: relative;
+  color: $text;
+  font-family: "Inter", sans-serif;
+  font-weight: 900;
+  padding: 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 20px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 6px 16px rgba(138, 180, 248, 0.2);
+
+  &.inset {
+    margin: 0 30px;
+  }
+
+  &.secondary {
+    background: rgba(255, 255, 255, 0.04);
     color: $text;
-    font-family: "Inter", sans-serif;
-    font-weight: 900;
-    padding: 20px;
-    border: none;
-    border-radius: 12px;
-    font-size: 20px;
-    transition: ease background-color .2s, ease opacity .2s, border-bottom .2s ease;
-    background: rgba($mantle, .6);
-    box-shadow: 0px 0px 16px rgba($crust, .5);
+  }
 
-    &.inset {
-      margin: 0 30px;
-    }
+  &:not([disabled]):hover {
+    background: rgba(138, 180, 248, 0.18); 
+    box-shadow: 0 6px 16px rgba(138, 180, 248, 0.2);
 
-    &:not([disabled]):hover {
-      background-color: color.adjust(color.adjust(rgba($accent-mix, 0.4), $saturation: -30%), $lightness: -10%);
-      cursor: pointer;
-
-      &.secondary {
-        background-color: color.adjust(color.adjust($base, $saturation: -30%), $lightness: -10%);
-      }
-    }
-
-    &[disabled] {
-      opacity: .6;
+    &.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: $text;
     }
   }
+
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 </style>

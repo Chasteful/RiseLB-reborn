@@ -98,10 +98,10 @@
 
   .value {
     width: 100%;
-background: rgba($base, 0.3);
-backdrop-filter: blur(6px);
--webkit-backdrop-filter: blur(6px);
-border: 1px solid rgba($accent-color, 0.05);
+    background: rgba($base, 0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba($accent-color, 0.05);
     border: 4px solid rgba($text, 0.1);
     border-left: 2px solid $accent;
     font-size: 12px;

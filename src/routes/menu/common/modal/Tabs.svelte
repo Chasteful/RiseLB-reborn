@@ -65,7 +65,7 @@
     }
 
     &.active {
-      border-color: $accent;
+      border-color: rgba($text,0.7);
     }
   }
 </style>
