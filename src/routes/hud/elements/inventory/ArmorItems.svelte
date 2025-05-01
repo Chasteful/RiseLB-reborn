@@ -91,11 +91,7 @@
       font-size: 0.85rem;
       font-weight: bold;
       margin-bottom: 6px;
-      text-shadow:
-    0 0 2px rgba(255, 255, 255, 0.7),  
-    0 0 4px rgba(255, 255, 255, 0.5),  
-    1px 1px 2px rgba(255, 255, 255, 0.4), 
-    -1px -1px 2px rgba(255, 255, 255, 0.4); 
+
 
     }
     .bar {
