@@ -97,15 +97,20 @@
       align-items: center;
       gap: 6px;
   }
-  .label,.value {
-      font-size: 20px;
+  .value {
+    font-size: 20px;
       font-weight: bold;
       text-align: right;
       color: rgba(255, 255, 255, 0.8);
-      text-shadow:0 2px 8px rgba($base,0.7);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  }
+      font-family: '汉仪文黑-85W', sans-serif; 
+}
   .label{
+    font-size: 20px;
+      font-weight: bold;
+      text-align: right;     
+       filter: drop-shadow(0 0 2px $text);
+      color: rgba(255, 255, 255, 0.8);
+      font-family: '汉仪文黑-85W', sans-serif;
       background-image: linear-gradient(45deg, $text 0%, $blue 100%);
       -webkit-background-clip: text;
       background-clip: text;

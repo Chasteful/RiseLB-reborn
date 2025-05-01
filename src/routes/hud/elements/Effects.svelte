@@ -60,6 +60,7 @@
   .effect {
     font-weight: 600;
     font-size: 18px;
+    font-family: '汉仪文黑-85W', sans-serif;
     text-align: left;
     border-radius: 8px;
     transition: background 0.3s ease, transform 0.2s ease;

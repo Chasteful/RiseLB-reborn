@@ -9,6 +9,7 @@ let intervalId: ReturnType<typeof setInterval>;
 let timeoutId: ReturnType<typeof setTimeout>;
 let redLayer: HTMLImageElement;
 let blueLayer: HTMLImageElement;
+export let showAccount: boolean;
 
 function startGlitch() {
   clearInterval(intervalId);
@@ -74,7 +75,10 @@ onDestroy(() => {
       />
     </button>
   <Notifications />
-  <Account />
+
+  {#if showAccount}
+    <Account />
+  {/if}
 </div>
 
 <style lang="scss">

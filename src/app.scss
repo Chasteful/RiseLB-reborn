@@ -41,7 +41,13 @@
     font-style: normal;
 }
 
-
+@font-face {
+    font-family: '汉仪文黑-85W';
+    src: url('/fonts/hk4e_zh-cn.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
 * {
     box-sizing: border-box;
     margin: 0;
@@ -58,16 +64,15 @@ body {
     overflow: hidden;
 }
 
-/* 高雅滚动条 - 仅适用于WebKit浏览器 */
 ::-webkit-scrollbar {
     width: 12px;
-    height: 12px;  /* 水平滚动条高度 */
+    height: 12px; 
 }
 
 ::-webkit-scrollbar-track {
     background-color: transparent;
     border-radius: 10px;
-    margin: 4px 0;  /* 为轨道添加上下边距 */
+    margin: 4px 0; 
 }
 
 ::-webkit-scrollbar-thumb {
