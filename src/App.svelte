@@ -38,7 +38,7 @@
     // HACK: Just in case
     setTimeout(() => {
         showSplash = false;
-    }, 10 * 1000);
+    }, 3 * 1000);
 
     async function changeRoute(name: string) {
         cleanupListeners();

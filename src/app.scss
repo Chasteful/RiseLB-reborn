@@ -47,7 +47,12 @@
     font-weight: normal;
     font-style: normal;
   }
-  
+  @font-face {
+    font-family: 'DreamScape';
+    src: url('/fonts/DreamScape.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
 * {
     box-sizing: border-box;
     margin: 0;
@@ -59,7 +64,7 @@
 }
 
 body {
-    font-family: "Inter", sans-serif;
+    font-family: '汉仪文黑-85W';
     user-select: none;
     overflow: hidden;
 }

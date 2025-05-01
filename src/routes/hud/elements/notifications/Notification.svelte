@@ -63,6 +63,10 @@
     position: relative;
     overflow: hidden;
     color: rgba($text, 0.9);
+    will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
   .notification::before {
     content: "";
     position: absolute;
@@ -70,16 +74,10 @@
     inset: 0;
     pointer-events: none;
     background-image: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-    animation: float-particles 8s infinite ease-in-out;
     opacity: 0.3;
     mix-blend-mode: overlay;
     z-index: 0;
     border-radius: inherit;
-}
-@keyframes float-particles {
-  0%   { transform: translateY(0px) scale(1); }
-  50%  { transform: translateY(-8px) scale(1.02); }
-  100% { transform: translateY(0px) scale(1); }
 }
   &.success {
     --accent-color: var(--success-color);

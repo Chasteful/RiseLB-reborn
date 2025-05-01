@@ -91,35 +91,28 @@
       flex-direction: column;
       font-family: monospace;
       align-items: baseline;
+      
   }
   .stat {
       display: flex;
       align-items: center;
       gap: 6px;
+      will-change: transform, opacity;
   }
-  .value {
+  .value, .label  {
     font-size: 20px;
       font-weight: bold;
       text-align: right;
       color: rgba(255, 255, 255, 0.8);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       font-family: '汉仪文黑-85W', sans-serif; 
 }
-  .label{
-    font-size: 20px;
-      font-weight: bold;
-      text-align: right;     
-       filter: drop-shadow(0 0 2px $text);
-      color: rgba(255, 255, 255, 0.8);
-      font-family: '汉仪文黑-85W', sans-serif;
-      background-image: linear-gradient(45deg, $text 0%, $blue 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-size: 200% ;
-      background-position: 0% center;
-      -moz-animation: gradient 2s ease-in-out infinite;
-      -webkit-animation: gradient 2s ease-in-out infinite;
-      animation: gradient 2s ease-in-out infinite;
+  .label{  
+    background: linear-gradient(45deg, $text 0%, $blue 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   }
   @keyframes gradient {
         0% { background-position: 0% 50%; }

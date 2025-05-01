@@ -38,7 +38,6 @@
       top: 0;
       left: 0;
       height: 100%;
-      will-change: width, opacity;
       transition: width 0.2s ease;
       border-radius: 5px;
       pointer-events: none;

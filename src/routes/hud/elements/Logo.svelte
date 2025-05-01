@@ -2,7 +2,8 @@
     import { onMount, onDestroy } from 'svelte';
     export let src = 'img/lb-logo.svg';
     export let size = 250;
-    export let className = '';
+    // svelte-ignore export_let_unused
+export let className = '';
     export let accentColor1 = 'rgb(173, 83, 137)';
     export let accentColor2 = 'rgb(60, 16, 83)';
     export let baseColor = '#ffffff';
@@ -53,9 +54,14 @@
       x: (Math.random() - 0.5) * 20,
       y: (Math.random() - 0.5) * 20
     }));
+    let mounted = false;
+  onMount(() => {
+  
+    requestAnimationFrame(() => mounted = true);
+  });
   </script>
   <div 
-    class={`cyberpunk-watermark ${className}`}
+   class="cyberpunk-watermark {mounted ? 'animate' : ''}"
     style={`--size: ${size}px; --accent1: ${accentColor1}; --accent2: ${accentColor2}; --base: ${baseColor};`}
   >
     <img class="layer base" src={src} alt="logo-base" />
@@ -86,6 +92,7 @@
       height: var(--size);
       pointer-events: none;
       filter: contrast(1.2);
+      animation: zoomInDown 0.5s ease-out both;
     }
     .layer {
       position: absolute;
@@ -157,6 +164,19 @@
       animation: holographic-pulse 0.1s infinite;
       mix-blend-mode: hard-light;
     }
+    @keyframes zoomInDown {
+  from {
+    opacity: 0;
+    transform: scale3d(0.1, 0.1, 0.1) translate3d(0, -1000px, 0);
+    animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale3d(0.475, 0.475, 0.475) translate3d(0, 60px, 0);
+    animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1);
+  }
+}
     @keyframes base-flicker {
       0%, 80%, 100% { opacity: 1; }
       85%, 90%, 95% { opacity: 0.1; }

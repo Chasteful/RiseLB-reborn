@@ -5,7 +5,7 @@
     import { listen } from "../../../../integration/ws";
     import { getPlayerData, getPlayerInventory } from "../../../../integration/rest";
     import ItemStackView from "../inventory/ItemStackView.svelte";
-    import { fly } from "svelte/transition";
+    import { fade, fly } from "svelte/transition";
     import { expoInOut } from "svelte/easing";
 
     let lastSlot = 0;
@@ -42,13 +42,13 @@ onMount(async () => {
   });
   </script>
   
-  <div class="item-column" >
+  <div class="item-column" in:fly={{ duration: 400, y: 20, easing: expoInOut }}>
     <!-- svelte-ignore element_invalid_self_closing_tag -->
 
-    <div class="slider" style="left: {currentSlot * 45}px"></div>
-    <div class="slots" transition:fly={{ duration: 400, y: 20, easing: expoInOut }}>
+    <div class="slider" style="left: {currentSlot * 45}px"in:fly={{ duration: 400, y: 20, easing: expoInOut }}></div>
+    <div class="slots" in:fly={{ duration: 400, y: 20, easing: expoInOut }} >
       {#each hotbar as stack, i (stack)}
-      <div class="slot" transition:fly={{ duration: 400, y: 20, easing: expoInOut }}>
+      <div class="slot" >
         <ItemStackView {stack} />
       </div>
     {/each}

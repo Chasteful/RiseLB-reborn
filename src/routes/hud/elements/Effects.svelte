@@ -68,7 +68,6 @@
     align-items: center;
     gap: 4px; 
     transform-origin: right center;
-    will-change: transform, opacity; 
     filter: drop-shadow(4px 4px 16px $mantle);
   &.warn-1 {
       color: #ff0000; 

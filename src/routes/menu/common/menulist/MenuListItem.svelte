@@ -54,8 +54,8 @@
       "a b c"
       "a d c";
   grid-template-columns: max-content 1fr max-content;
-  background-color: rgba($crust, .2);
-  box-shadow: 0px 0px 8px rgba($crust, .2);
+  background-color: rgba($base, .2);
+  box-shadow: 0px 0px 8px rgba($base, .2);
   padding: 15px 25px;
   column-gap: 15px;
   border-radius: 17px;
@@ -64,7 +64,7 @@
   cursor: grab;
 
   &:hover {
-    background-color: rgba($crust, 0.4);
+    background-color: rgba($base, 0.4);
     transform: scale(1.01); 
     letter-spacing: 1px; 
 

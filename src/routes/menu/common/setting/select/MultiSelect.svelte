@@ -55,7 +55,8 @@
     }
 
     &.active {
-      color: rgba($text,0.6);
+      color: rgba($text,0.7);
+      text-shadow: 0 0 4px rgba($text,0.7);
     }
   }
 </style>

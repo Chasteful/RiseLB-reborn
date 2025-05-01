@@ -118,7 +118,6 @@
       pointer-events: none;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      will-change: width, height, border-radius, opacity, backdrop-filter;
       transition: opacity 0.2s ease-out;
     }
   
@@ -142,7 +141,7 @@
         align-items: center;
         width: 100%;
         gap: 12px;
-        will-change: opacity;
+
       }
   
       .icon {
@@ -198,7 +197,6 @@
         margin: 0 20px;
         width: calc(100% - 40px);
         transform-origin: left center;
-        will-change: width;
         transition: width 0.1s linear;
       }
     }

@@ -1,8 +1,8 @@
 <script lang="ts">
+    import {fly} from "svelte/transition";
     import {SortableList} from "@jhubbardsf/svelte-sortablejs";
     import "./menulist.scss";
     import {createEventDispatcher} from "svelte";
-    import { fly } from "svelte/transition";
 
     export let sortable = false;
     export let elementCount = -1;
@@ -30,7 +30,8 @@
         return a;
     }
 </script>
-<div class="menu-list" transition:fly|global={{duration: 300, x: 1000}}>
+
+<div class="menu-list" transition:fly|global={{duration: 700, x: 1000}}>
     {#if sortable && elementCount > -1}
         <SortableList class="menu-list-items" onSort={handleChange} forceFallback={true} animation={150}>
             <slot/>
@@ -41,6 +42,7 @@
         </div>
     {/if}
 </div>
+
 
 <style lang="scss">
   @import "../../../../colors";

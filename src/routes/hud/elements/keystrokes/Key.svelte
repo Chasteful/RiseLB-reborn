@@ -70,6 +70,7 @@ listen("key", (e: KeyEvent) => {
   cursor: pointer;
   overflow: hidden;
   border-radius: 12px;
+  will-change: transform, opacity;
   transition: box-shadow 0.1s ease;
   background: linear-gradient(
     135deg,

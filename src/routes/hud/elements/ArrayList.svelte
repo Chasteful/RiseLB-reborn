@@ -72,7 +72,6 @@
         top: 10px;
         right: 10px;
         transform: translateZ(0);
-        will-change: transform;
         font-size: 72px;
     }
     .module {

@@ -144,7 +144,7 @@ const handleResize = debounce(() => {
   $: showTip = !$showSearch && isHoveringTip && !tipCooldown;
 </script>
 
-<div class="clickgui" class:grid={$showGrid} transition:fade|global={{duration: 200}}
+<div class="clickgui" class:grid={$showGrid} 
      style="transform: scale({$scaleFactor * 50}%); width: {2 / $scaleFactor * 100}vw; height: {2 / $scaleFactor * 100}vh;
      background-size: {$gridSize}px {$gridSize}px;">
      {#if $showResults}
@@ -189,7 +189,6 @@ const handleResize = debounce(() => {
   .clickgui {
     overflow: hidden;
     position: fixed;
-    will-change: opacity;
     top: 0;
     left: 0;
     transform-origin: left top;

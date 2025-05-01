@@ -204,7 +204,6 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    will-change: opacity, transform;
     transition: z-index 0s linear 300ms; 
   .options {
     position: relative;
@@ -230,7 +229,6 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
       0 0 0 1px rgba(255, 255, 255, 0.08) inset,
       0 0 0 2px rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    will-change: opacity, transform;
     &::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -247,7 +245,6 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
       border: 1px solid rgba(255, 255, 255, 0.1);
       -webkit-backface-visibility: hidden;
       transform: translate3d(0,0,0);
-      will-change: transform;
       contain: content;
       transition: background 0.3s ease-out, border-color 0.2s linear;
       backdrop-filter: none;

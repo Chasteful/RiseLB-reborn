@@ -1,4 +1,4 @@
-import {get, type Writable, writable} from "svelte/store";
+import { type Writable, writable} from "svelte/store";
 import type { Module } from "../../integration/types";
 
 export interface TDescription {

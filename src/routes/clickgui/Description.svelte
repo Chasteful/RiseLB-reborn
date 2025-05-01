@@ -48,7 +48,7 @@ $: {
 .description {
   position: relative;
   border-radius: 5px;
-  background-color: rgba($base, .9);
+  background-color: rgba($base, .7);
   filter: drop-shadow(0 0 10px rgba($base, 0.5));
 
   &::before {
@@ -59,7 +59,7 @@ $: {
     height: 0;
     border-top: 8px solid transparent;
     border-bottom: 8px solid transparent;
-    border-right: 8px solid rgba($base, .9);
+    border-right: 8px solid rgba($base, .7);
     left: -8px;
     top: 50%;
     transform: translateY(-50%);

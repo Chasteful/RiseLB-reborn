@@ -35,7 +35,12 @@
         <span class="title">
             <slot name="title"/>
         </span>
-        <img src="img/menu/icon-select-arrow.svg" alt="expand">
+        <img 
+          src="img/menu/icon-select-arrow.svg" 
+          alt="expand"
+          class="arrow"
+          class:expanded
+        >
     </div>
     {#if expanded}
         <div class="options" transition:fade|global={{ duration: 200, easing: quintOut }}>
@@ -58,10 +63,10 @@
       }
     }
   }
-
+ 
   .header {
     background: rgba($base, 0.5);
-    box-shadow: 0px 0px 8px rgba($base, 0.5);
+    box-shadow: 0px 0px 8px rgba($base, 0.6);
     border-bottom: 1px solid rgba(white, 0.1);
     padding: 20px;
     display: flex;
@@ -75,7 +80,16 @@
       color: $text;
       font-size: 20px;
       font-weight: 900;
+    }
+  }
 
+  .arrow {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &.expanded {
+      transform: rotate(180deg);
     }
   }
 
@@ -89,10 +103,6 @@
     color: $text;
     background-color: rgba($base, 0.5);
     border-left: $text;
-    &:hover {
-      color: $text;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
+    box-shadow: 0px 4px 8px rgba($base, 0.6);
   }
 </style>

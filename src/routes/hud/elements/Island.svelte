@@ -355,7 +355,6 @@ position: fixed;
 top: 5px;
 left: 50%;
 transform: translateX(-50%);
-z-index: 1000;
 filter: 
   drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
   drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2))
@@ -411,7 +410,28 @@ box-shadow:
   }
 }
 }
+@property --text-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #cdd6f4;
+  }
 
+  @property --accent-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: rgb(173, 83, 137);
+  }
+
+  @keyframes gradientFlow {
+    50% {
+      --text-color: rgb(173, 83, 137);
+      --accent-color: #cdd6f4;
+    }
+    100% {
+      --text-color: #cdd6f4;
+      --accent-color: rgb(173, 83, 137);
+    }
+  }
 .content-wrapper {
 width: 100%;
 display: flex;
@@ -444,8 +464,13 @@ white-space: nowrap;
 }
 
 .client {
-  background-image: linear-gradient(90deg,  $text, $accent-color,$text);
-}
+    background-image: linear-gradient(
+      90deg,
+      var(--text-color),
+      var(--accent-color),
+      var(--text-color)
+    );
+  }
 
 .greeting,.time,.username {
   background-image: linear-gradient(90deg, #ffffff, #ffffffb2, #ffffff);

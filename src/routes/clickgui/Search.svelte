@@ -370,9 +370,10 @@ function getWeightedRandomPlaceholder(): string {
   bind:this={searchContainerElement}
   
 >
-  <div class="input-wrapper"
+  <div class="input-wrapper"  draggable="false"
    class:focus-visible={isSearchFocused}
    bind:this={searchWrapperElement}>
+   
     <!-- svelte-ignore element_invalid_self_closing_tag -->
     <button
       class="search-icon"
@@ -532,7 +533,8 @@ function getWeightedRandomPlaceholder(): string {
       transition: 
         transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1),
         opacity 0.2s linear;
-      will-change: transform;              }
+      will-change: transform;   
+  }
   
 
     &:active {
