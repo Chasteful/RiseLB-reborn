@@ -12,6 +12,7 @@
   import { get } from "svelte/store";
   import { writable } from 'svelte/store';
   export let modules: Module[];
+  
   let isSearchFocused = false;
   let resultElements: HTMLElement[] = [];
   let searchContainerElement: HTMLElement;
@@ -41,12 +42,13 @@
     }, 0);
   }
 }
+const recentPlaceholders: string[] = [];
+const maxRecent = 5;
 const options = [
   { text: "Ciallo~(∠・ω< )⌒★ ", weight: 2 },
   {text: "ねえねえ、今日一緒に図書館で勉強しない？", weight: 2},
   {text: "ちょっと疲れてるみたいだけど、休まない？", weight: 1},
   { text: "呐呐~先輩と一緒に検索しましょうか？♡", weight: 2 },
-  { text: "ククク...この堕天使に検索させてみる？", weight: 1 },
   { text: "あの...一緒に調べ物しませんか？", weight: 2 },
   { text: "んもぉ~早く教えてよ！", weight: 1 },
   { text: "検索履歴は...見ませんからね！", weight: 1 },
@@ -346,16 +348,35 @@ function easeInBack(t: number): number {
   return c3 * t * t * t - c1 * t * t;
 }
 
+
 function getWeightedRandomPlaceholder(): string {
-    const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+  const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+  let tries = 10;
+
+  while (tries--) {
     let random = Math.random() * totalWeight;
 
     for (const opt of options) {
-      if (random < opt.weight) return opt.text;
+      if (random < opt.weight) {
+        if (!recentPlaceholders.includes(opt.text)) {
+          recentPlaceholders.unshift(opt.text);
+          if (recentPlaceholders.length > maxRecent) {
+            recentPlaceholders.pop();
+          }
+          return opt.text;
+        }
+        break; 
+      }
       random -= opt.weight;
     }
-    return options[0].text; 
   }
+
+
+  const fallback = options[Math.floor(Math.random() * options.length)].text;
+  recentPlaceholders.unshift(fallback);
+  if (recentPlaceholders.length > maxRecent) recentPlaceholders.pop();
+  return fallback;
+}
 
 </script>
 <svelte:window on:click={handleWindowClick} on:keydown={handleWindowKeyDown} on:contextmenu={handleWindowClick}/>
@@ -522,18 +543,15 @@ function getWeightedRandomPlaceholder(): string {
 
 
 
-        .search-input::placeholder {
-      transform: translateX(4px);
+      .search-input::placeholder {
+      transform: translateX(2px);           
       opacity: 0.7;
-    }
-
-
-    .search-input::placeholder {
-      transform: translateX(2px);            opacity: 0.8;
       transition: 
         transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1),
         opacity 0.2s linear;
-      will-change: transform;   
+      will-change: transform opacity;   
+
+ 
   }
   
 

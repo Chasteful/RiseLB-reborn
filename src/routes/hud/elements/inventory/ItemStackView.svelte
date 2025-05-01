@@ -66,9 +66,8 @@
     position: absolute;
     bottom: 0;
     right: 0;
-    font-size: 14px;
-    font-weight: bold;
-
+    font-size: 12px;
+  
     text-shadow: 1px 1px black; 
   }
 </style>

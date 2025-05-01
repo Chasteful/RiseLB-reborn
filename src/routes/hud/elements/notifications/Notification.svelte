@@ -12,7 +12,7 @@
     message;
 
 </script>
-<div class="notification {severity.toLowerCase()}" transition:fade>
+<div class="notification {severity.toLowerCase()}" >
   <div class="icon-container">
     <div class="icon {severity.toLowerCase()}"></div>
     {#if ['ENABLED','DISABLED'].includes(severity)}
