@@ -68,7 +68,7 @@
     right: 0;
     font-size: 14px;
     font-weight: bold;
-    font-family: '汉仪文黑-85W', sans-serif;
+
     text-shadow: 1px 1px black; 
   }
 </style>

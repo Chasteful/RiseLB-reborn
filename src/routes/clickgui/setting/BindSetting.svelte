@@ -109,7 +109,6 @@
     font-weight: 900;
     color: $text;
     font-size: 12px;
-    font-family: "Inter", sans-serif;
     width: 100%;
     display: flex;
     justify-content: center;

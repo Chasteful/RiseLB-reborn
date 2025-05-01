@@ -80,7 +80,7 @@
   }
 
   .button-add {
-    font-family: monospace;
+
     font-size: 12px;
     color: $text;
     background-color: $accent;

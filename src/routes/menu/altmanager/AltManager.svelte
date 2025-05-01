@@ -207,8 +207,3 @@
         </ButtonContainer>
     </BottomButtonWrapper>
 </Menu>
-<style lang="scss">
-  .uuid {
-    font-family: monospace;
-  }
-</style>

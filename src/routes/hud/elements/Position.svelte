@@ -89,7 +89,6 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      font-family: monospace;
       align-items: baseline;
       
   }
@@ -103,10 +102,10 @@
     font-size: 20px;
       font-weight: bold;
       text-align: right;
-      color: rgba(255, 255, 255, 0.8);
+      color: #bbbbbb;
+      text-shadow: 0 0 3px rgba(#AAAAAA,0.9);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      font-family: '汉仪文黑-85W', sans-serif; 
 }
   .label{  
     background: linear-gradient(45deg, $text 0%, $blue 100%);
@@ -114,11 +113,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   }
-  @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
+
 </style>
 
 <div class="stats-container"  >

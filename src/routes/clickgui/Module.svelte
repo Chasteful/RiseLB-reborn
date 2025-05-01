@@ -142,7 +142,6 @@
         font-size: 16px;
         font-weight: 500;
         padding: 10px;
-        font-family: "Product Sans";
         color: rgba(150, 150, 150);
         transition: all 0.3s ease-out;          position: relative;
         overflow: hidden;

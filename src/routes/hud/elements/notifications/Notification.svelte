@@ -52,7 +52,7 @@
       rgba(darken($base, 5%), 0.5) 100%
     );
     border-radius: 14px;
-    width: 320px;
+    width: 350px;
     padding: 16px;
     margin-bottom: 12px;
     border-left: 4px solid var(--accent-color);

@@ -301,6 +301,7 @@ onDestroy(() => {
 <style lang="scss">
 @import "../../../../colors.scss";
 .targethud {
+  will-change: auto;
   position: relative;
   width: 260px;
   border-radius: 20px;
@@ -408,7 +409,6 @@ onDestroy(() => {
   grid-area: name;
   padding-left: 0;
   font-size: 14px;
-  font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
   color: white;
   text-shadow: 0 0 4px rgba(white,0.8);
   align-self: start;
@@ -480,7 +480,6 @@ onDestroy(() => {
   margin-left: 8px; 
   bottom: 0; 
   transform: translateY(25%);
-  font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
   font-size: 14px;
   color: white;
   transition: opacity 0.3s ease;

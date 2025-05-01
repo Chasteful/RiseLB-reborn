@@ -60,7 +60,6 @@
   .effect {
     font-weight: 600;
     font-size: 18px;
-    font-family: '汉仪文黑-85W', sans-serif;
     text-align: left;
     border-radius: 8px;
     transition: background 0.3s ease, transform 0.2s ease;
@@ -68,7 +67,7 @@
     align-items: center;
     gap: 4px; 
     transform-origin: right center;
-    filter: drop-shadow(4px 4px 16px $mantle);
+
   &.warn-1 {
       color: #ff0000; 
       animation: pulse 0.5s infinite alternate;
@@ -98,8 +97,8 @@
       }
     }
     &:not(.warn-1):not(.warn-2):not(.warn-3) .duration {
-      color: rgba(255, 255, 255, 0.8);
-      text-shadow:0 2px 8px rgba($base,0.7);
+      color:  #bbbbbb;
+      text-shadow:0 2px 8px rgba(#bbbbbb,0.9);
     }}
   @keyframes pulse {
     from {

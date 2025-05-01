@@ -111,8 +111,9 @@
 
 .setting {
   position: relative;
-  padding: 8px;
+  padding: 12px;
   border-radius: 8px;
+  will-change: transform, opacity;
   background: rgba($mantle, 0.4);
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   box-sizing: border-box;
@@ -131,11 +132,13 @@
   }
 
   &::before {
-    background: linear-gradient(
-      135deg,
-      rgba($accent-color, var(--border-opacity)),
-      rgba($accent-color, var(--border-opacity))
-    );
+    opacity: var(--border-opacity);
+  background: linear-gradient(
+    135deg,
+    $accent-color,
+    $accent-color
+  );
+  transition: opacity 0.4s ease;
     box-shadow:
       0 0 calc(10px * var(--glow-intensity)) rgba($accent-color, var(--border-opacity)),
       inset 0 0 calc(10px * var(--glow-intensity)) rgba($accent-color, var(--border-opacity));
@@ -181,7 +184,7 @@
 
 .choice {
   color: $subtext0;
-  background-color: rgba($mantle, 0.3);
+  background-color: rgba($base, 0.3);
   border-radius: 3px;
   padding: 3px 6px;
   cursor: pointer;

@@ -114,7 +114,6 @@
     border-radius: 8px;
     text-align: center;
     color: #fff;
-    font-family: monospace;
     user-select: none;
     box-shadow:
       0 0 16px rgba(20,20, 20, 0.6);
@@ -123,7 +122,7 @@
   .count {
     font-size: 16px;
     font-weight: bold;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
   }
   .pointer {
     position: absolute;

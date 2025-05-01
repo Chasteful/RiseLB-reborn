@@ -71,7 +71,6 @@
       border-radius: 6px;
       padding: 6px 10px;
       width: fit-content;
-      font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
       font-weight: bold;
       letter-spacing: 2px;
       color: white;    

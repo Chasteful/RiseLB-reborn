@@ -121,7 +121,7 @@
         margin-right: 15px;
         margin-left: auto;
         width: 70px;
-        font-family: monospace;
+
     }
 
     .value-spot {

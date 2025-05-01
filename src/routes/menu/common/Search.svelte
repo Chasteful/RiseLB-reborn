@@ -17,7 +17,7 @@
   .search {
     background-color: rgba($base, 0.5);
     color: $text;
-    font-family: "Inter", sans-serif;
+    font-family: '汉仪文黑-85W';
     font-size: 20px;
     border-radius: 12px;
     border: none;

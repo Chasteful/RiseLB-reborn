@@ -36,7 +36,6 @@
   .button-setting {
     position: relative;
     color: $text;
-    font-family: "Inter", sans-serif;
     font-weight: 900;
     padding: 20px;
     border: none;

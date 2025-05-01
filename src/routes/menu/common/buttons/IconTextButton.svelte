@@ -89,6 +89,7 @@
       text-shadow: var(--button-text-shadow);
       padding: 0 20px 0 10px;
       opacity: 0;
+      font-family: '汉仪文黑-85W';
       transition: opacity 0.3s ease;
     }
 

@@ -39,7 +39,7 @@
   .value {
     width: 100%;
     background-color: rgba($base, .36);
-    font-family: monospace;
+
     font-size: 12px;
     color: $text;
     border: none;

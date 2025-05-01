@@ -179,7 +179,6 @@
   font-size: 16px;
   font-weight: bold;
   color: #fff;
-  font-family: '汉仪文黑-85W', sans-serif;
   text-shadow:
     0 0 2px rgba(0,0,0,0.9),
     0 0 4px rgba(0,0,0,0.7),
@@ -238,7 +237,7 @@
             0 0 4px rgba(0,0,0,0.7),
             1px 1px 2px rgba(0,0,0,0.6),
             -1px -1px 2px rgba(0,0,0,0.6);
-        font-family: '汉仪文黑-85W', sans-serif;
+
         white-space: nowrap;
         line-height: 1; 
     }

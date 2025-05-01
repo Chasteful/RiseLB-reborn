@@ -52,7 +52,6 @@
 
 .input {
   color: #e2e6eb;
-  font-family: "Inter", sans-serif;
   font-size: 18px;
   font-weight: 500;
   background: transparent;

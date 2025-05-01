@@ -16,7 +16,7 @@
   let enabledModules: (Module & { prefix: string; formattedName: string; width: number })[] = [];
   let scoreboard: Scoreboard | null = null;
   async function updateEnabledModules() {
-      await document.fonts.load("500 16px 'Inter'");
+      await document.fonts.load("500 16px 'Product Sans'");
       const modules = await getModules();
       const visibleModules = modules.filter(m => m.enabled && !m.hidden);
       const prefixMap = new Map<string, string>();
@@ -28,7 +28,7 @@
           const formattedName = $spaceSeperatedNames ? convertToSpacedString(module.name) : module.name;
           const prefix = prefixMap.get(module.name) || "";
           const fullName = `${formattedName} ${prefix}`;
-          const font = "500 16px 'Inter', system-ui, sans-serif";
+          const font = "500 16px 'Product Sans', system-ui, sans-serif";
           const width = getTextWidth(fullName, font);
           return {
               ...module,
@@ -119,7 +119,7 @@
       background-color: rgba(0, 0, 0, 0.2);
       color: var(--accent-color);
       text-shadow: var(--accent-color);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
       font-size: 16px;
       padding: 2px 6px;
       width: max-content;

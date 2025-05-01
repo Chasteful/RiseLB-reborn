@@ -151,7 +151,7 @@
         display: inline;
 
         &.allow-preformatting {
-            font-family: "Inter";
+            font-family: '汉仪文黑-85W';
             white-space: pre;
         }
 
