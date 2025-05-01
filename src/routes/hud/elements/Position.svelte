@@ -5,9 +5,9 @@
   import type { ClientInfo, PlayerData, Session} from "../../../integration/types";
   import { onMount } from "svelte";
   import { tweened } from 'svelte/motion';
-  import { cubicOut, expoInOut } from 'svelte/easing';
+  import { cubicOut} from 'svelte/easing';
   import { writable } from 'svelte/store';
-  import { fly } from "svelte/transition";
+
 
   let playerData: PlayerData | null = {
       position: { x: 0, y: 0, z: 0 },
@@ -128,7 +128,7 @@
     }
 </style>
 
-<div class="stats-container"  transition:fly={{duration: 700, y: 50, easing: expoInOut}}>
+<div class="stats-container"  >
   {#if clientInfo}
       <div class="stat">
           <span class="label">FPS: </span> 
@@ -144,7 +144,7 @@
       </div>
   {/if}
   {#if playerData}
-  <div class="stat">
+  <div class="stat" >
       <span class="label">XYZ: </span>
       <span class="value">
           {formatCoordinate($xPos)},
