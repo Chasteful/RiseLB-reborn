@@ -176,6 +176,8 @@
     white-space: nowrap; 
 }
 .header {
+    font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
+    font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;

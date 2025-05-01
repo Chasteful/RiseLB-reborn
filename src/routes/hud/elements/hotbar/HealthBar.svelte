@@ -63,7 +63,7 @@
     
     .level-stat {
         position: absolute;
-        left: -70px; 
+        left: -60px; 
         font-size: 14px;
         font-weight: bold;
         color: rgba(255, 255, 255, 0.85);

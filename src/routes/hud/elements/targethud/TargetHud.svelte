@@ -17,12 +17,15 @@
     let particles: Particle[] = [];
     let animationFrame: number;
     let simulatedHurtTime = 0;
-    let hurtTimeTick: ReturnType<typeof setInterval>;
-    const PARTICLE_COUNT = 10;
+    let hurtTimeTick: ReturnType<typeof setInterval>;  
     let lastAttackTime = 0;
+    let lastParticleSpawnTime = 0;
     const ATTACK_COOLDOWN = 450; 
-    const MAX_PARTICLES = 150;      const PARTICLE_LIFETIME = 2000;  const PARTICLE_FADE_TIME = 500;  let lastParticleSpawnTime = 0;
-const PARTICLE_SPAWN_COOLDOWN = 100; 
+    const MAX_PARTICLES = 100;      
+    const PARTICLE_LIFETIME = 2000;  
+    const PARTICLE_FADE_TIME = 500; 
+    const PARTICLE_COUNT = 10;
+    const PARTICLE_SPAWN_COOLDOWN = 470; 
 interface Particle {
     id: number;
     x: number;
@@ -108,24 +111,31 @@ function spawnParticles(hurtTimeTick = 1) {
     const now = Date.now();
     if (now - lastParticleSpawnTime < PARTICLE_SPAWN_COOLDOWN) return;
     lastParticleSpawnTime = now;
+
     const avatar = document.querySelector('.avatar') as HTMLElement;
     const hud = document.querySelector('.targethud') as HTMLElement;
     if (!avatar || !hud) return;
+
     particles = particles.filter(p => now - p.bornAt < PARTICLE_LIFETIME);
     const availableSlots = MAX_PARTICLES - particles.length;
-    if (availableSlots <= 0) return;
-    const count = Math.min(Math.floor(PARTICLE_COUNT * hurtTimeTick), availableSlots);
+
+
+    const count = Math.min(Math.max(Math.floor(PARTICLE_COUNT * hurtTimeTick), 2), availableSlots);
+
     const avatarRect = avatar.getBoundingClientRect();
     const hudRect = hud.getBoundingClientRect();
     const globalOffset = 16;  
-         const centerX = avatarRect.left - hudRect.left + avatarRect.width / 2 + globalOffset;
+
+    const centerX = avatarRect.left - hudRect.left + avatarRect.width / 2 + globalOffset;
     const centerY = avatarRect.top - hudRect.top + avatarRect.height / 2 + globalOffset;
+
     for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 0.5 + Math.random() * 2 * hurtTimeTick;
         const size = 3 + Math.random() * 7;
         const lifetimeOffset = Math.random() * 500;
         const particleColor = getRandomThemeColor();
+
         particles.push({
             id: particleId++,
             x: centerX,
@@ -141,6 +151,7 @@ function spawnParticles(hurtTimeTick = 1) {
         });
     }
 }
+
 function updateParticles() {
     const now = Date.now();
     particles = particles.map(p => {
@@ -197,7 +208,7 @@ onDestroy(() => {
                 avatar.classList.add('hurt');
             }
             const damage = lastHealth - newTarget.actualHealth;
-            spawnParticles(Math.min(damage / 3, 5));
+            spawnParticles(Math.min(damage / 10, 5));
         }
         animateHealth(newTarget.actualHealth);
     } else {
@@ -306,13 +317,7 @@ onDestroy(() => {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    to bottom right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0) 45%,
-    rgba(255, 255, 255, 0.03) 48%,
-    rgba(255, 255, 255, 0) 52%
-  );
+
   transform: rotate(30deg);
   animation: shine 6s infinite;
   z-index: 1;
@@ -403,7 +408,7 @@ onDestroy(() => {
   grid-area: name;
   padding-left: 0;
   font-size: 14px;
-  font-family: 'Inter';
+  font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
   color: white;
   text-shadow: 0 0 4px rgba(white,0.8);
   align-self: start;
@@ -475,7 +480,7 @@ onDestroy(() => {
   margin-left: 8px; 
   bottom: 0; 
   transform: translateY(25%);
-  font-family: 'Inter';
+  font-family: 'Product Sans', system-ui, -apple-system, sans-serif;
   font-size: 14px;
   color: white;
   transition: opacity 0.3s ease;
