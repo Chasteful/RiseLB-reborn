@@ -3,7 +3,6 @@
   import {description, type TDescription} from "./clickgui_store";
 
   let data: TDescription | null = null;
-  let scale: number = 1;
 
   description.subscribe((v) => {
       data = v;

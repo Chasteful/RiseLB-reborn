@@ -21,6 +21,7 @@
       snappingEnabled,
       filteredModules
   } from "./clickgui_store";
+    import { debounce } from "lodash";
 
   
   const EDGE_THRESHOLD = 50;
@@ -192,6 +193,7 @@ function onMouseMove(e: MouseEvent) {
     panelConfig.left = snapToGrid(e.clientX * (2 / $scaleFactor) - offsetX);
     panelConfig.top = snapToGrid(e.clientY * (2 / $scaleFactor) - offsetY);
     fixPosition();
+    debouncedMouseMove(e);
 }
 
   function onMouseUp() {
@@ -358,13 +360,13 @@ function onMouseMove(e: MouseEvent) {
   onMount(() => {
       setupGlobalShortcuts();
       fixPosition();
-
+      const options = { passive: true };
       const keydownHandler = (e: KeyboardEvent) => handleKeydown(e);
       const keyupHandler = (e: KeyboardEvent) => handleKeyup(e);
 
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mousedown', handleMouseDown);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousemove', debouncedMouseMove, options);
       window.addEventListener('wheel', handleWheel, { passive: false });
       window.addEventListener("keydown", keydownHandler, true);
       window.addEventListener("keyup", keyupHandler, true);
@@ -372,7 +374,7 @@ function onMouseMove(e: MouseEvent) {
       return () => {
           window.removeEventListener("keydown", keydownHandler, true);
           window.removeEventListener("keyup", keyupHandler, true);
-          window.removeEventListener('mousemove', handleMouseMove);
+          window.removeEventListener('mousemove', debouncedMouseMove);
           window.removeEventListener('mousedown', handleMouseDown);
           window.removeEventListener('mouseup', handleMouseUp);
           window.removeEventListener('wheel', handleWheel);
@@ -381,27 +383,35 @@ function onMouseMove(e: MouseEvent) {
 
   
   highlightModuleName.subscribe((name) => {
-      const index = modules.findIndex((m) => m.name === name);
-      if (index === -1) return;
+  if (!name || !modulesElement) return;
 
-      panelConfig.zIndex = ++$maxPanelZIndex;
-      panelConfig.expanded = true;
-      renderedModules = modules;
+  requestAnimationFrame(() => {
+    const index = modules.findIndex((m) => m.name === name);
+    if (index === -1) return;
 
-      tick().then(() => {
-          const moduleEls = modulesElement.querySelectorAll('.module');
-          const targetEl = moduleEls[index] as HTMLElement;
-
-          if (targetEl) {
-              modulesElement.scrollTo({
-                  top: targetEl.offsetTop - 20,
-                  behavior: 'smooth'
-              });
-          }
-      });
-
-      savePanelConfig();
+    panelConfig.zIndex = ++$maxPanelZIndex;
+    panelConfig.expanded = true;
+    
+   
+    setTimeout(() => {
+      const targetEl = modulesElement.children[index] as HTMLElement;
+      if (targetEl) {
+        modulesElement.scrollTo({
+          top: targetEl.offsetTop - 20,
+          behavior: 'smooth'
+        });
+      }
+    }, 50);
   });
+});
+const debouncedMouseMove = debounce((e: MouseEvent) => {
+  if ($locked || !moving) return;
+  
+  panelConfig.left = snapToGrid(e.clientX * (2 / $scaleFactor) - offsetX);
+  panelConfig.top = snapToGrid(e.clientY * (2 / $scaleFactor) - offsetY);
+  fixPosition();
+}, 16); // ~60fps
+
 
   listen("moduleToggle", (e: ModuleToggleEvent) => {
       const mod = modules.find((m) => m.name === e.moduleName);
@@ -415,6 +425,7 @@ function onMouseMove(e: MouseEvent) {
           renderedModules = modules;
       }
   });
+
 </script>
 
 <!-- Scroll Indicator -->
@@ -434,8 +445,6 @@ class="panel-wrapper {moving ? 'no-transition' : ''}"
 bind:this={panelElement}
   class:expanded={panelConfig.expanded}
   style="left: {panelConfig.left}px; top: {panelConfig.top}px; z-index: {panelConfig.zIndex};"
-  in:fly|global={{y: -30, duration: 250, easing: expoInOut}}
-  out:fly|global={{y: -30, duration: 250, easing: expoInOut}}
 >
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
@@ -613,7 +622,7 @@ bind:this={panelElement}
     max-width: 100%;
     position: relative;
     overflow: hidden;
-    will-change: transform, opacity;
+    will-change: transform;
     background-color: rgba($base, 0.5);
     border-radius: 8px;
     height: 100%;

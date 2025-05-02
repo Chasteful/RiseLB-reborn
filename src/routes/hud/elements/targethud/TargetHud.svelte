@@ -235,7 +235,7 @@ onDestroy(() => {
         />
       </div>
       <!-- Name -->
-        <span class="name">Name: {target.username}</span>
+        <span class="name">{target.username}</span>
       <div class="armor-stats">
         {#if target.offHandStack?.identifier && !target.offHandStack.identifier.includes('air')}
         <ArmorStatus itemStack={target.offHandStack} />
@@ -408,7 +408,7 @@ onDestroy(() => {
 .name {
   grid-area: name;
   padding-left: 0;
-  font-size: 14px;
+  font-size: 16px;
   color: white;
   text-shadow: 0 0 4px rgba(white,0.8);
   align-self: start;

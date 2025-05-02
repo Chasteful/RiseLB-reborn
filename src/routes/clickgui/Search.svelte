@@ -619,7 +619,9 @@ function getWeightedRandomPlaceholder(): string {
   color: $text;
   font-size: 20px;
   letter-spacing: 1px;
-  font-family: '汉仪文黑-85W';
+  font-family: "Inter", "汉仪文黑-85W", sans-serif;
+  font-feature-settings: "frac" 0; 
+
     &::placeholder {
     color: rgba($text, 0.5);
    

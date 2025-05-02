@@ -64,5 +64,6 @@
   color: white;
   text-shadow: 0 0 2px black;
   z-index: 1;
+  font-family:  "Inter",  sans-serif;
 }
 </style>

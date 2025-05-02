@@ -127,9 +127,11 @@ onDestroy(() => {
 
 
 const handleResize = debounce(() => {
-  resolutionScaler.updateScaleFactor();
-  scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resolutionScaler.getScaleFactor());
-}, 50); 
+  requestAnimationFrame(() => {
+    resolutionScaler.updateScaleFactor();
+    scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resolutionScaler.getScaleFactor());
+  });
+}, 100, { leading: false, trailing: true });
 
   listen("scaleFactorChange", async (e: ScaleFactorChangeEvent) => {
     minecraftScaleFactor = e.scaleFactor;
@@ -193,10 +195,13 @@ const handleResize = debounce(() => {
     left: 0;
     transform-origin: left top;
     &.grid {
-      background-image: linear-gradient(to right, $clickgui-grid-color 1px, transparent 1px),
-      linear-gradient(to bottom, $clickgui-grid-color 1px, transparent 1px);
-    }
+      background-image: 
+      linear-gradient(to right, rgba($clickgui-grid-color, 0.3) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba($clickgui-grid-color, 0.3) 1px, transparent 1px);
+    background-size: #{$GRID_SIZE}px #{$GRID_SIZE}px;
+    will-change: transform; 
   }
+}
 .elegant-overlay {
   position: fixed;
   inset: 0;
@@ -252,25 +257,7 @@ const handleResize = debounce(() => {
 }
 
 
-/*.hud-edit-button {
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  padding: 6px 14px;
-  background: rgba($accent-color, 0.2);
-  color: $accent-color;
-  font-weight: bold;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: all 0.2s ease;
 
-  &:hover {
-    background: rgba($accent-color, 0.3);
-    transform: scale(1.05);
-  }
-}*/
   .ctrl-f-tip {
   position: absolute;
   bottom: 150px;
