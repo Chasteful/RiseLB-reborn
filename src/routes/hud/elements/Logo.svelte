@@ -31,8 +31,8 @@ export let className = '';
             layer.style.transform = '';
             layer.style.clipPath = '';
           });
-        }, 300); 
-      }, 1000); 
+        }, 150); 
+      }, 450); 
     }
     onMount(() => {
       startGlitchLoop();
@@ -116,7 +116,7 @@ export let className = '';
     .glitch {
       z-index: 4;
       opacity: 0;
-      animation: glitch-effect 0.1s infinite, zoom-blur 1s infinite;
+      animation: glitch-effect 0.1s infinite;
       clip-path: polygon(0 0, 100% 0, 100% 60%, 0 60%);
     }
     .glitch-dynamic.red {
@@ -217,10 +217,7 @@ export let className = '';
       25% { opacity: 0.5; transform: translate(-2px, 1px); }
       30% { opacity: 0; transform: translate(0, 0); }
     }
-    @keyframes zoom-blur {
-      0%, 100% { transform: scale(1); filter: blur(0); }
-      50% { transform: scale(1.3); filter: blur(8px); }
-    }
+
     @keyframes holographic-pulse {
       0%, 100% { opacity: 0; transform: scale(1); }
       50% { opacity: 0.2; transform: scale(1.05); }

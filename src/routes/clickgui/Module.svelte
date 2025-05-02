@@ -208,7 +208,7 @@
               0 0 8px rgba($accent-color, 0.1),
               inset 0 0 4px rgba($accent-color-2, 0.05);
   transition: box-shadow 0.3s ease;
-  will-change: transform;
+
   &:hover {
     box-shadow: 0 0 0 1px rgba($accent-color, 0.4),
                 0 0 12px rgba($accent-color, 0.3),
