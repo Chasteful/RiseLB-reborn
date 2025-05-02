@@ -263,7 +263,7 @@ onMount(() => {
   (async () => {
     await tick();
 
-    initialWidth.set((wrapper?.scrollWidth || 290) + 64);
+    initialWidth.set((wrapper?.scrollWidth || 300) + 64);
     initialOpacity.set(1);
 
     await updateAllData().catch(console.error);
