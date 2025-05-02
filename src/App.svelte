@@ -28,66 +28,63 @@
         "/proxymanager": ProxyManager,
         "/disconnected": Disconnected,
         "/browser": Browser
-    };let titleVisited = localStorage.getItem("title_visited") === "true";
-const url = window.location.href;
-const staticTag = url.split("?")[1];
-const isStatic = staticTag === "static";
-let showSplash: boolean = false;
+    };
+   
+    const url = window.location.href;
+    const staticTag = url.split("?")[1];
+    const isStatic = staticTag === "static";
+    let showSplash: boolean = false;
 
-setTimeout(() => {
-    showSplash = false;
-}, 3 * 1000);
+    // HACK: Just in case
+    setTimeout(() => {
+        showSplash = false;
+    }, 3 * 1000);
 
-async function changeRoute(name: string) {
-    cleanupListeners();
-    console.log(`[Router] Redirecting to ${name}`);
-
-    if (name === "title" && !titleVisited) {
-        localStorage.setItem("title_visited", "true");
-        titleVisited = true;
+    async function changeRoute(name: string) {
+        cleanupListeners();
+        console.log(`[Router] Redirecting to ${name}`);
+        await push(`/${name}`);
     }
 
-    await push(`/${name}`);
-}
+    onMount(async () => {
+        await insertPersistentData();
 
-onMount(async () => {
-    await insertPersistentData();
+        if (isStatic) {
+            return;
+        }
 
-    if (isStatic) {
-        return;
-    }
+        listenAlways("socketReady", async () => {
+            const virtualScreen = await getVirtualScreen();
+            showSplash = virtualScreen.showingSplash;
+            await changeRoute(virtualScreen.name || "none");
+        });
 
-    listenAlways("socketReady", async () => {
+        listenAlways("splashOverlay", async (event: any) => {
+            showSplash = event.showingSplash;
+            if (!showSplash) {
+           
+                window.location.replace(window.location.href.split("#").shift()!);
+            }
+        });
+
+        listenAlways("virtualScreen", async (event: any) => {
+            console.log(`[Router] Virtual screen change to ${event.screenName}`);
+            const action = event.action;
+
+            switch (action) {
+                case "close":
+                    await changeRoute("none");
+                    break;
+                case "open":
+                    await changeRoute(event.screenName || "none");
+                    break;
+            }
+        });
+
         const virtualScreen = await getVirtualScreen();
         showSplash = virtualScreen.showingSplash;
         await changeRoute(virtualScreen.name || "none");
     });
-
-    listenAlways("splashOverlay", async (event: any) => {
-        showSplash = event.showingSplash;
-        if (!showSplash) {
-            window.location.replace(window.location.href.split("#").shift()!);
-        }
-    });
-
-    listenAlways("virtualScreen", async (event: any) => {
-        const action = event.action;
-
-        switch (action) {
-            case "close":
-                await changeRoute("none");
-                break;
-            case "open":
-                await changeRoute(event.screenName || "none");
-                break;
-        }
-    });
-
-    const virtualScreen = await getVirtualScreen();
-    showSplash = virtualScreen.showingSplash;
-    await changeRoute(virtualScreen.name || "none");
-});
-
 </script>
 
 <main>

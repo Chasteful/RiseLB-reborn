@@ -75,7 +75,7 @@
         <MultiSelect title="Difficulty" options={["Peaceful", "Easy", "Normal", "Hard"]} bind:values={difficulties}/>
     </OptionBar>
 
-    <MenuList sortable={false} on:sort={handleWorldSort}>
+    <MenuList  sortable={false} on:sort={handleWorldSort}>
         {#each renderedWorlds as world}
             <MenuListItem
                     image={!world.icon ?
