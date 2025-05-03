@@ -1,63 +1,70 @@
 <script lang="ts">
   import { toggleBackgroundShaderEnabled } from "../../../../integration/rest";
-import Account from "./Account.svelte";
-import Notifications from "./Notifications.svelte";
-import { onDestroy } from "svelte";
-import { currentLogo, logoVariants } from './logoStore';
-let glitchActive = false;
-let intervalId: ReturnType<typeof setInterval>;
-let timeoutId: ReturnType<typeof setTimeout>;
-let redLayer: HTMLImageElement;
-let blueLayer: HTMLImageElement;
-export let showAccount: boolean;
+  import Account from "./Account.svelte";
+  import Notifications from "./Notifications.svelte";
+  import { onDestroy } from "svelte";
+  import { currentLogo, logoVariants } from './logoStore';
 
-function startGlitch() {
-  clearInterval(intervalId);
-  clearTimeout(timeoutId);
-  glitchActive = true;
-  currentLogo.update(n => n % logoVariants + 1);
-  const layers = [redLayer, blueLayer].filter(Boolean) as HTMLImageElement[];
-  intervalId = setInterval(() => {
-    layers.forEach((layer) => {
-      const tx = Math.random() * 20 - 10;
-      const ty = Math.random() * 20 - 10;
-      layer.style.transform = `translate(${tx}px, ${ty}px)`;
+  let glitchActive = false;
+  let intervalId: ReturnType<typeof setInterval>;
+  let timeoutId: ReturnType<typeof setTimeout>;
+  let redLayer: HTMLImageElement;
+  let blueLayer: HTMLImageElement;
 
-      const x = Math.random() * 100;
-      const y = Math.random() * 100;
-      const w = Math.random() * 20 + 20;
-      const h = Math.random() * 20 + 20;
-      layer.style.clipPath = `polygon(${x}% ${y}%, ${x + w}% ${y}%, ${x + w}% ${y + h}%, ${x}% ${y + h}%)`;
-    });
-  }, 30);
+  export let showAccount: boolean;
 
-  timeoutId = setTimeout(() => {
+  function switchLogo() {
+    currentLogo.update(n => (n % logoVariants) + 1);  
+  }
+
+  function startGlitch() {
     clearInterval(intervalId);
-    layers.forEach((layer) => {
-      layer.style.transform = '';
-      layer.style.clipPath = '';
-    });
-    glitchActive = false;
-  }, 1000);
-}
+    clearTimeout(timeoutId);
+    glitchActive = true;
+    const layers = [redLayer, blueLayer].filter(Boolean) as HTMLImageElement[];
+    intervalId = setInterval(() => {
+      layers.forEach((layer) => {
+        const tx = Math.random() * 20 - 10;
+        const ty = Math.random() * 20 - 10;
+        layer.style.transform = `translate(${tx}px, ${ty}px)`;
 
-function handleClick() {
-  startGlitch();
-}
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const w = Math.random() * 20 + 20;
+        const h = Math.random() * 20 + 20;
+        layer.style.clipPath = `polygon(${x}% ${y}%, ${x + w}% ${y}%, ${x + w}% ${y + h}%, ${x}% ${y + h}%)`;
+      });
+    }, 30);
 
-onDestroy(() => {
-  clearInterval(intervalId);
-  clearTimeout(timeoutId);
-});
+    timeoutId = setTimeout(() => {
+      clearInterval(intervalId);
+      layers.forEach((layer) => {
+        layer.style.transform = '';
+        layer.style.clipPath = '';
+      });
+      glitchActive = false;
+    }, 1000);
+  }
+
+  function handleClick() {
+    startGlitch();
+    toggleBackgroundShaderEnabled(); 
+  }
+
+
+  onDestroy(() => {
+    clearInterval(intervalId);
+    clearTimeout(timeoutId);
+  });
 </script>
 
-
 <div class="header">
-
-  <button class="logo-container reset-button " on:click={() => {
-    handleClick();
-    toggleBackgroundShaderEnabled();
-  }}>
+  <button 
+    class="logo-container reset-button" 
+    on:click={handleClick}
+    on:click|preventDefault={switchLogo} 
+    on:contextmenu|preventDefault={switchLogo} 
+  >
     <img class="logo {glitchActive ? 'transparent' : ''}"      
      src="img/lb-logo{$currentLogo}.svg"  alt="logo" 
      draggable="false"/>
