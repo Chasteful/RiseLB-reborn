@@ -26,7 +26,6 @@
    $: expanded = $expandedModuleName === name;
   onMount(async () => {
     configurable = await getModuleSettings(name);
-    expanded = localStorage.getItem(path) === "true";
   });
 
   highlightModuleName.subscribe((name) => {

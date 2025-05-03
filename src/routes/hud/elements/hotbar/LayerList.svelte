@@ -1,17 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { fade } from "svelte/transition";
   import { listen } from "../../../../integration/ws";
   import { getPlayerData } from "../../../../integration/rest";
-  import type { ClientPlayerDataEvent, OverlayMessageEvent } from "../../../../integration/events";
-  import type { PlayerData, TextComponent as TTextComponent } from "../../../../integration/types";
-  import TextComponent from "../../../menu/common/TextComponent.svelte";
+  import type { ClientPlayerDataEvent,  } from "../../../../integration/events";
+  import type { PlayerData, } from "../../../../integration/types";
   import Status from "./Status.svelte";
   import { TimeoutManager } from "./TimeoutManager";
-
   let playerData: PlayerData | null = null;
-  let overlayMessage: OverlayMessageEvent | null = null;
-  let itemStackName: TTextComponent | string | null = null;
   let currentSlot = 0;
   let lastSlot = 0;
   let slotsElement: HTMLElement;
@@ -19,7 +14,6 @@
   const timeouts = new TimeoutManager();
   let maxAbsorption = 0;
   const ITEM_NAME_TIMEOUT = 2000;
-  const OVERLAY_TIMEOUT = 3000;
   type BarAnimation = {
     from: number;
     to: number;
@@ -63,7 +57,7 @@
       lastSlot = prev.selectedSlot;
       currentSlot = newData.selectedSlot;
       if (newData.mainHandStack?.identifier !== "minecraft:air") {
-        itemStackName = newData.mainHandStack?.displayName;
+
         showItemStackName = true;
         timeouts.set('itemName', () => showItemStackName = false, ITEM_NAME_TIMEOUT);
       }
@@ -72,10 +66,7 @@
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
     updatePlayerData(event.playerData);
   });
-  listen("overlayMessage", (event: OverlayMessageEvent) => {
-    overlayMessage = event;
-    timeouts.set('overlay', () => overlayMessage = null, OVERLAY_TIMEOUT);
-  });
+
   onMount(async () => {
     updatePlayerData(await getPlayerData());
   });
@@ -120,18 +111,6 @@
 
 </script>
 {#if playerData && playerData.gameMode !== "spectator"}
-  <div class="hotbar">
-    {#if overlayMessage}
-      <div class="overlay-message" out:fade={{duration: 200}}
-           style="max-width: {slotsElement?.offsetWidth ?? 0}px">
-        <TextComponent fontSize={14} textComponent={overlayMessage.text}/>
-      </div>
-    {/if}
-    {#if showItemStackName && itemStackName}
-      <div class="item-name" out:fade={{duration: 200}}>
-        <TextComponent fontSize={14} textComponent={itemStackName}/>
-      </div>
-    {/if}
     {#each statusBars as bar (bar.key)}
       {#if bar.condition()}
         <Status
@@ -146,58 +125,4 @@
         />
       {/if}
     {/each}
-    <div class="hotbar-elements">
-      <!-- svelte-ignore element_invalid_self_closing_tag -->
-      <div class="slider" style="left: {currentSlot * 45}px" />
-      <div class="slots" bind:this={slotsElement}>
-        {#each Array(9) as _, i}
-          <!-- svelte-ignore element_invalid_self_closing_tag -->
-          <div class="slot" />
-        {/each}
-      </div>
-    </div>
-  </div>
 {/if}
-
-<style lang="scss">
-  @import "../../../../colors.scss";
-  .hotbar {
-    .hotbar-elements {
-
-  background-color: transparent;
-  position: relative;
-  box-shadow: none;
-  overflow: visible; 
-
-  .slider {
-    display: none;
-  }
-
-  .slots {
-    display: flex;
-    opacity: 0;
-  }
-
-  .slot {
-    height: 45px;
-    width: 45px;
-  }
-}
-    .item-name {
-      color: $hotbar-text-color;
-      font-size: 14px;
-      margin: 0 auto 15px;
-      font-weight: 500;
-      background-color: rgba($hotbar-base-color, 0.68);
-      padding: 5px 8px;
-      border-radius: 16px;
-      width: max-content;
-    }
-    .overlay-message {
-      text-align: center;
-      color: $hotbar-text-color;
-      margin-bottom: 15px;
-      overflow: hidden;
-    }
-  }
-</style>

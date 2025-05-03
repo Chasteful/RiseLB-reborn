@@ -29,7 +29,7 @@
   <div
     class="layer"
     class:align-right={alignRight}
-    style="width: {(progress / max) * 100}%; background-color: {color}; opacity: {opacity};"
+    style="width: 320px; background-color: {color}; opacity: {opacity};"
   />
   <style>
     

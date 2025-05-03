@@ -21,11 +21,10 @@
   } from "./clickgui_store";
     import { debounce } from "lodash";
 
-  const expandedModuleName = writable<string | null>(null);
   const EDGE_THRESHOLD = 50;
   const UNDO_STACK_LIMIT = 100;
   const ANIMATION_DURATION = 2000;
-  setContext("expandedModuleName", expandedModuleName);
+
 
   export let modules: TModule[];
   export const locked = writable(false);
@@ -65,7 +64,10 @@
       scrollTop: number;
       zIndex: number;
   }
-
+  export let panelId: string; // 唯一标识
+const storageKey = `clickgui.panel.${panelId}.expandedModule`;
+const expandedModuleName = writable<string | null>(null);
+setContext("expandedModuleName", expandedModuleName);
   const panelConfig = loadPanelConfig();
 
   
@@ -194,8 +196,6 @@ function onMouseMove(e: MouseEvent) {
     fixPosition();
     debouncedMouseMove(e);
 }
-export let panelId: string;  
-const storageKey = `clickgui.panel.${panelId}.expandedModule`;
 
   function onMouseUp() {
       if (moving) {
@@ -363,7 +363,7 @@ const storageKey = `clickgui.panel.${panelId}.expandedModule`;
       fixPosition();
       const last = localStorage.getItem(storageKey);
     if (last) expandedModuleName.set(last);
-    // 订阅变化，写入 localStorage
+
     expandedModuleName.subscribe(name => {
       if (name) localStorage.setItem(storageKey, name);
       else localStorage.removeItem(storageKey);
