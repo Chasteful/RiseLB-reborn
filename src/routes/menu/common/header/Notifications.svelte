@@ -133,7 +133,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       
       &.error {
-        background-color: rgba($menu-error-color, 0.9);
+        box-shadow: 0 4px 30px rgba($red , 0.7);
       }
   
       .content {

@@ -1,31 +1,29 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import {
-    getModuleSettings,
-    setModuleSettings,
-    setModuleEnabled,
-  } from "../../integration/rest";
+  import { getContext } from "svelte";
+  import { get, type Writable } from "svelte/store";
+  import { setItem } from "../../integration/persistent_storage";
   import type { ConfigurableSetting } from "../../integration/types";
+  import { onMount } from "svelte";
+  import { getModuleSettings, setModuleSettings, setModuleEnabled } from "../../integration/rest";
   import GenericSetting from "./setting/common/GenericSetting.svelte";
+  import { description as descriptionStore, highlightModuleName, scaleFactor } from "./clickgui_store";
   import { fade, slide } from "svelte/transition";
   import { quintOut } from "svelte/easing";
-  import { description as descriptionStore, highlightModuleName, scaleFactor } from "./clickgui_store";
-  import { setItem } from "../../integration/persistent_storage";
   import { convertToSpacedString, spaceSeperatedNames } from "../../theme/theme_config";
-  import { getContext } from "svelte";
-
 
   export let name: string;
   export let enabled: boolean;
   export let description: string;
   export let aliases: string[];
+  const expandedModuleName: Writable<string | null> = getContext("expandedModuleName");
 
-  let moduleNameElement: HTMLElement;
-  let configurable: ConfigurableSetting;
-  const path = `clickgui.${name}`;
-  const modulesElement = getContext<HTMLElement>("modules-element");
-  let expanded = false;
-
+    
+   let configurable: ConfigurableSetting;
+   const path = `clickgui.${name}`;
+   let moduleNameElement: HTMLElement;
+   const modulesElement = getContext<HTMLElement>("modules-element");
+   let expanded: boolean = false;
+   $: expanded = $expandedModuleName === name;
   onMount(async () => {
     configurable = await getModuleSettings(name);
     expanded = localStorage.getItem(path) === "true";
@@ -82,10 +80,15 @@
         }
     }
   
-  async function toggleExpanded() {
-    expanded = !expanded;
-    await setItem(path, expanded.toString());
+    async function toggleExpanded() {
+  if (get(expandedModuleName) === name) {
+    expandedModuleName.set(null); 
+  } else {
+    expandedModuleName.set(name);
   }
+  await setItem(path, (get(expandedModuleName) === name).toString());
+}
+
 </script>
 
 <div

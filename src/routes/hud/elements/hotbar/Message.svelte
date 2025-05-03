@@ -6,7 +6,6 @@
     import type { ClientPlayerDataEvent, OverlayMessageEvent } from "../../../../integration/events";
     import type { PlayerData, TextComponent as TTextComponent } from "../../../../integration/types";
     import TextComponent from "../../../menu/common/TextComponent.svelte";
-    import Status from "./Status.svelte";
     import { TimeoutManager } from "./TimeoutManager";
   
     let playerData: PlayerData | null = null;
@@ -14,35 +13,13 @@
     let itemStackName: TTextComponent | string | null = null;
     let currentSlot = 0;
     let lastSlot = 0;
-    let slotsElement: HTMLElement;
     let showItemStackName = false;
     const timeouts = new TimeoutManager();
     let maxAbsorption = 0;
     const ITEM_NAME_TIMEOUT = 2000;
     const OVERLAY_TIMEOUT = 3000;
-    type BarAnimation = {
-      from: number;
-      to: number;
-      max: number;
-      color: string;
-    };
-    type BarKey =  | 'armor'  | 'air' | 'food';
-    let barAnimations: Record<BarKey, BarAnimation | null> = {
-  
-      armor: null,
-      air: null,
-      food: null
-    };
-    const barColors: Record<BarKey, string> = {
-      armor: "#49EAD6",
-      air: "#AAC1E3",
-      food: "#B88458"
-    };
-    function maybeAnimateBar(key: BarKey, from: number | undefined, to: number | undefined, max: number | undefined) {
-      if (from !== undefined && to !== undefined && max !== undefined && to < from) {
-        barAnimations[key] = { from, to, max, color: barColors[key] };
-      }
-    }
+
+
     function updatePlayerData(newData: PlayerData) {
       const prev = playerData;
       playerData = newData;
@@ -84,13 +61,13 @@
     <div class="hotbar">
       {#if overlayMessage}
         <div class="overlay-message" out:fade={{duration: 200}}
-             style="max-width: 200px">
-          <TextComponent fontSize={14} textComponent={overlayMessage.text}/>
+             style="max-width: 400px">
+          <TextComponent fontSize={20} textComponent={overlayMessage.text}/>
         </div>
       {/if}
       {#if showItemStackName && itemStackName}
         <div class="item-name" out:fade={{duration: 200}}>
-          <TextComponent fontSize={14} textComponent={itemStackName}/>
+          <TextComponent fontSize={20} textComponent={itemStackName}/>
         </div>
       {/if}
     </div>
@@ -100,21 +77,23 @@
   <style lang="scss">
     @import "../../../../colors.scss";
 
-      .item-name {
+    .item-name {
         color: $hotbar-text-color;
-        font-size: 14px;
         margin: 0 auto 15px;
         font-weight: 500;
-        background-color: rgba($hotbar-base-color, 0.68);
         padding: 5px 8px;
-        border-radius: 16px;
-        width: max-content;
-      }
-      .overlay-message {
+        width: max-content;   
+        text-shadow: 1px 1px 2px rgba($base , 0.7); 
+    }
+
+    .overlay-message {
         text-align: center;
         color: $hotbar-text-color;
         margin-bottom: 15px;
         overflow: hidden;
-      }
-    
+        text-shadow: 1px 1px 2px rgba($base , 0.7); 
+        max-width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
   </style>

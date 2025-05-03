@@ -5,7 +5,7 @@
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { writable } from 'svelte/store';
-  
+  import { setContext } from "svelte";
   import type { Module as TModule } from "../../integration/types";
   import type { ModuleToggleEvent } from "../../integration/events";
   import { listen } from "../../integration/ws";
@@ -23,12 +23,13 @@
   } from "./clickgui_store";
     import { debounce } from "lodash";
 
-  
+  const expandedModuleName = writable<string | null>(null);
   const EDGE_THRESHOLD = 50;
   const UNDO_STACK_LIMIT = 100;
   const ANIMATION_DURATION = 2000;
+  setContext("expandedModuleName", expandedModuleName);
 
-  
+  export let modules: TModule[];
   export const locked = writable(false);
   export const showLockHint = writable(false);
   export const saveAnimation = writable<'save' | null>(null);
@@ -38,7 +39,7 @@
 
   
   export let category: string;
-  export let modules: TModule[];
+
   export let panelIndex: number;
 
   
@@ -195,6 +196,8 @@ function onMouseMove(e: MouseEvent) {
     fixPosition();
     debouncedMouseMove(e);
 }
+export let panelId: string;  
+const storageKey = `clickgui.panel.${panelId}.expandedModule`;
 
   function onMouseUp() {
       if (moving) {
@@ -360,6 +363,13 @@ function onMouseMove(e: MouseEvent) {
   onMount(() => {
       setupGlobalShortcuts();
       fixPosition();
+      const last = localStorage.getItem(storageKey);
+    if (last) expandedModuleName.set(last);
+    // 订阅变化，写入 localStorage
+    expandedModuleName.subscribe(name => {
+      if (name) localStorage.setItem(storageKey, name);
+      else localStorage.removeItem(storageKey);
+    });
       const options = { passive: true };
       const keydownHandler = (e: KeyboardEvent) => handleKeydown(e);
       const keyupHandler = (e: KeyboardEvent) => handleKeyup(e);
