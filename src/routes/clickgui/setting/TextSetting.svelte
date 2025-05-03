@@ -43,7 +43,7 @@
     font-size: 12px;
     color: $text;
     border: none;
-    border-bottom: solid 2px $border-accent;
+    border-bottom: solid 2px $accent;
     padding: 5px;
     border-radius: 3px;
     transition: ease border-color .2s;

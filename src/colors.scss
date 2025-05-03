@@ -22,7 +22,7 @@ $sapphire: #74c7ec;
 $blue: #89b4fa;
 $lavender: #b4befe;
 
- $text: #cdd6f4;
+$text: #cdd6f4;
 $subtext0: #a6acd8;
 $subtext1: #bac2de;
 $overlay0: #6c7086;
@@ -31,21 +31,6 @@ $overlay2: #9399b2;
 $surface0: #313244;
 $surface1: #45475a;
 $surface2: #585b70;
-
- $border-accent: conic-gradient(
-  from 0deg,
-  $accent-color 0%,
-  $accent-color 20%,
-  $accent-color-2 20%,
-  $accent-color-2 40%,
-  $accent-color 40%,
-  $accent-color 60%,
-  $accent-color-2 60%,
-  $accent-color-2 80%,
-  $accent-color 80%,
-  $accent-color 100%
-);
-
 
 $menu-button-loader-color: rgb(255, 255, 255);
 $clickgui-grid-color: rgba(127, 127, 127, 0.25);

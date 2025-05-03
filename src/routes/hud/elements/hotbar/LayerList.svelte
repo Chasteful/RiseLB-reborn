@@ -136,7 +136,11 @@
 <style lang="scss">
   @import "../../../../colors.scss";
   .hotbar {
- width: 400px;
+  display: flex; 
+  gap: 4px;      
+  width: fit-content;
+  width: 400px;
+  justify-content: right;
   }
 
 
