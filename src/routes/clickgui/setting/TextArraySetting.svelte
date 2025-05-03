@@ -83,7 +83,7 @@
 
     font-size: 12px;
     color: $text;
-    background-color: $accent;
+    background-color: $accent-color;
     border: none;
     padding: 6px 10px;
     border-radius: 3px;
@@ -103,7 +103,7 @@
     -webkit-backdrop-filter: blur(6px);
     border: 1px solid rgba($accent-color, 0.05);
     border: 4px solid rgba($text, 0.1);
-    border-left: 2px solid $accent;
+    border-left: 2px solid $accent-color;
     font-size: 12px;
     color: $text;
     border: none;

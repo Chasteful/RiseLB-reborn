@@ -9,7 +9,6 @@
   let playerData: PlayerData | null = null;
   let currentSlot = 0;
   let lastSlot = 0;
-  let slotsElement: HTMLElement;
   let showItemStackName = false;
   const timeouts = new TimeoutManager();
   let maxAbsorption = 0;
@@ -71,15 +70,16 @@
     updatePlayerData(await getPlayerData());
   });
   type StatusBarConfig = {
-    key: BarKey;
-    condition: () => boolean;
-    max: number | (() => number);
-    value: () => number | undefined;
-    color: string;
-    icon?: string;
-    label?: () => string | undefined;
-    alignRight?: boolean;
-  };
+  key: BarKey;
+  condition: () => boolean;
+  max: number | (() => number);
+  value: () => number | undefined;
+  color: string;
+  icon?: string;
+  label?: () => string | undefined;
+  alignRight?: boolean;
+  disableAutoColor?: boolean;
+};
   const statusBars: StatusBarConfig[] = [
     {
       key: "air", 
@@ -96,6 +96,7 @@
       value: () => playerData?.armor, 
       color: barColors.armor,
       icon: "shield", 
+      disableAutoColor: true,
       alignRight: false
     },
     {
@@ -111,6 +112,8 @@
 
 </script>
 {#if playerData && playerData.gameMode !== "spectator"}
+  <div class="hotbar">
+
     {#each statusBars as bar (bar.key)}
       {#if bar.condition()}
         <Status
@@ -119,10 +122,22 @@
           color={bar.color}
           icon={bar.icon}
           label={bar.label?.()}
-          alignRight={bar.alignRight}
           animateFrom={barAnimations[bar.key]?.from}
           onDone={() => barAnimations[bar.key] = null}
+          disableAutoColor={bar.disableAutoColor}
         />
       {/if}
     {/each}
+
+    </div>
+  
 {/if}
+
+<style lang="scss">
+  @import "../../../../colors.scss";
+  .hotbar {
+ width: 400px;
+  }
+
+
+</style>

@@ -91,9 +91,12 @@
   font-size: 20px;
   grid-area: d;
   align-self: flex-start;
-
+  text-shadow:0 0 2px rgba(0, 0, 0, 0.4);
   .premium {
     color: $menu-account-premium-color;
+  }
+  .offline {
+    color: $menu-account-offline-color;
   }
 }
 
