@@ -7,7 +7,7 @@
   import { getModuleSettings, setModuleSettings, setModuleEnabled } from "../../integration/rest";
   import GenericSetting from "./setting/common/GenericSetting.svelte";
   import { description as descriptionStore, highlightModuleName, scaleFactor } from "./clickgui_store";
-  import { fade, slide } from "svelte/transition";
+  import {  slide } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { convertToSpacedString, spaceSeperatedNames } from "../../theme/theme_config";
 

@@ -1,7 +1,5 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { fly } from "svelte/transition";
-  import { expoInOut } from "svelte/easing";
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { writable } from 'svelte/store';

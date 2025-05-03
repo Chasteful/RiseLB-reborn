@@ -10,10 +10,15 @@ export interface TDescription {
 export const expandedModuleName = writable<string | null>(null);
 
 export const activePanelId = writable<string | null>(null); 
+
 export const resolutionScale = writable(1);
+
 export const viewportOffset = writable({ x: 0, y: 0 });
+
 export const description: Writable<TDescription | null> = writable(null);
+
 export const isClickGuiOpen = writable(false);
+
 export const maxPanelZIndex: Writable<number> = writable(0);
 
 export const highlightModuleName: Writable<string | null> = writable(null);
@@ -28,7 +33,6 @@ export const gridSize: Writable<number> = writable(10);
 
 export const showResults = writable<boolean>(false);
  
-
 export const filteredModules = writable<Module[]>([]);
 
   
