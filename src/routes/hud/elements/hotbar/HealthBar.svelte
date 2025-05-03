@@ -6,8 +6,10 @@
     import { onMount, onDestroy } from "svelte";
     import { tweened } from 'svelte/motion';
     import { cubicOut, expoInOut } from 'svelte/easing';
-    import { fly } from "svelte/transition";
-
+    import { fade, fly } from "svelte/transition";
+    import { tick } from 'svelte';
+  
+    let showHealthbar = false;
     let playerData: PlayerData | null = null;
     
     
@@ -23,7 +25,11 @@
         duration: 300,
         easing: cubicOut
     });
-
+    async function showDelayed() {
+    await tick();
+    await new Promise(res => setTimeout(res, 500));
+    showHealthbar = true;
+  }
     function updatePlayerData(s: PlayerData) {
         playerData = s;
         healthTweened.set(s.health);
@@ -101,10 +107,10 @@
     )`;
 
     
-
+    onMount(showDelayed);
 </script>
-{#if playerData && playerData.gameMode !== "spectator"}
-  <div class="healthbar"  transition:fly={{duration: 700, y: 50, easing: expoInOut}}>
+{#if showHealthbar && playerData && playerData.gameMode !== "spectator"}
+  <div class="healthbar"  transition:fade>
     {#if playerData.gameMode !== "creative"}
       <div class="status-container">
         <div class="status-wrapper">

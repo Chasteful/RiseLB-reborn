@@ -23,6 +23,7 @@
   import type { Component } from "../../integration/types";
   import type { ComponentsUpdateEvent, ScaleFactorChangeEvent } from "../../integration/events";
   import LayerList from "./elements/hotbar/LayerList.svelte";
+  import Message from "./elements/hotbar/Message.svelte";
 
   const baseResolution = { width: 1920, height: 1080 };
   let hudZoom = 100;     
@@ -91,7 +92,8 @@
           {:else if c.name === "Position"}    <Position/>
           {:else if c.name === "Keystrokes"}  <Keystrokes/>
           {:else if c.name === "Effects"}     <Effects/>
-          {:else if c.name === "Layer"}        <LayerList/>
+          {:else if c.name === "Message"}     <Message/>
+          {:else if c.name === "Status"}        <LayerList/>
           {:else if c.name === "ItemColumn"}  <ItemColumn/>
           {:else if c.name === "Text"}        <Text settings={c.settings}/>
           {:else if c.name === "Image"}       <img alt="" src="{c.settings.src}" style="scale: {c.settings.scale};"/>

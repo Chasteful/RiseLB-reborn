@@ -170,7 +170,37 @@
       ]
     },
     {
-      "name": "Layer",
+      "name": "Status",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": false
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "CenterTranslated"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 0
+            },
+            {
+              "name": "Vertical",
+              "value": "Bottom"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 90
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Message",
       "value": [
         {
           "name": "Enabled",
@@ -283,7 +313,7 @@
             },
             {
               "name": "VerticalOffset",
-              "value": 15
+              "value": 125
             }
           ]
         }

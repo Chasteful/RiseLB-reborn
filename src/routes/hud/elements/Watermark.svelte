@@ -1,17 +1,24 @@
-<span class="watermark">Aurora</span>
+<span class="watermark-container">
+  <span class="watermark">Aurora</span>
+  <span class="watermark-small">1.6</span>
+</span>
 
 <style lang="scss">
-
 @import "../../../colors.scss";
 $Speed: 8s;
+
+.watermark-container {
+  position: relative;
+  display: inline-block;
+}
+
 .watermark {
-  font-family: 'tenacity-bold', system-ui, -apple-system, sans-serif;
+  font-family: 'Greycliff CF Bold';
   font-weight: bold;
   font-size: 60px;
-  position: relative;
   color: transparent;
   background: linear-gradient(
-   135deg,
+    135deg,
     $accent-color,
     $accent-color-2,
     $accent-color
@@ -20,7 +27,24 @@ $Speed: 8s;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: flow $Speed ease infinite;
-  animation-delay: calc(var(--i, 0) * 0.2s); 
+
+}
+
+.watermark-small {
+  position: absolute;
+  right: -25;
+  top: 0;
+  font-size: 20px; 
+  color: transparent;
+  background: linear-gradient(
+    135deg,
+    $accent-color,
+    $accent-color-2,
+    $accent-color
+  );
+  background-size: 400% 400%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 </style>
