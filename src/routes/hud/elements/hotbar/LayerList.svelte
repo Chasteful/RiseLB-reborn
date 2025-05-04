@@ -23,8 +23,9 @@
   let barAnimations: Record<BarKey, BarAnimation | null> = {
 
     armor: null,
-    air: null,
-    food: null
+
+    food: null,
+    air: null
   };
   const barColors: Record<BarKey, string> = {
     armor: "#49EAD6",
@@ -82,16 +83,17 @@
 };
   const statusBars: StatusBarConfig[] = [
     {
-      key: "air", 
-      condition: () => playerData?.air !== undefined && playerData?.maxAir !== undefined && playerData.air < playerData.maxAir, 
-      max: () => playerData?.maxAir ?? 0, 
-      value: () => playerData?.air, 
-      color: barColors.air,
+      key: "food", 
+      condition: () => playerData?.food !== undefined && playerData.food > 0, 
+      max: 20, 
+      value: () => playerData?.food, 
+      color: barColors.food,
+      icon: "food", 
       alignRight: false
     },
     {
       key: "armor", 
-      condition: () => playerData?.armor !== undefined && playerData.armor > 0, 
+      condition: () => playerData?.armor !== undefined &&playerData.armor > 0, 
       max: 20, 
       value: () => playerData?.armor, 
       color: barColors.armor,
@@ -99,13 +101,14 @@
       disableAutoColor: true,
       alignRight: false
     },
+
+
     {
-      key: "food", 
-      condition: () => playerData?.food !== undefined && playerData.food > 0, 
-      max: 20, 
-      value: () => playerData?.food, 
-      color: barColors.food,
-      icon: "food", 
+      key: "air", 
+      condition: () => playerData?.air !== undefined && playerData?.maxAir !== undefined && playerData.air < playerData.maxAir, 
+      max: () => playerData?.maxAir ?? 0, 
+      value: () => playerData?.air, 
+      color: barColors.air,
       alignRight: false
     },
   ];
@@ -139,8 +142,8 @@
   display: flex; 
   gap: 4px;      
   width: fit-content;
-  width: 400px;
-  justify-content: right;
+  width: 600px;
+  justify-content: center;
   }
 
 
