@@ -61,7 +61,7 @@
     <div class="hotbar">
       {#if overlayMessage}
         <div class="overlay-message" out:fade={{duration: 200}}
-             style="max-width: 400px">
+         >
           <TextComponent fontSize={20} textComponent={overlayMessage.text}/>
         </div>
       {/if}
@@ -92,7 +92,6 @@
         margin-bottom: 15px;
         overflow: hidden;
         text-shadow: 1px 1px 2px rgba($base , 0.7); 
-        max-width: 80%;
         margin-left: auto;
         margin-right: auto;
     }
