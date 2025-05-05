@@ -1,6 +1,5 @@
 <script lang="ts"> 
-  import { fade } from "svelte/transition";
-  // svelte-ignore export_let_unused
+
   export let title: string;
   export let message: string;
   export let severity: string;

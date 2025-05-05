@@ -57,7 +57,7 @@
         );
         setTimeout(() => {
           notifications = notifications.filter(n => n.id !== id);
-        }, 300);
+        }, 10);
       }, 3000);
     }
     listen("notification", (e: NotificationEvent) => {
