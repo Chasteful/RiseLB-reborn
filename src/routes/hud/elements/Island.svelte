@@ -359,7 +359,7 @@ filter:
   drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
   drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2))
   drop-shadow(0 16px 48px rgba(0, 0, 0, 0.15));
-perspective: 1000px;
+
 }
 
 .dynamic-island {

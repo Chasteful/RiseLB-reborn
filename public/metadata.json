@@ -294,26 +294,26 @@
       "value": [
         {
           "name": "Enabled",
-          "value": false
+          "value": true
         },
         {
           "name": "Alignment",
           "value": [
             {
               "name": "Horizontal",
-              "value": "CenterTranslated"
+              "value": "Left"
             },
             {
               "name": "HorizontalOffset",
-              "value": 0
+              "value": 10
             },
             {
               "name": "Vertical",
-              "value": "Bottom"
+              "value": "Top"
             },
             {
               "name": "VerticalOffset",
-              "value": 125
+              "value": 15
             }
           ]
         }
@@ -384,7 +384,7 @@
       "value": [
         {
           "name": "Enabled",
-          "value": false
+          "value": true
         },
         {
           "name": "Alignment",
@@ -568,7 +568,7 @@
       "value": [
         {
           "name": "Enabled",
-          "value": true
+          "value": false
         },
         {
           "name": "Alignment",

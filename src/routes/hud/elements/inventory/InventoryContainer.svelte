@@ -37,14 +37,14 @@
   <style lang="scss">
     @import "../../../../colors";
     .inventory-hud {
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba($base, 0.5);
       border-radius: 6px;
       padding: 6px 10px;
       width: fit-content;
-      letter-spacing: 2px;
-      font-weight: bold;
       color: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      box-shadow: 
+  0 4px 16px rgba($base, 0.6),
+  inset 0 0 10px rgba(255, 255, 255, 0.05);
       user-select: none;
     }
     .title {
@@ -52,6 +52,7 @@
       align-items: center;
       font-size: 0.85rem;
       font-weight: bold;
+      letter-spacing: 2px;
       margin-bottom: 6px;
 
     }

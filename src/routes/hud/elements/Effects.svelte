@@ -98,7 +98,7 @@
     }
     &:not(.warn-1):not(.warn-2):not(.warn-3) .duration {
       color:  #bbbbbb;
-      text-shadow:0 2px 8px rgba(#bbbbbb,0.9);
+      text-shadow: 0 0 3px rgba(#AAAAAA,0.9);
     }}
   @keyframes pulse {
     from {

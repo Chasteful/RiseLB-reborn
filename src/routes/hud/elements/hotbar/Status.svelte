@@ -1,214 +1,106 @@
 <script lang="ts">
-  import { slide } from "svelte/transition";
+  import { tweened } from 'svelte/motion';
+  import { cubicOut } from 'svelte/easing';
 
-export let max: number;
-export let value: number;
-export let color: string = "white";
-export let alignRight = false;
-export let label: string | null = null;
-export let icon: string | null = null;
-export let animateFrom: number | null = null;
-export let onDone: () => void = () => {};
-export let disableAutoColor: boolean = false;
+  export let max: number = 100;
+  export let value: number = 0;
+  export let color: string = 'white';
+  export let disableAutoColor: boolean = false;
+  export let height: string = '20px';
+  export let borderRadius: string = '5px';
+  export let label: string | null = null;
+  export let icon: string | null = null;
+  export let animate: boolean = true;
+  export let onDone: () => void = () => {};
 
-let showAnimation = false;
-let progress = Math.max(0, Math.min(value, max));
-let animOpacity = 1;
-let animProgress = Math.max(0, Math.min(value, max));
+  $: ratio = Math.max(0, Math.min(value, max)) / max;
 
-function clamp(value: number): number {
-  return Math.max(0, Math.min(value, max));
-}
+  const tweenRatio = tweened(0, {
+    duration: animate ? 450 : 0,
+    easing: cubicOut
+  });
 
-$: {
-  if (animateFrom !== null) {
-    const clampedFrom = clamp(animateFrom);
-    const clampedTo = clamp(value);
+  $: tweenRatio.set(ratio).then(() => {
+    onDone();
+  });
 
-    if (clampedFrom !== clampedTo) {
-      startAnimation(clampedFrom, clampedTo);
-    } else {
-      progress = clampedTo;
-      animateFrom = null;
-    }
-  } else {
-    progress = clamp(value);
-  }
-}
+  import { derived } from 'svelte/store';
+  const widthPct = derived(tweenRatio, $tr => $tr * 100);
 
-$: barColor =
-  disableAutoColor
+  $: pct = ratio * 100;
+  $: barColor = disableAutoColor
     ? color
-    : progress / max < 0.2
-    ? 'red'
-    : progress / max < 0.4
-    ? 'orange'
-    : color;
-
-$: isEmpty = progress <= 0;
-$: isFull = progress >= max;
-
-// 动画的实现
-function startAnimation(from: number, to: number) {
-  showAnimation = true;
-  animProgress = from;
-  progress = to;
-  const delta = to - from; 
-  const duration = 450;
-  const start = Date.now();
-
-  function tick() {
-    const now = Date.now();
-    const t = Math.min((now - start) / duration, 1);
-    animProgress = from + delta * t; 
-    animOpacity = 1 - t; 
-    if (t < 1) {
-      requestAnimationFrame(tick); 
-    } else {
-      animateFrom = null;
-      showAnimation = false;
-      onDone(); 
-    }
-  }
-
-  tick(); 
-}
-
-$: barShadow = isFull
-  ? `0 0 10px 2px ${color}, 0 0 5px, 0 0 5px inset, 100em 0 0 0 inset`
-  : `0 0 5px, 0 0 5px inset, ${(progress / max) * 100}em 0 0 0 inset`;
-
-$: displayWidth = 'min(100%, 200px)';
+    : pct < 20
+      ? 'red'
+      : pct < 40
+        ? 'orange'
+        : color;
 </script>
-<div class="progress-container"  transition:slide={{ duration: 300 }} style="width: min(100%, 200px); display: {displayWidth === '0px' ? 'none' : 'block'}">
-<div class="progress" class:align-right={alignRight} class:empty={isEmpty} class:full={isFull}>
-  
-  {#if label}
-    <div class="label">{label}</div>
-  {/if}
-  
-  {#if icon}
-    <img class="icon" src="img/hud/hotbar/icon-{icon}.svg" alt={icon} />
-  {/if}
 
-  <!-- 静态进度条 -->
-  <div class="skew-wrapper">
-    <div class="skew-inner" style="width: {(progress / max) * 100}%">
+<div class="status-bar-container" style="--h: {height}; --radius: {borderRadius};">
+  <div class="status-bar">
+    {#if icon}
+      <img class="icon" src="img/hud/hotbar/icon-{icon}.svg" alt={icon} />
+    {/if}
+
+    <div class="bar-bg">
       <div
-        class="xgui-bar"
-        style="
-          box-shadow: {barShadow};
-          color: {barColor};
-          filter: {isFull ? 'brightness(1.1)' : 'none'};
-        "
+        class="bar-fg"
+        style="width: {$widthPct}%; background: {barColor};"
       ></div>
     </div>
-  </div>
 
-  <!-- 动画进度条 -->
-  {#if showAnimation}
-    <div class="animation-container">
-      <div class="skew-wrapper">
-        <div
-          class="xgui-bar anim-layer"
-          style="
-            width: {(animProgress / max) * 100}%;
-            box-shadow: 0 0 5px, 0 0 5px inset, {(animProgress / max) * 100}em 0 0 0 inset;
-            color: {barColor};
-            opacity: {animOpacity};
-          "
-        ></div>
-      </div>
-    </div>
-  {/if}
-  
-  <slot />
-</div>
+    {#if label}
+      <div class="label">{label}</div>
+    {/if}
+  </div>
 </div>
 
 <style lang="scss">
-  @use "../../../../colors.scss" as *;
-  
-  .progress-container {
+.status-bar-container {
+  position: relative;
+  width: 100%;
+  height: var(--h);
+}
 
-    position: relative; 
-    width: 100%;
-    height: 20px; 
+.status-bar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+
+  .icon {
+    margin: 0 4px;
+    height: calc(var(--h) * 0.8);
+    z-index: 2;
   }
-  .skew-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transform: skew(30deg);
-    transform-origin: left;
-    overflow: hidden;
-  }
-  
-  .progress {
+
+  .bar-bg {
     position: relative;
-    width: 100%;
+    flex: 1;
     height: 100%;
-    margin-bottom: 6px;
-    display: inline-flex;
-    border-radius: 5px;
-    font-size: 2px;
+    background: #333;
+    border-radius: var(--radius);
     overflow: hidden;
-     
-    &.align-right {
-      .icon {
-        right: 5px;
-        left: unset;
-      }
-      &.empty {
-        border-color: transparent;
-      }
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
 
-      &.full {
-        border-color: $hotbar-text-color; 
-      }
-    }
-
-    .label {
-      position: absolute;
-      font-size: 14px;
-      right: 5px;
-      top: 50%;
-      transform: translateY(-50%);
-      text-shadow: $hotbar-text-color 0px 0px 4px;
-      z-index: 2;
-    }
-
-    .icon {
-      position: absolute;
-      left: 6px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 2;
-      filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
-    }
-
-    .xgui-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
+    .bar-fg {
       height: 100%;
-      width: 100%;
-      border-radius: 5px;
-      transition: width 0.2s ease;
-      z-index: 1;
-    }
-    .animation-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 2; 
-  }    .anim-layer {
-      pointer-events: none;
+      transition: width 0.45s ease;
     }
   }
+
+  .label {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: calc(var(--h) * 0.6);
+    color: #fff;
+    text-shadow: 0 0 2px rgba(0,0,0,0.7);
+    pointer-events: none;
+    user-select: none;
+    z-index: 2;
+  }
+}
 </style>

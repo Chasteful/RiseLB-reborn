@@ -156,8 +156,7 @@
     position: relative;
     overflow: hidden;
 
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.5);
-    border-radius: 0;
+    box-shadow: 0px 0px 4px 4px rgba($base,0.5);
     display: inline-block; 
     right: 0;
     transition: width 0.2s ease;
@@ -182,8 +181,9 @@
     align-items: center;
     background-color: rgba($scoreboard-base-color, 0.5);
     padding: 10px;
-    color: $accent-color;
-    text-shadow: $base 0px 0px 16px;
+    color: $text;
+    text-shadow: 0 0 5px rgba($text, 0.4), 
+                 1px 1px 1px rgba(darken($scoreboard-base-color, 20%), 0.6);
     font-size: 20px;
     text-align: center;
     white-space: nowrap; 

@@ -51,11 +51,11 @@
       : n.toFixed(1);
   }
     $: health     = playerData ? playerData.health     : 0;
-    $: absorption = playerData ? playerData.absorption : 0;
     $: max        = playerData ? playerData.maxHealth  : 1;
-    $: total = Math.max(health + absorption, max, 1);
-    $: healthPct = Math.min(Math.max(health / total, 0), 1) * 100;
-    $: absorbPct = Math.min(Math.max(absorption / total, 0), 1) * 100;
+    $: healthPct = Math.min(Math.max($healthTweened / total, 0), 1) * 100;
+    $: absorbPct = Math.min(Math.max($absorptionTweened / total, 0), 1) * 100;
+    $: total = Math.max($healthTweened + $absorptionTweened, $maxHealthTweened, 1);
+
 
     $: isLowHealth = health / max <= 0.25;
     let blink = false;
@@ -175,7 +175,7 @@
         border-radius: 7px;
         background-size: 100% 100%;
         background-repeat: no-repeat;      
-        transition: background 0.3s ease;
+ 
         position: relative;
         z-index: 1;
     }

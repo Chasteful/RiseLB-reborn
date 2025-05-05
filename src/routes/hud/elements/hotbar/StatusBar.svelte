@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts"> 
   import { onMount } from "svelte";
   import { listen } from "../../../../integration/ws";
   import { getPlayerData } from "../../../../integration/rest";
@@ -90,36 +90,36 @@
     alignRight?: boolean;
     disableAutoColor?: boolean;
   };
-
   const statusBars: StatusBarConfig[] = [
-    {
-      key: "food", 
-      condition: () => playerData?.food !== undefined && playerData.food > 0, 
-      max: 20, 
-      value: () => playerData?.food, 
-      color: barColors.food,
-      icon: "food", 
-      alignRight: false
-    },
-    {
-      key: "armor", 
-      condition: () => playerData?.armor !== undefined && playerData.armor > 0, 
-      max: 20, 
-      value: () => playerData?.armor, 
-      color: barColors.armor,
-      icon: "shield", 
-      disableAutoColor: true,
-      alignRight: false
-    },
-    {
-      key: "air", 
-      condition: () => playerData?.air !== undefined && playerData?.maxAir !== undefined && playerData.air < playerData.maxAir, 
-      max: () => playerData?.maxAir ?? 0, 
-      value: () => playerData?.air, 
-      color: barColors.air,
-      alignRight: false
-    },
-  ];
+  {
+    key: "food", 
+    condition: () => playerData?.food !== undefined  && playerData.air === playerData.maxAir   , 
+    max: 20, 
+    value: () => playerData?.food, 
+    color: barColors.food,
+    icon: "food", 
+    alignRight: false
+  },
+  {
+    key: "armor", 
+    condition: () => playerData?.armor !== undefined && playerData.air === playerData.maxAir  , 
+    max: 20, 
+    value: () => playerData?.armor, 
+    color: barColors.armor,
+    icon: "shield", 
+    disableAutoColor: true,
+    alignRight: false
+  },
+  {
+    key: "air", 
+    condition: () => playerData?.air !== undefined && playerData?.maxAir !== undefined && playerData.air < playerData.maxAir, 
+    max: () => playerData?.maxAir ?? 0, 
+    value: () => playerData?.air, 
+    color: barColors.air,
+    alignRight: false
+  },
+];
+
 </script>
 
 {#if playerData && playerData.gameMode !== "spectator"}
@@ -131,11 +131,12 @@
           value={bar.value() ?? 0}
           color={bar.color}
           icon={bar.icon}
+            height="24px"
+            borderRadius="12px"
           label={bar.label?.()}
-          animateFrom={barAnimations[bar.key]?.from}
-          onDone={() => barAnimations[bar.key] = null}
           disableAutoColor={bar.disableAutoColor}
-         
+          animate={true}
+          
         />
       {/if}
     {/each}
@@ -146,10 +147,9 @@
   @import "../../../../colors.scss";
   
   .hotbar {
-    display: flex;
+  display: flex;
   gap: 4px;
-  width: 100%; 
-  max-width: none;  
-  justify-content: flex-start; 
+  width: 400px;  
+
   }
 </style>

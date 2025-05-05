@@ -5,8 +5,6 @@
   import { listen } from "../../../../integration/ws";
   import { getPlayerData, getPlayerInventory } from "../../../../integration/rest";
   import ItemStackView from "../inventory/ItemStackView.svelte";
-  import { fade, fly, scale } from "svelte/transition";
-  import { expoInOut, quintOut } from "svelte/easing";
   import { elasticOut } from 'svelte/easing';
   import { tweened } from 'svelte/motion';
   let lastSlot = 0;
@@ -25,12 +23,7 @@ $: if (currentSlot !== lastSlot) {
 function updateStacks(inventory: PlayerInventory) {
 hotbar = [...inventory.main.slice(0, 9)]; 
 }
-let pathDashoffset = 36;
 
-let slots = Array(9).fill(0).map((_, i) => ({
-  id: i,
-  dashOffset: 36
-}));
 function updatePlayerData(s: PlayerData) {
     playerData = s;
 
@@ -57,7 +50,7 @@ updatePlayerData(await getPlayerData());
       primary: "#74c7ec", 
       secondary: "#74c7ec",
       accent: "#67285E", 
-      bg: "rgba(10,5,20,0.95)"
+      bg: "rgba(10,5,20,0.91)"
   };
  
 
@@ -95,17 +88,14 @@ updatePlayerData(await getPlayerData());
         </div>
       {/each}
       
-      <div class="tracking-hud" 
-           style="transform: translateX({currentSlot * 68}px)"
-       ></div>
-        <div class="hud-aura"></div>
+
       </div>
     </div>
 
 
 
 <style lang="scss">
-
+    @import "../../../../colors.scss";
   .selection-overlay {
     position: absolute;
     width: 100%;
@@ -115,7 +105,6 @@ updatePlayerData(await getPlayerData());
       rgba(116, 199, 236, 0.15) 0%,
       rgba(103, 40, 94, 0.1) 100%
     );
-    z-index: 1;
   }
 
 
@@ -124,16 +113,16 @@ updatePlayerData(await getPlayerData());
       --spacing: 8px;
       position: relative;
       padding: 12px;
-      background: linear-gradient(
-          145deg, 
-          var(--bg) 0%, 
-          rgba(30,15,40,0.9) 100%
-      );
+      box-shadow: 
+  0 4px 16px rgba($base, 0.6),
+  inset 0 0 10px rgba(255, 255, 255, 0.05);
+    background: rgba($base, 0.5);
+    backdrop-filter: blur(12px) brightness(1.1);
+    filter: 
+  drop-shadow(0 4px 12px rgba($base, 0.3))
+  drop-shadow(0 8px 24px rgba($base, 0.2))
+  drop-shadow(0 16px 48px rgba($base, 0.15));
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.15);
-      box-shadow:
-          0 8px 32px rgba(0,0,0,0.6),
-          inset 0 1px 2px rgba(255,255,255,0.1);
       overflow: hidden;
   }
   
@@ -195,43 +184,8 @@ updatePlayerData(await getPlayerData());
   
 
 
-  .tracking-hud {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: var(--slot-size);
-    height: 100%;
-    z-index: 1;
-    will-change: transform;
-  }
 
-  .hud-aura {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    box-shadow:
-      0 0 20px rgba(0, 0, 0, 0.7),
-      0 0 40px rgba(116, 199, 236, 0.1),
-      inset 0 0 12px rgba(255, 255, 255, 0.05);
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(0, 0, 0, 0.3) 50%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
-  }
-  .slot-bg {
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    padding: 2px;
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.05),
-      0 2px 4px rgba(0, 0, 0, 0.3);
-  }
+
 
   .slot {
     width: 100%;
@@ -259,20 +213,7 @@ updatePlayerData(await getPlayerData());
   background: none;
   transition: transform 0.15s ease;
 }
-  @keyframes highlight-pulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0;
-  }
-}
+
 .slot-number {
     margin-top: 8px;
     text-align: center;
