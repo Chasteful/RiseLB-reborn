@@ -391,19 +391,19 @@
           "value": [
             {
               "name": "Horizontal",
-              "value": "Left"
+              "value": "CenterTranslated"
             },
             {
               "name": "HorizontalOffset",
-              "value": 20
+              "value": -20
             },
             {
               "name": "Vertical",
-              "value": "Top"
+              "value": "CenterTranslated"
             },
             {
               "name": "VerticalOffset",
-              "value": -50
+              "value": 50
             }
           ]
         }
