@@ -7,6 +7,7 @@
   import { tweened } from 'svelte/motion';
   import { cubicOut} from 'svelte/easing';
   import { writable } from 'svelte/store';
+    import { throttle } from "lodash";
 
 
   let playerData: PlayerData | null = {
@@ -18,7 +19,7 @@
   let session: Session | null = null;
   const fpsAnimated = tweened(0, { duration: 500, easing: cubicOut });
   const fps = writable(0);
-  const bps = tweened(0, { duration: 500, easing: cubicOut });
+  const bps = tweened(0, { duration: 500, easing: t => t });
   const xPos = tweened(0, { duration: 500, easing: cubicOut });
   const yPos = tweened(0, { duration: 500, easing: cubicOut });
   const zPos = tweened(0, { duration: 500, easing: cubicOut });
@@ -62,7 +63,7 @@
           updateSession();
       }, 1000);
   });
-  listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
+  listen("clientPlayerData", throttle((event: ClientPlayerDataEvent) => {
   if (playerData) {
     lastX = playerData.position.x;
     lastZ = playerData.position.z;
@@ -77,68 +78,79 @@
       bps.set(calculatedBps);
     }
   }
-});
+}, 50));
   listen("session", async () => {
       await updateSession();
   });
 
-</script>
-<style lang="scss">
+</script><style lang="scss">
   @use "../../../colors.scss" as *;
   .stats-container {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: baseline;
-      
+      /* Promote to its own layer to isolate expensive effects */
+      will-change: transform;
   }
   .stat {
       display: flex;
       align-items: center;
       gap: 6px;
-      will-change: transform, opacity;
   }
   .value, .label  {
     font-size: 20px;
-      font-weight: bold;
-      text-align: right;
-      color: #bbbbbb;
-      text-shadow: 0 0 3px rgba(#AAAAAA,0.9);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-}
-  .label{  
-    background: linear-gradient(45deg, $text 0%, $blue 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    text-align: right;
+    color: #bbbbbb;
+    text-shadow: 0 0 3px rgba(170, 170, 170, 0.9);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    will-change: transform;
   }
-
+  .value {
+  position: relative;
+  &::after {
+    content: attr(data-value);
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: transparent;
+    text-shadow: 0 0 3px rgba(170, 170, 170, 0.9);
+    z-index: -1;
+  }
+}
+  .label {  
+    background: linear-gradient(45deg, $text 0%, $blue 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+ 
+  }
 </style>
-
-<div class="stats-container"  >
+<div class="stats-container">
   {#if clientInfo}
-      <div class="stat">
-          <span class="label">FPS: </span> 
-          <span class="value">{$fps.toString().padStart(3, " ")}</span>
-      </div>
+    {@const fpsValue = $fps.toString().padStart(3, " ")}
+    <div class="stat">
+      <span class="label">FPS: </span> 
+      <span class="value">{fpsValue}</span>
+    </div>
   {/if}
+  
   {#if playerData}
-      <div class="stat">
-          <span class="label">BPS: </span> 
-          <span class="value">
-              {roundToDecimal($bps, 2).toString().padStart(6, " ")}
-          </span>
-      </div>
-  {/if}
-  {#if playerData}
-  <div class="stat" >
+    {@const bpsValue = roundToDecimal($bps, 2).toString().padStart(6, " ")}
+    <div class="stat">
+      <span class="label">BPS: </span> 
+      <span class="value">{bpsValue}</span>
+    </div>
+    
+    {@const x = formatCoordinate($xPos)}
+    {@const y = formatCoordinate($yPos)}
+    {@const z = formatCoordinate($zPos)}
+    <div class="stat">
       <span class="label">XYZ: </span>
-      <span class="value">
-          {formatCoordinate($xPos)},
-          {formatCoordinate($yPos)},
-          {formatCoordinate($zPos)}
-      </span>
-  </div>
+      <span class="value">{x}, {y}, {z}</span>
+    </div>
   {/if}
 </div>

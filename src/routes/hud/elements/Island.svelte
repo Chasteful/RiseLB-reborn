@@ -18,8 +18,8 @@ import { tweened } from "svelte/motion";
 import { cubicOut } from "svelte/easing";
 
 const CLIENT_NAME = "RiseLB";
-const CLIENT_VERSION = "1.5.8";
-const UPDATE_INTERVAL_MS = 1000;
+const CLIENT_VERSION = "1.6.1";
+const UPDATE_INTERVAL_MS = 50;
 const ALERT_DISPLAY_DURATION_MS = 3000;
 const ANIMATION_DURATION_MS = 300;
 
@@ -208,26 +208,20 @@ async function updateAllData(): Promise<void> {
 
 async function switchContent(type: ContentType) {
   if (currentContent === type) return;
-
   nextContent = type;
-  await tick();
   const targetEl = contentRefs[type];
-  nextContentWidth = targetEl ? targetEl.scrollWidth + (type === 'status' ? 32 : 0) : 
-  (type === 'alert' ? 280 : 300);
-
+   nextContentWidth = targetEl 
+  ? targetEl.scrollWidth + 64
+  : 300; 
   animationPhase = 'contract';
-  await tick();
-
   currentContent = type;
-  w.set(nextContentWidth);
+  w.set(nextContentWidth );
   h.set(type === 'alert' ? 50 : 40);
-
   animationPhase = 'expand';
-  await tick();
-
   animationPhase = 'idle';
   nextContent = null;
 }
+
 
 async function handleInitialAnimationEnd() {
   await waitUntilNoAlert();
@@ -247,7 +241,7 @@ $: {
 } else if (initialAnimation) {
   } else {
     const widthMap = {
-      alert: 280,
+      alert: 280 + 32,
       greeting: (contentRefs.greeting?.scrollWidth || 0) + 32,
       status: (contentRefs.status?.scrollWidth || 0) + 32
 
@@ -355,6 +349,7 @@ position: fixed;
 top: 5px;
 left: 50%;
 transform: translateX(-50%);
+perspective: 1000px;
 filter: 
   drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
   drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2))
@@ -453,34 +448,20 @@ white-space: nowrap;
   font-size: 20px;
   letter-spacing: -0.25px;
   background-clip: text;
-  flex-shrink: 0; 
+  flex-shrink: 0;   
   -webkit-background-clip: text;
-  color: transparent;
-  animation: gradientFlow 6s linear infinite;
+  color:  #ffffff;
   background-size: 200% 200%;
   font-weight: bold;
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
 }
 
-.client {
-    background-image: linear-gradient(
-      90deg,
-      var(--text-color),
-      var(--accent-color),
-      var(--text-color)
-    );
-  }
-
-.greeting,.time,.username {
-  background-image: linear-gradient(90deg, #ffffff, #ffffffb2, #ffffff);
-}
 
 .separator {
   width: 2px;
   height: 14px;
   background: linear-gradient(to bottom, transparent, rgba(($text), 0.7), transparent);
-  animation: separatorPulse 2s infinite;
   flex-shrink: 0; 
   position: relative;
 }

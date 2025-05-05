@@ -169,8 +169,8 @@ updatePlayerData(await getPlayerData());
       text-shadow: 0 0 8px rgba(103, 40, 94, 0.5);
     
           .slot-number {
-              color: var(--accent);
-              text-shadow: 0 0 10px var(--accent);
+              color: var(--primary);
+              text-shadow: 0 0 10px var(--primary);
               transform: scale(1.2);
           }
       }
@@ -218,16 +218,8 @@ updatePlayerData(await getPlayerData());
     margin-top: 8px;
     text-align: center;
     font-size: 18px;
-    color: var(--primary);
+    color: #dddddd;
     text-shadow: 0 0 5px currentColor;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-
-    .active & { 
-      color: var(--accent);
-      font-weight: 800;
-      text-shadow: 0 0 10px var(--accent 0.5);
-      transform: scale(1.15);
-    }
   }
 </style>
