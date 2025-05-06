@@ -17,9 +17,10 @@ import type {
 import { tweened } from "svelte/motion";
 import { cubicOut } from "svelte/easing";
 import { blockCount,armorValue, armorThreshold,DURABILITY_RECOVERY,
-  armorDurabilityStore, DURABILITY_THRESHOLD } from './Island';
+  armorDurabilityStore, emptySlotCount,DURABILITY_THRESHOLD } from './Island';
 import { get } from 'svelte/store';
 
+const INVENTORY_FULL_COOLDOWN_MS = 30000; 
 const CLIENT_NAME = "RiseLB";
 const CLIENT_VERSION = "1.6.1";
 const UPDATE_INTERVAL_MS = 50;
@@ -27,7 +28,9 @@ const ALERT_DISPLAY_DURATION_MS = 2500;
 const ARMOR_ALERT_DURABILITY_COOLDOWN_MS = 15000;
 const ANIMATION_DURATION_MS = 300;
 const DURABILITY_COOLDOWN_MS = 1000;
-type AlertType = 'health' | 'air' | 'blocks' | 'hunger' | 'saturation' | 'armor' | 'durability' | null;
+type AlertType =
+    'health' | 'air' | 'blocks' | 'hunger' | 
+    'saturation' | 'armor' | 'durability' | 'inventory' | null;
 type AlertState = 'hidden' | 'showing' | 'hiding';
 type ContentType = 'alert' | 'greeting' | 'status';
 
@@ -45,7 +48,8 @@ let session: Session | null = null;
 let playerData: PlayerData | null = null;
 let showUsername = false;
 let currentAlert: Alert | null = null;
-
+let lastEmptySlotCount = 27;
+let lastInventoryFullAlertTime = 0;
 
 let time = "";
 let timeGreeting = "";
@@ -80,7 +84,12 @@ $: {
     checkArmorAlert($armorValue, playerData?.armor ?? 0);
   }
 }
-
+$: {
+    
+    if ($emptySlotCount !== undefined) {
+      checkInventoryFullAlert($emptySlotCount);
+    }
+  }
 const initialWidth = tweened(0, { duration: 400, easing: cubicOut });
 const initialOpacity = tweened(0, { duration: 400, easing: cubicOut });
 const w = tweened(400, { duration: 300, easing: cubicOut });
@@ -198,6 +207,18 @@ function checkFoodAlert(newFood: number): void {
   }
   lastFoodValue = newFood;
 }
+function checkInventoryFullAlert(emptySlots: number) {
+    const now = Date.now();
+    if (
+      emptySlots === 0 &&
+      lastEmptySlotCount > 0 &&
+      now - lastInventoryFullAlertTime > INVENTORY_FULL_COOLDOWN_MS
+    ) {
+      showAlert('inventory', 'Inventory Full', 'You cannot bring anything further!');
+      lastInventoryFullAlertTime = now;
+    }
+    lastEmptySlotCount = emptySlots;
+  }
 function checkArmorDurability() {
   const armor = get(armorDurabilityStore);
   const slots = ['helmet', 'chestplate', 'leggings', 'boots'] as const;
@@ -379,6 +400,7 @@ listen("playerData", (event: ClientPlayerDataEvent) => {
   checkHealthAlert(event.playerData.actualHealth);
   checkAirAlert(event.playerData.air);
   checkFoodAlert(event.playerData.food);
+
   checkArmorDurability()
   if ($blockCount !== undefined) 
   checkBlockAlert($blockCount);
@@ -592,7 +614,12 @@ filter:
   brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
   drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
 }
+&.inventory.icon img{
 
+filter: 
+  brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
+  drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
+}
 &.blocks .icon img{
 
   filter: 
@@ -635,6 +662,7 @@ filter:
       &.armor{ background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
       &.durability{ background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
       &.saturation { background: linear-gradient(90deg, #ff640a, #ffab5e); }
+      &.inventory{ background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
     }
   }
   .text {
@@ -676,6 +704,15 @@ filter:
     }
   }
   &.durability{
+    .title { 
+      color: #ff9f0a;
+      background: linear-gradient(90deg, #ff9f0a, #ffd60a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+  &.inventory { 
     .title { 
       color: #ff9f0a;
       background: linear-gradient(90deg, #ff9f0a, #ffd60a);

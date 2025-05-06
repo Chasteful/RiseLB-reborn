@@ -1,9 +1,10 @@
 
-import { writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 import type { TextComponent } from '../../../integration/types';
 
 export const blockCount = writable<number | undefined>(undefined);
-
+export let emptySlotCount = writable(27);
+export const isInventoryFull = derived(emptySlotCount, $count => $count === 0);
 export const armorValue = writable<number |undefined>(undefined);
 
 export const armorThreshold = 4 ;
