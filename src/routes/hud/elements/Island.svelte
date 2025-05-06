@@ -24,7 +24,7 @@ const CLIENT_NAME = "RiseLB";
 const CLIENT_VERSION = "1.6.1";
 const UPDATE_INTERVAL_MS = 50;
 const ALERT_DISPLAY_DURATION_MS = 2500;
-const ARMOR_ALERT_DURABILITY_COOLDOWN_MS = 10000;
+const ARMOR_ALERT_DURABILITY_COOLDOWN_MS = 15000;
 const ANIMATION_DURATION_MS = 300;
 const DURABILITY_COOLDOWN_MS = 1000;
 type AlertType = 'health' | 'air' | 'blocks' | 'hunger' | 'saturation' | 'armor' | 'durability' | null;
@@ -73,6 +73,11 @@ const contentRefs = {
 $: {
   if ($blockCount !== undefined) {
     checkBlockAlert($blockCount);
+  }
+}
+$: {
+  if ($armorValue !== undefined) {
+    checkArmorAlert($armorValue, playerData?.armor ?? 0);
   }
 }
 
@@ -432,7 +437,7 @@ class:notification-active={currentAlert !== null}
           <span class="time gradient-text">{time}</span>
           {#if session && showUsername}
             <div class="separator"></div>
-            <span class="username gradient-text">User: {$armorValue}</span>
+            <span class="username gradient-text">User: {session.username}</span>
           {/if}
         {/if}
       </div>

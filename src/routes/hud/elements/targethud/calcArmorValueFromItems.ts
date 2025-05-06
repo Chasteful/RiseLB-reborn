@@ -1,4 +1,3 @@
-import type { TargetChangeEvent } from "../../../../integration/events";
 import type { ItemStack } from "../../../../integration/types"; 
     
     export interface Target {
@@ -10,17 +9,6 @@ import type { ItemStack } from "../../../../integration/types";
         feet?: ItemStack;
       };
     }
-    function updateTargetArmor(target: Target) {
-        const items: ItemStack[] = [
-          target.equipment.head,
-          target.equipment.chest,
-          target.equipment.legs,
-          target.equipment.feet,
-        ].filter(Boolean) as ItemStack[];
-      
-        target.armor = calcArmorValueFromItems(items);
-      }
-
 export function calcArmorValueFromItems(items: ItemStack[]): number {
   if (!items || items.length === 0) return 0;
 

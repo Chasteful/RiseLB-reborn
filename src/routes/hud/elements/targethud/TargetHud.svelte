@@ -11,6 +11,11 @@
     let displayHealth = 0;
     let animationFrameId: number | null = null;
     let target: PlayerData | null = null;
+    
+    let lastNotifiedArmor: number | undefined;
+    let clearArmorTimer: ReturnType<typeof setTimeout>;
+      
+
     let visible = true;
     let lastHealth: number | null = null;
     let hideTimeout: ReturnType<typeof setTimeout>;
@@ -29,6 +34,7 @@
     const PARTICLE_FADE_TIME = 500; 
     const PARTICLE_COUNT = 10;
     const PARTICLE_SPAWN_COOLDOWN = 470; 
+    const CLEAR_DELAY = 10_000; 
 interface Particle {
     id: number;
     x: number;
@@ -199,11 +205,23 @@ onDestroy(() => {
 
     }
     listen("targetChange", (data: TargetChangeEvent) => {
-  const now = Date.now();
+      const now = Date.now();
+      const t = data.target;
   const newTarget = data.target;
   target = newTarget;
   visible = true;
-
+  const newArmor = t
+    ? calcArmorValueFromItems(t.armorItems)
+    : undefined;
+    clearTimeout(clearArmorTimer);
+  clearArmorTimer = setTimeout(() => {
+    armorValue.set(undefined);
+    lastNotifiedArmor =  undefined;
+  }, CLEAR_DELAY);
+  if (newArmor !== lastNotifiedArmor) {
+    armorValue.set(newArmor);
+    lastNotifiedArmor = newArmor;
+  }
   if (newTarget) {
     updateTargetArmorValue(data); 
     armorValue.set(Math.floor(newTarget.armor));
