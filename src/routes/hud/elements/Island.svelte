@@ -24,7 +24,7 @@ const CLIENT_NAME = "RiseLB";
 const CLIENT_VERSION = "1.6.1";
 const UPDATE_INTERVAL_MS = 50;
 const ALERT_DISPLAY_DURATION_MS = 2500;
-const ARMOR_ALERT_DURABILITY_COOLDOWN_MS_MS = 10000;
+const ARMOR_ALERT_DURABILITY_COOLDOWN_MS = 10000;
 const ANIMATION_DURATION_MS = 300;
 const DURABILITY_COOLDOWN_MS = 1000;
 type AlertType = 'health' | 'air' | 'blocks' | 'hunger' | 'saturation' | 'armor' | 'durability' | null;
@@ -39,14 +39,13 @@ interface Alert {
 
 }
 const warnedSlots = new Map<string, number>();
-let lastArmorValue:number | undefined = undefined;
 let alertState: AlertState = 'hidden';
 let clientInfo: ClientInfo | null = null;
 let session: Session | null = null;
 let playerData: PlayerData | null = null;
 let showUsername = false;
 let currentAlert: Alert | null = null;
-let lastArmorAlertTime = 0;
+
 
 let time = "";
 let timeGreeting = "";
@@ -62,6 +61,8 @@ let isMounted = true;
 let currentContent: ContentType = 'greeting';
 let nextContent: ContentType | null = null;
 let nextContentWidth = 0;
+let lastArmorAlertTime = 0;
+
 let animationPhase: 'idle' | 'contract' | 'expand' = 'idle';
 let wrapper: HTMLDivElement | null = null;
 const contentRefs = {
@@ -222,22 +223,21 @@ function checkArmorDurability() {
     }
   }
 }
-function checkArmorAlert(targetArmor: number | undefined, playerArmor: number | undefined): void {
-  if (targetArmor === undefined || playerArmor === undefined) return;
+function checkArmorAlert(targetArmor: number | undefined, playerArmor: number ): void {
+  if (targetArmor === undefined) return;
 
   const now = Date.now();
   const threshold = armorThreshold + playerArmor;
 
   if (
     targetArmor > threshold &&
-    (now - lastArmorAlertTime > ARMOR_ALERT_DURABILITY_COOLDOWN_MS_MS)
+    (now - lastArmorAlertTime > ARMOR_ALERT_DURABILITY_COOLDOWN_MS)
   ) {
-    showAlert('armor', 'Disadvantage', `You're at an disadvantage of armor!`);
+    showAlert('armor', 'High Armor Alert', `You're at an equipment disadvantage!`);
     lastArmorAlertTime = now;
   }
-
-  lastArmorValue = targetArmor;
 }
+
 function checkBlockAlert(newBlock: number | undefined): void {
   if (newBlock === undefined) return;
   
@@ -251,21 +251,25 @@ async function updateSession() {
   sessionLoaded = true;  
 }
 
-async function updatePlayerData(): Promise<void> {
+  async function updatePlayerData() {
   const newData = await getPlayerData();
   if (!newData) return;
+
   checkHealthAlert(newData.actualHealth);
   checkAirAlert(newData.air);
   checkFoodAlert(newData.food);
-  
-  if ($armorValue !== null) {
-    checkArmorAlert($armorValue, newData.armor);
+  if ($armorValue !== undefined) {
+
+checkArmorAlert($armorValue, newData.armor);
+
   }
-  
   playerData = newData;
 }
 
 async function updateAllData(): Promise<void> {
+  const newData = await getPlayerData();
+  if (!newData) return;
+
   clientInfo = await getClientInfo();
   updateTime();  
   session = await getSession();
@@ -273,9 +277,11 @@ async function updateAllData(): Promise<void> {
   await checkUsernameVisibility();
   await updatePlayerData();
   timeLoaded = true;
+  
   if (!currentAlert && wrapper) {
     w.set(wrapper.scrollWidth + 32);
   }
+
 }
 
 async function switchContent(type: ContentType) {
@@ -297,14 +303,29 @@ async function switchContent(type: ContentType) {
 
 async function handleInitialAnimationEnd() {
   await waitUntilNoAlert();
+  
+ 
+  while (!sessionLoaded || !session || !timeLoaded || !showUsername) {
+    await new Promise((res) => setTimeout(res, 50));
+  }
+
+  await tick(); 
+
+  const greetingEl = contentRefs.greeting;
+  while (!greetingEl || greetingEl.scrollWidth === 0) {
+    await tick(); 
+  }
+
   if (!isMounted) return;
-  
+
   await new Promise((res) => setTimeout(res, 1500));
-  
+
   initialAnimation = false;
   initialAnimationDone = true;
+
   await switchContent('status');
 }
+
 
 $: {
   if (nextContent) {
@@ -354,10 +375,10 @@ listen("playerData", (event: ClientPlayerDataEvent) => {
   checkAirAlert(event.playerData.air);
   checkFoodAlert(event.playerData.food);
   checkArmorDurability()
-  if ($blockCount !== undefined) checkBlockAlert($blockCount);
-  
-  if ($armorValue !== null) {
-    checkArmorAlert($armorValue, event.playerData.armor);
+  if ($blockCount !== undefined) 
+  checkBlockAlert($blockCount);
+  if ($armorValue !== undefined) {
+  checkArmorAlert($armorValue, event.playerData.armor);
   }
   playerData = event.playerData;
 });
@@ -396,9 +417,10 @@ class:notification-active={currentAlert !== null}
            in:fade={{ duration: 150 }} 
            bind:this={contentRefs.greeting}>
         <span class="greeting gradient-text">{timeGreeting}</span>
-        {#if sessionLoaded && session && showUsername}
-          <span class="username gradient-text">&nbsp;{session.username}~</span>
-        {/if}
+        {#if sessionLoaded && session !== null && showUsername}
+        <span class="username gradient-text">&nbsp;{session.username}~</span>
+      {/if}
+      
       </div>
     {:else}
       <div class="status-content" 
@@ -410,7 +432,7 @@ class:notification-active={currentAlert !== null}
           <span class="time gradient-text">{time}</span>
           {#if session && showUsername}
             <div class="separator"></div>
-            <span class="username gradient-text">User: {session.username}</span>
+            <span class="username gradient-text">User: {$armorValue}</span>
           {/if}
         {/if}
       </div>

@@ -190,6 +190,7 @@ export interface Scoreboard {
 }
 
 export interface PlayerData {
+    name: any;
     username: string;
     uuid: string;
     position: Vec3;

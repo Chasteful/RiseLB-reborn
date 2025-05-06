@@ -4,8 +4,9 @@ import type { TextComponent } from '../../../integration/types';
 
 export const blockCount = writable<number | undefined>(undefined);
 
-export const armorValue = writable<number | null>(null);
-export const armorThreshold = 4;
+export const armorValue = writable<number |undefined>(undefined);
+
+export const armorThreshold = 4 ;
 interface ArmorSlot {
     identifier: string;
     durability: number;

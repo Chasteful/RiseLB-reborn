@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
     export let src = 'img/lb-logo.svg';
-    export let size = 250;
+    export let size = 225;
     // svelte-ignore export_let_unused
     export let className = '';
     export let accentColor1 = 'rgb(173, 83, 137)';

@@ -5,7 +5,9 @@
     import { elasticOut, quintOut } from "svelte/easing";
     import { onMount, onDestroy } from "svelte";
     import ArmorStatus from "./ArmorStatus.svelte";
+    import { calcArmorValueFromItems } from "./calcArmorValueFromItems"
     import { armorValue } from '../../../hud/elements/Island';
+    import type { TargetChangeEvent } from "../../../../integration/events.js";
     let displayHealth = 0;
     let animationFrameId: number | null = null;
     let target: PlayerData | null = null;
@@ -152,7 +154,6 @@ function spawnParticles(hurtTimeTick = 1) {
         });
     }
 }
-
 function updateParticles() {
     const now = Date.now();
     particles = particles.map(p => {
@@ -171,6 +172,12 @@ function updateParticles() {
     }).filter(p => now - p.bornAt < PARTICLE_LIFETIME && p.opacity > 0.01);
     animationFrame = requestAnimationFrame(updateParticles);
 }
+
+function updateTargetArmorValue(event: TargetChangeEvent) {
+        if (!event.target) return;
+      
+        event.target.armor = calcArmorValueFromItems(event.target.armorItems);
+      }
 onMount(() => {
     updateParticles();
     spawnParticles(1);
@@ -183,46 +190,55 @@ onMount(() => {
 onDestroy(() => {
     cancelAnimationFrame(animationFrame);
     clearInterval(hurtTimeTick);  });
+
     function startHideTimeout() {
         clearTimeout(hideTimeout);
         hideTimeout = setTimeout(() => {
             visible = false;
         }, 1500);
+
     }
-    listen("targetChange", (data: { target: PlayerData | null; }) => {
-    const now = Date.now();
-    const newTarget = data.target;
-    target = newTarget;
-    visible = true;
-    if (newTarget) {
-                 if (now - lastAttackTime >= ATTACK_COOLDOWN) {
-            attacked = true;
-            setTimeout(() => attacked = false, 450);
-            lastAttackTime = now;
-            armorValue.set(newTarget.armor);
-          } else {
-      armorValue.set(null);
-    }  
-                 if (lastHealth !== null && newTarget.actualHealth < lastHealth) {
-            simulatedHurtTime = Math.max(simulatedHurtTime, 10);
-                         const avatar = document.querySelector('.avatar') as HTMLElement | null;
-            if (avatar) {
-                avatar.classList.remove('hurt');
-                void avatar.offsetWidth;
-                avatar.classList.add('hurt');
-            }
-            const damage = lastHealth - newTarget.actualHealth;
-            spawnParticles(Math.min(damage / 10, 5));
-        }
-        animateHealth(newTarget.actualHealth);
-    } else {
-        displayHealth = 0;
+    listen("targetChange", (data: TargetChangeEvent) => {
+  const now = Date.now();
+  const newTarget = data.target;
+  target = newTarget;
+  visible = true;
+
+  if (newTarget) {
+    updateTargetArmorValue(data); 
+    armorValue.set(Math.floor(newTarget.armor));
+
+    if (now - lastAttackTime >= ATTACK_COOLDOWN) {
+      attacked = true;
+      setTimeout(() => attacked = false, 450);
+      lastAttackTime = now;
     }
-    lastHealth = newTarget?.actualHealth ?? null;
-    startHideTimeout();
-    lastArmor = newTarget?.armor ?? null;
-    startHideTimeout();
-  });
+
+    if (lastHealth !== null && newTarget.actualHealth < lastHealth) {
+      simulatedHurtTime = Math.max(simulatedHurtTime, 10);
+      const avatar = document.querySelector('.avatar') as HTMLElement | null;
+      if (avatar) {
+        avatar.classList.remove('hurt');
+        void avatar.offsetWidth;
+        avatar.classList.add('hurt');
+      }
+      const damage = lastHealth - newTarget.actualHealth;
+      spawnParticles(Math.min(damage / 10, 5));
+    }
+
+    animateHealth(newTarget.actualHealth);
+  } else {
+    armorValue.set(undefined);
+    displayHealth = 0;
+  }
+
+  lastHealth = newTarget?.actualHealth ?? null;
+  lastArmor = newTarget?.armor ?? null;
+  startHideTimeout();
+});
+
+
+
 
 </script>
 {#if visible && target}
