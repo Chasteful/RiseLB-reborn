@@ -1,2 +1,3 @@
 # RiseLB-reborn
-A Base on Catppuccin LiquidBounceNextGen Theme
+
+It's not just that the theme has been modified.
