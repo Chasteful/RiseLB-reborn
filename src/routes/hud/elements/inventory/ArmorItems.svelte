@@ -7,6 +7,36 @@
   import { getPlayerInventory, getPlayerData } from "../../../../integration/rest";
   import { fly } from "svelte/transition";
   import { expoInOut } from "svelte/easing";
+  import { armorDurabilityStore } from '../../elements/Island';
+
+  $: if (armorSlots) {
+    armorDurabilityStore.set({
+      helmet: armorSlots[0]?.identifier !== 'minecraft:air' ? {
+        identifier: armorSlots[0].identifier,
+        displayName: armorSlots[0].displayName,   
+        durability: armorSlots[0].maxDamage - armorSlots[0].damage,
+        maxDurability: armorSlots[0].maxDamage
+      } : null,
+      chestplate: armorSlots[1]?.identifier !== 'minecraft:air' ? {
+        identifier: armorSlots[1].identifier,
+        displayName: armorSlots[1].displayName,
+        durability: armorSlots[1].maxDamage - armorSlots[1].damage,
+        maxDurability: armorSlots[1].maxDamage
+      } : null,
+      leggings: armorSlots[2]?.identifier !== 'minecraft:air' ? {
+        identifier: armorSlots[2].identifier,
+        displayName: armorSlots[2].displayName,
+        durability: armorSlots[2].maxDamage - armorSlots[2].damage,
+        maxDurability: armorSlots[2].maxDamage
+      } : null,
+      boots: armorSlots[3]?.identifier !== 'minecraft:air' ? {
+        identifier: armorSlots[3].identifier,
+        displayName: armorSlots[3].displayName,
+        durability: armorSlots[3].maxDamage - armorSlots[3].damage,
+        maxDurability: armorSlots[3].maxDamage
+      } : null
+    });
+  }
   const EMPTY_SLOT: ItemStack = {
   identifier: "minecraft:air",
   count: 0,
@@ -15,7 +45,7 @@
   displayName: "Air",
   hasEnchantment: false
 };
-  let armorSlots: ItemStack[] = Array(36).fill(EMPTY_SLOT);
+  export let armorSlots: ItemStack[] = Array(36).fill(EMPTY_SLOT);
   let offHand: ItemStack = EMPTY_SLOT;
   let selectedSlot = 0;
   function updatePlayerData(newData: PlayerData) {
@@ -32,13 +62,17 @@
     updatePlayerData(event.playerData);
   });
   onMount(async () => {
+  try {
     const [inventory, playerData] = await Promise.all([
-      getPlayerInventory(),
-      getPlayerData()
+      getPlayerInventory().catch(e => null),
+      getPlayerData().catch(e => null)
     ]);
-    updateInventory(inventory);
-    updatePlayerData(playerData);
-  });
+    if (inventory) updateInventory(inventory);
+    if (playerData) updatePlayerData(playerData);
+  } catch (e) {
+    console.error("Failed to load player data:", e);
+  }
+});
   function shouldShowSlot(stack: ItemStack): boolean {
     return stack.identifier !== "minecraft:air" && stack.count > 0;
   }
