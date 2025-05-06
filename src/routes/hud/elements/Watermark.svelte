@@ -1,16 +1,11 @@
-<span class="watermark-container">
+
   <span class="watermark">Aurora</span>
   <span class="watermark-small">1.6</span>
-</span>
+
 
 <style lang="scss">
 @import "../../../colors.scss";
-$Speed: 8s;
 
-.watermark-container {
-  position: relative;
-  display: inline-block;
-}
 
 .watermark {
   font-family: 'Greycliff CF Bold';
@@ -32,19 +27,11 @@ $Speed: 8s;
 
 .watermark-small {
   position: absolute;
-  right: -25;
+  font-family: 'Greycliff CF Bold';
+  right: 0;
   top: 0;
   font-size: 20px; 
-  color: transparent;
-  background: linear-gradient(
-    135deg,
-    $accent-color,
-    $accent-color-2,
-    $accent-color
-  );
-  background-size: 400% 400%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color:$accent-mix;
+  text-shadow:0 0 1px $accent-mix;
 }
 </style>

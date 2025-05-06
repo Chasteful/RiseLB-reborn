@@ -1,15 +1,94 @@
 <script lang="ts">
   import { expoInOut, quintOut } from "svelte/easing";
   import { scale, fade, fly } from "svelte/transition";
-  import { onMount } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
 
+
+  const dispatch = createEventDispatcher();
   let showLoader = false;
+
+
   
   onMount(() => {
-  
-    setTimeout(() => showLoader = true, 100);
+
+    setTimeout(() => {
+      showLoader = true;
+    }, 100);
+
+    setTimeout(() => {
+      dispatch('finish'); 
+    }, 4200); 
   });
+
 </script>
+
+<style lang="scss">
+  @use "../././../../colors.scss" as *;
+
+
+
+  @keyframes loading-bar {
+    0% {
+      width: 0;
+      background-size: 500px 62.5px;
+    }
+    100% {
+      width: 500px;
+    }
+  }
+
+
+  .wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 21000000000;
+  }
+
+  .bg-pattern {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #1C1B22;
+  }
+
+  .loader-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .loading-bar {
+    position: relative;
+    width: 500px;
+    height: 62.5px;
+    user-select: none;
+    overflow: hidden;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 500px;
+      left: 0;
+      filter: drop-shadow(0 -500px 0 #ece5d8);
+      width: 500px;
+      height: 62.5px;
+      background: url("https://yuanshen.site/imgs/loading-bar.png") no-repeat left 100%;
+      background-size: 500px 62.5px;
+      background-position-x: 0;
+      animation: loading-bar 3.5s ease-out infinite forwards;
+    }
+  }
+</style>
 
 <div class="wrapper" 
      in:fly={{ y: -50, duration: 800, easing: quintOut }}
@@ -17,124 +96,17 @@
   
   <!-- svelte-ignore element_invalid_self_closing_tag -->
   <div class="bg-pattern" 
-       in:scale={{ duration: 1200, easing: expoInOut, delay: 200 }} 
-       out:scale={{ duration: 600, easing: expoInOut }} />
+       in:fade={{ duration: 1200, easing: expoInOut, delay: 200 }} 
+       out:fade={{ duration: 600, easing: expoInOut }} />
   
   {#if showLoader}
     <div class="loader-wrapper" 
          in:fly={{ y: 20, duration: 800, easing: quintOut, delay: 200 }}
          out:scale={{ duration: 600, easing: expoInOut }}>
-      <div class="lds-ring">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
+      <div class="loading-bar" role="presentation" aria-hidden="true">
+        <!-- Using a data attribute instead of longdesc -->
+ 
       </div>
-      <div class="loading-text" in:fade={{ delay: 600 }}>Loading...</div>
     </div>
   {/if}
 </div>
-
-<style lang="scss">
-  @use "../././../../colors.scss" as *;
-
-  .wrapper {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    background-color:transparent;
-  }
-
-  .bg-pattern {
-  background: 
-    radial-gradient(circle at center, transparent 0%, $base 70%),
-    linear-gradient(to right, $mauve, $blue);
-  animation: bgPulse 8s ease infinite;
-}
-
-@keyframes bgPulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
-}
-
-  .loader-wrapper {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .loading-text {
-    color: $text;
-    font-size: 1rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  .lds-ring,
-  .lds-ring div {
-    box-sizing: border-box;
-    position: relative;
-    color: $mauve;
-  }
-  
-  .lds-ring {
-    display: inline-block;
-    width: 64px;
-    height: 64px;
-    filter: drop-shadow(0 0 8px rgba($mauve, 0.4));
-  }
-  
-  .lds-ring div {
-    box-sizing: border-box;
-    display: block;
-    position: absolute;
-    width: 48px;
-    height: 48px;
-    margin: 8px;
-    border: 4px solid currentColor;
-    border-radius: 50%;
-    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    border-color: currentColor transparent transparent transparent;
-  }
-  
-  .lds-ring div:nth-child(1) {
-    animation-delay: -0.45s;
-  }
-  
-  .lds-ring div:nth-child(2) {
-    animation-delay: -0.3s;
-  }
-  
-  .lds-ring div:nth-child(3) {
-    animation-delay: -0.15s;
-  }
-
-  @keyframes lds-ring {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 0.8;
-      transform: scale(0.98);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.02);
-    }
-  }
-</style>

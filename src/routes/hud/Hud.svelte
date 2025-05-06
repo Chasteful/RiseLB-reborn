@@ -24,8 +24,9 @@
   import type { ComponentsUpdateEvent, ScaleFactorChangeEvent } from "../../integration/events";
   import StatusBar from "./elements/hotbar/StatusBar.svelte";
   import Message from "./elements/hotbar/Message.svelte";
-
+  import SplashScreen from '../menu/splash/SplashScreen.svelte';
   const baseResolution = { width: 1920, height: 1080 };
+  let splashDone = false;
   let hudZoom = 100;     
   let hotbarZoom = 100;   
   let components: Component[] = [];
@@ -70,7 +71,9 @@
   });
 
 </script>
-
+{#if !splashDone}
+  <SplashScreen on:finish={() => splashDone = true} />
+{:else}
 <div class="hud" style="zoom: {hudZoom}%">
   <div class="hud">
     {#each components as c (c.name)}
@@ -103,7 +106,7 @@
     {/each}
   </div>
 </div>
-
+{/if}
 
 <style lang="scss">
   @import "../../colors.scss";

@@ -24,7 +24,6 @@
         "/altmanager": AltManager,
         "/singleplayer": Singleplayer,
         "/proxymanager": ProxyManager,
-
         "/disconnected": Disconnected,
         "/browser": Browser
     };
