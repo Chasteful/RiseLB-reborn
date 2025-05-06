@@ -614,7 +614,7 @@ filter:
   brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
   drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
 }
-&.inventory.icon img{
+&.inventory .icon img{
 
 filter: 
   brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
