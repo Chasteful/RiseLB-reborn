@@ -24,9 +24,9 @@ const CLIENT_NAME = "RiseLB";
 const CLIENT_VERSION = "1.6.1";
 const UPDATE_INTERVAL_MS = 50;
 const ALERT_DISPLAY_DURATION_MS = 2500;
-const ARMOR_ALERT_COOLDOWN_MS = 10000;
+const ARMOR_ALERT_DURABILITY_COOLDOWN_MS_MS = 10000;
 const ANIMATION_DURATION_MS = 300;
-const COOLDOWN = 30;
+const DURABILITY_COOLDOWN_MS = 1000;
 type AlertType = 'health' | 'air' | 'blocks' | 'hunger' | 'saturation' | 'armor' | 'durability' | null;
 type AlertState = 'hidden' | 'showing' | 'hiding';
 type ContentType = 'alert' | 'greeting' | 'status';
@@ -209,7 +209,7 @@ function checkArmorDurability() {
     const ratio = item.durability / item.maxDurability;
     const lastTime = warnedSlots.get(slot) ?? 0;
 
-    if (ratio <= DURABILITY_THRESHOLD && now - lastTime > COOLDOWN) {
+    if (ratio <= DURABILITY_THRESHOLD && now - lastTime > DURABILITY_COOLDOWN_MS) {
       showAlert(
         'durability',
         `Durability Warn`,
@@ -230,7 +230,7 @@ function checkArmorAlert(targetArmor: number | undefined, playerArmor: number | 
 
   if (
     targetArmor > threshold &&
-    (now - lastArmorAlertTime > ARMOR_ALERT_COOLDOWN_MS)
+    (now - lastArmorAlertTime > ARMOR_ALERT_DURABILITY_COOLDOWN_MS_MS)
   ) {
     showAlert('armor', 'Disadvantage', `You're at an disadvantage of armor!`);
     lastArmorAlertTime = now;

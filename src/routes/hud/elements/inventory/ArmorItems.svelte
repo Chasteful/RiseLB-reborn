@@ -8,71 +8,78 @@
   import { fly } from "svelte/transition";
   import { expoInOut } from "svelte/easing";
   import { armorDurabilityStore } from '../../elements/Island';
+  import { get } from 'svelte/store';
+  function createEmptySlot(): ItemStack {
+  return {
+    identifier: "minecraft:air",
+    count: 0,
+    damage: 0,
+    maxDamage: 0,
+    displayName: "Air",
+    hasEnchantment: false
+  };
+}
 
-  $: if (armorSlots) {
-    armorDurabilityStore.set({
-      helmet: armorSlots[0]?.identifier !== 'minecraft:air' ? {
-        identifier: armorSlots[0].identifier,
-        displayName: armorSlots[0].displayName,   
-        durability: armorSlots[0].maxDamage - armorSlots[0].damage,
-        maxDurability: armorSlots[0].maxDamage
-      } : null,
-      chestplate: armorSlots[1]?.identifier !== 'minecraft:air' ? {
-        identifier: armorSlots[1].identifier,
-        displayName: armorSlots[1].displayName,
-        durability: armorSlots[1].maxDamage - armorSlots[1].damage,
-        maxDurability: armorSlots[1].maxDamage
-      } : null,
-      leggings: armorSlots[2]?.identifier !== 'minecraft:air' ? {
-        identifier: armorSlots[2].identifier,
-        displayName: armorSlots[2].displayName,
-        durability: armorSlots[2].maxDamage - armorSlots[2].damage,
-        maxDurability: armorSlots[2].maxDamage
-      } : null,
-      boots: armorSlots[3]?.identifier !== 'minecraft:air' ? {
-        identifier: armorSlots[3].identifier,
-        displayName: armorSlots[3].displayName,
-        durability: armorSlots[3].maxDamage - armorSlots[3].damage,
-        maxDurability: armorSlots[3].maxDamage
-      } : null
-    });
-  }
-  const EMPTY_SLOT: ItemStack = {
-  identifier: "minecraft:air",
-  count: 0,
-  damage: 0,
-  maxDamage: 0,
-  displayName: "Air",
-  hasEnchantment: false
-};
-  export let armorSlots: ItemStack[] = Array(36).fill(EMPTY_SLOT);
-  let offHand: ItemStack = EMPTY_SLOT;
+export let armorSlots: ItemStack[] = Array(4).fill(0).map(() => createEmptySlot());
+
+let offHand: ItemStack = createEmptySlot();
   let selectedSlot = 0;
+
+  function getDurabilityObj(item?: ItemStack | null) {
+    return item && item.identifier !== 'minecraft:air' ? {
+      identifier: item.identifier,
+      displayName: item.displayName,
+      durability: item.maxDamage - item.damage,
+      maxDurability: item.maxDamage
+    } : null;
+  }
+
+  function updateArmorDurability() {
+    const next = {
+      helmet: getDurabilityObj(armorSlots[0]),
+      chestplate: getDurabilityObj(armorSlots[1]),
+      leggings: getDurabilityObj(armorSlots[2]),
+      boots: getDurabilityObj(armorSlots[3])
+    };
+    const current = get(armorDurabilityStore);
+
+    if (JSON.stringify(current) !== JSON.stringify(next)) {
+      armorDurabilityStore.set(next);
+    }
+  }
+
   function updatePlayerData(newData: PlayerData) {
     selectedSlot = newData.selectedSlot;
-    offHand = newData.offHandStack || EMPTY_SLOT;
+    offHand = newData.offHandStack ? { ...newData.offHandStack } : createEmptySlot();
+    ;
   }
-  function updateInventory(inventory: PlayerInventory) {
-    armorSlots = inventory.armor.map(slot => slot || EMPTY_SLOT);
+
+function updateInventory(inventory: PlayerInventory) {
+  const newArmor = inventory.armor.map(slot => slot ? { ...slot } : createEmptySlot());
+
+  if (JSON.stringify(armorSlots) !== JSON.stringify(newArmor)) {
+    armorSlots = newArmor;
+    updateArmorDurability();
   }
+}
+
   listen("clientPlayerInventory", (event: PlayerInventoryEvent) => {
     updateInventory(event.inventory);
   });
+
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
     updatePlayerData(event.playerData);
   });
+
   onMount(async () => {
-  try {
     const [inventory, playerData] = await Promise.all([
-      getPlayerInventory().catch(e => null),
-      getPlayerData().catch(e => null)
+      getPlayerInventory(),
+      getPlayerData()
     ]);
-    if (inventory) updateInventory(inventory);
-    if (playerData) updatePlayerData(playerData);
-  } catch (e) {
-    console.error("Failed to load player data:", e);
-  }
-});
+    updateInventory(inventory);
+    updatePlayerData(playerData);
+  });
+
   function shouldShowSlot(stack: ItemStack): boolean {
     return stack.identifier !== "minecraft:air" && stack.count > 0;
   }
