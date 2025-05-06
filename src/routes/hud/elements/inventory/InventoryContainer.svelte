@@ -9,14 +9,15 @@
     import { fly } from "svelte/transition";
     import { emptySlotCount } from "../Island";
     let stacks: ItemStack[] = [];
-    let lastEmptySlotCount = 27;
     
     function updateStacks(inventory: PlayerInventory) {
         stacks = inventory.main.slice(9);
   
-        const emptySlots = stacks.filter(slot => 
-            !slot  || (slot.identifier && slot.identifier === "air")
-        ).length;
+        const emptySlots = stacks.filter(
+  slot => slot.identifier === "air" || slot.identifier === "minecraft:air"
+).length;
+
+
         emptySlotCount.set(emptySlots);
     }
 

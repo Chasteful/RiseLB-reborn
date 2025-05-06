@@ -48,7 +48,7 @@ let session: Session | null = null;
 let playerData: PlayerData | null = null;
 let showUsername = false;
 let currentAlert: Alert | null = null;
-let lastEmptySlotCount = 27;
+let lastEmptySlotCount = 36;
 let lastInventoryFullAlertTime = 0;
 
 let time = "";
@@ -211,7 +211,6 @@ function checkInventoryFullAlert(emptySlots: number) {
     const now = Date.now();
     if (
       emptySlots === 0 &&
-      lastEmptySlotCount > 0 &&
       now - lastInventoryFullAlertTime > INVENTORY_FULL_COOLDOWN_MS
     ) {
       showAlert('inventory', 'Inventory Full', 'You cannot bring anything further!');
@@ -468,344 +467,241 @@ class:notification-active={currentAlert !== null}
 </div>
 </div>
 <style lang="scss">
-@import "../../../colors.scss";
-@mixin text-ellipsis {
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
-.dynamic-island-container {
-position: fixed;
-top: 5px;
-left: 50%;
-transform: translateX(-50%);
-perspective: 1000px;
-filter: 
-  drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
-  drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2))
-  drop-shadow(0 16px 48px rgba(0, 0, 0, 0.15));
-
-}
-
-.dynamic-island {
-overflow: hidden;
-border-radius: 20px;
-background: rgba(20, 20, 20, 0.5);
-backdrop-filter: blur(12px) brightness(1.1);
-color: rgba(var(--text), 0.9);
-padding: 0 16px;
-display: flex;
-align-items: center;
-transition: 
-  width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-  height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-  border-radius 0.3s 0.1s cubic-bezier(0.4, 0, 0.2, 1),
-  box-shadow 0.3s ease;
-transform-style: preserve-3d;
-box-shadow: 
-  0 4px 16px rgba(0, 0, 0, 0.6),
-  inset 0 0 10px rgba(255, 255, 255, 0.05);
-
-&.expand {
-  border-radius: 16px;
-
-}
-
-&.showing {
-  transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
-}
-
-&.hiding {
-  transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-&.initial {
-  transform-origin: center;
-  animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
-
-  &:not(.showing):not(.hiding) {
-    transform-origin: center;
-    animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
-  }
-
-  .greeting-content {
-    justify-content: center;
-    opacity: 0;
-    animation: fadeIn 0.4s 0.3s forwards;
-  }
-}
-}
-
-.content-wrapper {
-width: 100%;
-display: flex;
-align-items: center;
-overflow: hidden;
-position: relative;
-}
-
-.greeting-content,
-.status-content {
-display: flex;
-align-items: center;
-gap: 8px;
-width: 100%;
-font-size: 14px;
-white-space: nowrap;
-
-.client, .greeting, .time,.username {
-  font-size: 20px;
-  letter-spacing: -0.25px;
-  flex-shrink: 0;   
-  color: #bbbbbb;
-  text-shadow: 0 0 3px rgba(170, 170, 170, 0.9);
-  font-feature-settings: "tnum";
-  font-variant-numeric: tabular-nums;
-}
-
-
-.separator {
-  width: 2px;
-  height: 14px;
-  background: linear-gradient(to bottom, transparent, rgba(($text), 0.7), transparent);
-  flex-shrink: 0; 
-  position: relative;
-}
-}
-
-.notification-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 4px 0;
-  position: relative;
-  .icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    filter: 
-      brightness(0) saturate(100%) invert(100%)
-      drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-  }
-}
-&.health .icon img {
-  filter: 
-    brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(340deg)
-    drop-shadow(0 0 5px rgba(255, 50, 50, 0.7));
-}
-&.air .icon img {
-  filter: 
-    brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(180deg)
-    drop-shadow(0 0 5px rgba(50, 150, 255, 0.7));
-}
-&.hunger .icon img {
-  filter: 
-    brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
-    drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
-}
-&.durability .icon img{
-
-filter: 
-  brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
-  drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
-}
-&.inventory .icon img{
-
-filter: 
-  brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
-  drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
-}
-&.blocks .icon img{
-
-  filter: 
-    brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
-    drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
-}
-&.armor .icon img{
-
-filter: 
-  brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
-  drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
-}
-&.saturation .icon img {
-  filter: 
-    brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(10deg)
-    drop-shadow(0 0 5px rgba(255, 100, 50, 0.7));
-}
-  .progress-bar-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 0 0 16px 16px;
+  @import "../../../colors.scss";
+  
+  @mixin text-ellipsis {
+    white-space: nowrap;
     overflow: hidden;
-    .progress-bar {
+    text-overflow: ellipsis;
+  }
+  
+  .dynamic-island-container {
+    position: fixed;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    perspective: 1000px;
+    filter: 
+      drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
+      drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2))
+      drop-shadow(0 16px 48px rgba(0, 0, 0, 0.15));
+  }
+  
+  .dynamic-island {
+    overflow: hidden;
+    border-radius: 20px;
+    background: rgba(20, 20, 20, 0.5);
+    backdrop-filter: blur(12px) brightness(1.1);
+    color: rgba(var(--text), 0.9);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    transition: 
+      width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+      height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+      border-radius 0.3s 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.3s ease;
+    transform-style: preserve-3d;
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.6),
+      inset 0 0 10px rgba(255, 255, 255, 0.05);
+  
+    &.expand {
+      border-radius: 16px;
+    }
+  
+    &.showing {
+      transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+    }
+  
+    &.hiding {
+      transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+  
+    &.initial {
+      transform-origin: center;
+      animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+  
+      &:not(.showing):not(.hiding) {
+        transform-origin: center;
+        animation: initialExpand 0.5s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+      }
+  
+      .greeting-content {
+        justify-content: center;
+        opacity: 0;
+        animation: fadeIn 0.4s 0.3s forwards;
+      }
+    }
+  }
+  
+  .content-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .greeting-content,
+  .status-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    font-size: 14px;
+    white-space: nowrap;
+  
+    .client, .greeting, .time, .username {
+      font-size: 20px;
+      letter-spacing: -0.25px;
+      flex-shrink: 0;   
+      color: #bbbbbb;
+      text-shadow: 0 0 3px rgba(170, 170, 170, 0.9);
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+    }
+  
+    .separator {
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(to bottom, transparent, rgba(($text), 0.7), transparent);
+      flex-shrink: 0; 
+      position: relative;
+    }
+  }
+  
+  .notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 4px 0;
+    position: relative;
+  
+    .icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+  
+    // 定义不同类型通知的颜色变量
+    $notification-types: (
+      health: (#ff453a, #ff8a80, 340deg, #ff453a),
+      air: (#2e90bd, #7fd1ff, 180deg, #2e90bd),
+      hunger: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
+      durability: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
+      inventory: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
+      blocks: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
+      armor: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
+      saturation: (#ff640a, #ffab5e, 10deg, #ff640a)
+    );
+  
+    // 循环生成不同类型通知的样式
+    @each $type, $colors in $notification-types {
+      $primary: nth($colors, 1);
+      $secondary: nth($colors, 2);
+      $hue-rotate: nth($colors, 3);
+      $text-color: nth($colors, 4);
+  
+      &.#{$type} {
+        .icon img {
+          filter: 
+            brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate($hue-rotate)
+            drop-shadow(0 0 5px rgba($primary, 0.7));
+        }
+  
+        .title {
+          background: linear-gradient(90deg, $primary, $secondary);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
+  
+        .progress-bar {
+          background: linear-gradient(90deg, $primary, $secondary);
+        }
+      }
+    }
+  
+    .progress-bar-container {
       position: absolute;
-      top: 0;
+      bottom: 0;
       left: 0;
       width: 100%;
-      height: 100%;
-      transform-origin: left center;
-      animation: progress 3s linear forwards;
-      box-shadow: 0 0 10px currentColor;
-      &.health { background: linear-gradient(90deg, #ff453a, #ff8a80); }
-      &.air { background: linear-gradient(90deg, #2e90bd, #7fd1ff); }
-      &.hunger { background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
-      &.blocks { background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
-      &.armor{ background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
-      &.durability{ background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
-      &.saturation { background: linear-gradient(90deg, #ff640a, #ffab5e); }
-      &.inventory{ background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
+      height: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 0 0 16px 16px;
+      overflow: hidden;
+  
+      .progress-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform-origin: left center;
+        animation: progress 3s linear forwards;
+        box-shadow: 0 0 10px currentColor;
+      }
+    }
+  
+    .text {
+      flex: 1;
+      min-width: 0;
+      
+      .title {
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 1.2;
+        @include text-ellipsis;
+        text-shadow: 0 0 5px currentColor;
+        animation: textGlow 2s infinite alternate;
+      }
+  
+      .description {
+        font-size: 12px;
+        color: rgba($text, 0.9);
+        @include text-ellipsis;
+        margin-top: 2px;
+        text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+      }
     }
   }
-  .text {
-    flex: 1;
-    min-width: 0;
-    
-    .title {
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 1.2;
-      @include text-ellipsis;
-      text-shadow: 0 0 5px currentColor;
-      animation: textGlow 2s infinite alternate;
+  
+  @keyframes progress {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+  
+  @keyframes initialExpand {
+    0% {
+      width: 0;
+      opacity: 0;
+      transform: scaleX(0.1);
     }
-    .description {
-      font-size: 12px;
-      color: rgba($text, 0.9);
-      @include text-ellipsis;
-      margin-top: 2px;
-      text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+    70% {
+      opacity: 1;
+      transform: scaleX(1.1);
+    }
+    100% {
+      transform: scaleX(1);
+      opacity: 1;
     }
   }
-  &.health { 
-    .title { 
-      color: #ff453a;
-      background: linear-gradient(90deg, #ff453a, #ff8a80);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-  &.air { 
-    .title { 
-      color: #2e90bd;
-      background: linear-gradient(90deg, #2e90bd, #7fd1ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+  
+  @keyframes textGlow {
+    0% { text-shadow: 0 0 5px currentColor; }
+    100% { text-shadow: 0 0 10px currentColor; }
   }
-  &.durability{
-    .title { 
-      color: #ff9f0a;
-      background: linear-gradient(90deg, #ff9f0a, #ffd60a);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-  }
-  &.inventory { 
-    .title { 
-      color: #ff9f0a;
-      background: linear-gradient(90deg, #ff9f0a, #ffd60a);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-  }
-  &.hunger { 
-    .title { 
-      color: #ff9f0a;
-      background: linear-gradient(90deg, #ff9f0a, #ffd60a);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-  }
-  &.blocks{
-  .title { 
-      color: #ff9f0a;
-      background: linear-gradient(90deg, #ff9f0a, #ffd60a);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-  }
-  &.armor{
-  .title { 
-      color: #ff9f0a;
-      background: linear-gradient(90deg, #ff9f0a, #ffd60a);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-  }
-  &.saturation { 
-    .title { 
-      color: #ff640a;
-      background: linear-gradient(90deg, #ff640a, #ffab5e);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-  }
-}
-@keyframes progress {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
-}
-@keyframes initialExpand {
-0% {
-  width: 0;
-  opacity: 0;
-  transform: scaleX(0.1);
-}
-70% {
-  opacity: 1;
-  transform: scaleX(1.1);
-}
-
-100% {
-  transform: scaleX(1);
-  opacity: 1;
-}
-}
-
-@keyframes fadeIn {
-from { opacity: 0; }
-to { opacity: 1; }
-}
-@keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
-  100% { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
-}
-@keyframes glowPulse {
-  0% { opacity: 0.5; }
-  100% { opacity: 0.9; }
-}
-@keyframes gradientFlow {
-  0% {
-  background-position: 0% 0%;
-}
-100% {
-  background-position: 200% 200%; 
-}
-}
-@keyframes separatorPulse {
-  0%, 100% { opacity: 0.7; height: 14px; }
-  50% { opacity: 1; height: 16px; }
-}
-@keyframes textGlow {
-  0% { text-shadow: 0 0 5px currentColor; }
-  100% { text-shadow: 0 0 10px currentColor; }
-}
-
-</style>
+  </style>
