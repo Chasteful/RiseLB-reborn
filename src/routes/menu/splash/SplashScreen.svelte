@@ -49,7 +49,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 21000000000;
   }
 
   .bg-pattern {
@@ -91,7 +90,6 @@
 </style>
 
 <div class="wrapper" 
-     in:fly={{ y: -50, duration: 800, easing: quintOut }}
      out:fade={{ duration: 400 }}>
   
   <!-- svelte-ignore element_invalid_self_closing_tag -->
