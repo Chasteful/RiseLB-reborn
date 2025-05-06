@@ -5,7 +5,7 @@
     import { elasticOut, quintOut } from "svelte/easing";
     import { onMount, onDestroy } from "svelte";
     import ArmorStatus from "./ArmorStatus.svelte";
-
+    import { armorValue } from '../../../hud/elements/Island';
     let displayHealth = 0;
     let animationFrameId: number | null = null;
     let target: PlayerData | null = null;
@@ -14,6 +14,7 @@
     let hideTimeout: ReturnType<typeof setTimeout>;
     let attacked = false;
     let particleId = 0;
+    let lastArmor: number | null = null;
     let particles: Particle[] = [];
     let animationFrame: number;
     let simulatedHurtTime = 0;
@@ -198,7 +199,10 @@ onDestroy(() => {
             attacked = true;
             setTimeout(() => attacked = false, 450);
             lastAttackTime = now;
-        }
+            armorValue.set(newTarget.armor);
+          } else {
+      armorValue.set(null);
+    }  
                  if (lastHealth !== null && newTarget.actualHealth < lastHealth) {
             simulatedHurtTime = Math.max(simulatedHurtTime, 10);
                          const avatar = document.querySelector('.avatar') as HTMLElement | null;
@@ -216,7 +220,9 @@ onDestroy(() => {
     }
     lastHealth = newTarget?.actualHealth ?? null;
     startHideTimeout();
-});
+    lastArmor = newTarget?.armor ?? null;
+    startHideTimeout();
+  });
 
 </script>
 {#if visible && target}

@@ -117,11 +117,6 @@ updatePlayerData(await getPlayerData());
   0 4px 16px rgba($base, 0.6),
   inset 0 0 10px rgba(255, 255, 255, 0.05);
     background: rgba($base, 0.5);
-    backdrop-filter: blur(12px) brightness(1.1);
-    filter: 
-  drop-shadow(0 4px 12px rgba($base, 0.3))
-  drop-shadow(0 8px 24px rgba($base, 0.2))
-  drop-shadow(0 16px 48px rgba($base, 0.15));
       border-radius: 16px;
       overflow: hidden;
   }

@@ -17,12 +17,12 @@
   let lastX = 0;
   let lastZ = 0;
   let session: Session | null = null;
-  const fpsAnimated = tweened(0, { duration: 500, easing: cubicOut });
+  const fpsAnimated = tweened(0, { duration: 300, easing: cubicOut });
   const fps = writable(0);
-  const bps = tweened(0, { duration: 500, easing: t => t });
-  const xPos = tweened(0, { duration: 500, easing: cubicOut });
-  const yPos = tweened(0, { duration: 500, easing: cubicOut });
-  const zPos = tweened(0, { duration: 500, easing: cubicOut });
+  const bps = tweened(0, { duration: 300, easing: cubicOut});
+  const xPos = tweened(0, { duration: 300, easing: cubicOut });
+  const yPos = tweened(0, { duration: 300, easing: cubicOut });
+  const zPos = tweened(0, { duration: 300, easing: cubicOut });
   function roundToDecimal(value: number, decimal: number) {
   const rounded = Math.round(value * Math.pow(10, decimal)) / Math.pow(10, decimal);
   return rounded.toFixed(decimal);
@@ -106,7 +106,6 @@
     text-shadow: 0 0 3px rgba(170, 170, 170, 0.9);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-
     will-change: transform;
   }
   .value {
@@ -133,7 +132,7 @@
   {#if clientInfo}
     {@const fpsValue = $fps.toString().padStart(3, " ")}
     <div class="stat">
-      <span class="label">FPS: </span> 
+      <span class="label">FPS:&nbsp;</span> 
       <span class="value">{fpsValue}</span>
     </div>
   {/if}
@@ -141,7 +140,7 @@
   {#if playerData}
     {@const bpsValue = roundToDecimal($bps, 2).toString().padStart(6, " ")}
     <div class="stat">
-      <span class="label">BPS: </span> 
+      <span class="label">BPS:&nbsp;</span> 
       <span class="value">{bpsValue}</span>
     </div>
     
@@ -149,7 +148,7 @@
     {@const y = formatCoordinate($yPos)}
     {@const z = formatCoordinate($zPos)}
     <div class="stat">
-      <span class="label">XYZ: </span>
+      <span class="label">XYZ:&nbsp;</span>
       <span class="value">{x}, {y}, {z}</span>
     </div>
   {/if}

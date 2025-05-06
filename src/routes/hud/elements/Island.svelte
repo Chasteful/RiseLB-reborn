@@ -16,14 +16,14 @@ import type {
 } from "../../../integration/types";
 import { tweened } from "svelte/motion";
 import { cubicOut } from "svelte/easing";
+import { blockCount,armorValue, armorThreshold } from './Island';
 
 const CLIENT_NAME = "RiseLB";
 const CLIENT_VERSION = "1.6.1";
 const UPDATE_INTERVAL_MS = 50;
 const ALERT_DISPLAY_DURATION_MS = 3000;
 const ANIMATION_DURATION_MS = 300;
-
-type AlertType = 'health' | 'air' | 'hunger' | 'saturation' | null;
+type AlertType = 'health' | 'air' | 'blocks' | 'hunger' | 'saturation' | 'armor' | null;
 type AlertState = 'hidden' | 'showing' | 'hiding';
 type ContentType = 'alert' | 'greeting' | 'status';
 
@@ -32,18 +32,21 @@ interface Alert {
   title: string;
   message: string;
 }
-
+let lastArmorValue:number | undefined = undefined;
 let alertState: AlertState = 'hidden';
 let clientInfo: ClientInfo | null = null;
 let session: Session | null = null;
 let playerData: PlayerData | null = null;
 let showUsername = false;
 let currentAlert: Alert | null = null;
+let lastArmorAlertTime = 0;
+const ARMOR_ALERT_COOLDOWN_MS = 10000;
 let time = "";
 let timeGreeting = "";
 let lastHealthValue = 20;
 let lastAirValue = 300;
 let lastFoodValue = 20;
+let lastBlockValue: number | undefined = undefined;
 let initialAnimation = true;
 let sessionLoaded = false;
 let initialAnimationDone = false;
@@ -60,6 +63,11 @@ const contentRefs = {
   greeting: null as HTMLDivElement | null,
   status: null as HTMLDivElement | null
 };
+$: {
+  if ($blockCount !== undefined) {
+    checkBlockAlert($blockCount);
+  }
+}
 
 const initialWidth = tweened(0, { duration: 400, easing: cubicOut });
 const initialOpacity = tweened(0, { duration: 400, easing: cubicOut });
@@ -178,7 +186,30 @@ function checkFoodAlert(newFood: number): void {
   }
   lastFoodValue = newFood;
 }
+function checkArmorAlert(targetArmor: number | undefined, playerArmor: number | undefined): void {
+  if (targetArmor === undefined || playerArmor === undefined) return;
 
+  const now = Date.now();
+  const threshold = armorThreshold + playerArmor;
+
+  if (
+    targetArmor > threshold &&
+    (now - lastArmorAlertTime > ARMOR_ALERT_COOLDOWN_MS)
+  ) {
+    showAlert('armor', 'Disadvantage', `You're at an disadvantage of armor!`);
+    lastArmorAlertTime = now;
+  }
+
+  lastArmorValue = targetArmor;
+}
+function checkBlockAlert(newBlock: number | undefined): void {
+  if (newBlock === undefined) return;
+  
+  if (newBlock < 16 && (lastBlockValue === undefined || lastBlockValue >= 16)) {
+    showAlert('blocks', 'Low Blocks', ` You've only got ${newBlock} blocks left,Take heed!`);
+  } 
+  lastBlockValue = newBlock;
+}
 async function updateSession() {
   session = await getSession();
   sessionLoaded = true;  
@@ -190,6 +221,11 @@ async function updatePlayerData(): Promise<void> {
   checkHealthAlert(newData.actualHealth);
   checkAirAlert(newData.air);
   checkFoodAlert(newData.food);
+  
+  if ($armorValue !== null) {
+    checkArmorAlert($armorValue, newData.armor);
+  }
+  
   playerData = newData;
 }
 
@@ -281,8 +317,14 @@ listen("playerData", (event: ClientPlayerDataEvent) => {
   checkHealthAlert(event.playerData.actualHealth);
   checkAirAlert(event.playerData.air);
   checkFoodAlert(event.playerData.food);
+  if ($blockCount !== undefined) checkBlockAlert($blockCount);
+  
+  if ($armorValue !== null) {
+    checkArmorAlert($armorValue, event.playerData.armor);
+  }
   playerData = event.playerData;
 });
+
 </script>
 
 <div class="dynamic-island-container">
@@ -405,28 +447,7 @@ box-shadow:
   }
 }
 }
-@property --text-color {
-    syntax: "<color>";
-    inherits: false;
-    initial-value: #cdd6f4;
-  }
 
-  @property --accent-color {
-    syntax: "<color>";
-    inherits: false;
-    initial-value: rgb(173, 83, 137);
-  }
-
-  @keyframes gradientFlow {
-    50% {
-      --text-color: rgb(173, 83, 137);
-      --accent-color: #cdd6f4;
-    }
-    100% {
-      --text-color: #cdd6f4;
-      --accent-color: rgb(173, 83, 137);
-    }
-  }
 .content-wrapper {
 width: 100%;
 display: flex;
@@ -447,12 +468,9 @@ white-space: nowrap;
 .client, .greeting, .time,.username {
   font-size: 20px;
   letter-spacing: -0.25px;
-  background-clip: text;
   flex-shrink: 0;   
-  -webkit-background-clip: text;
-  color:  #ffffff;
-  background-size: 200% 200%;
-  font-weight: bold;
+  color: #bbbbbb;
+  text-shadow: 0 0 3px rgba(170, 170, 170, 0.9);
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
 }
@@ -502,6 +520,18 @@ white-space: nowrap;
     brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
     drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
 }
+&.blocks .icon img{
+
+  filter: 
+    brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
+    drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
+}
+&.armor .icon img{
+
+filter: 
+  brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(30deg)
+  drop-shadow(0 0 5px rgba(255, 180, 50, 0.7));
+}
 &.saturation .icon img {
   filter: 
     brightness(0.8) saturate(200%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(10deg)
@@ -528,6 +558,8 @@ white-space: nowrap;
       &.health { background: linear-gradient(90deg, #ff453a, #ff8a80); }
       &.air { background: linear-gradient(90deg, #2e90bd, #7fd1ff); }
       &.hunger { background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
+      &.blocks { background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
+      &.armor{ background: linear-gradient(90deg, #ff9f0a, #ffd60a); }
       &.saturation { background: linear-gradient(90deg, #ff640a, #ffab5e); }
     }
   }
@@ -571,6 +603,24 @@ white-space: nowrap;
   }
   &.hunger { 
     .title { 
+      color: #ff9f0a;
+      background: linear-gradient(90deg, #ff9f0a, #ffd60a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+  &.blocks{
+  .title { 
+      color: #ff9f0a;
+      background: linear-gradient(90deg, #ff9f0a, #ffd60a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+  &.armor{
+  .title { 
       color: #ff9f0a;
       background: linear-gradient(90deg, #ff9f0a, #ffd60a);
       -webkit-background-clip: text;

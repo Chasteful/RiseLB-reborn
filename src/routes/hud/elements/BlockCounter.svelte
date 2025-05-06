@@ -5,12 +5,14 @@
   import { listen } from "../../../integration/ws";
   import { getPlayerData } from "../../../integration/rest";
   import { onMount } from "svelte";
-
+  import { blockCount } from './Island';
   let playerData: PlayerData | null = null;
   let count: number | undefined;
   listen("blockCountChange", (e: BlockCountChangeEvent) => {
-    count = e.count;
-  });
+  count = e.count;
+  blockCount.set(e.count);
+});
+
   listen("clientPlayerData", (e: ClientPlayerDataEvent) => {
   playerData = e.playerData;
 });
@@ -117,7 +119,6 @@
     user-select: none;
     box-shadow:
       0 0 16px rgba(20,20, 20, 0.6);
-    animation: glow 2s infinite alternate;
   }
   .count {
     font-size: 16px;

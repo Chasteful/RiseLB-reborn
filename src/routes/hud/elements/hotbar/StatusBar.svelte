@@ -5,70 +5,18 @@
   import type { ClientPlayerDataEvent } from "../../../../integration/events";
   import type { PlayerData } from "../../../../integration/types";
   import Status from "./Status.svelte";
-  import { TimeoutManager } from "./TimeoutManager";
-    import { fade } from "svelte/transition";
+  import { fade } from "svelte/transition";
 
   let playerData: PlayerData | null = null;
-  let currentSlot = 0;
-  let lastSlot = 0;
-  let showItemStackName = false;
-  const timeouts = new TimeoutManager();
-  let maxAbsorption = 0;
-  const ITEM_NAME_TIMEOUT = 2000;
-
-  type BarAnimation = {
-    from: number;
-    to: number;
-    max: number;
-    color: string;
-  };
   type BarKey = 'armor' | 'air' | 'food';
-
-  let barAnimations: Record<BarKey, BarAnimation | null> = {
-    armor: null,
-    food: null,
-    air: null
-  };
-
   const barColors: Record<BarKey, string> = {
     armor: "#49EAD6",
     air: "#AAC1E3",
     food: "#B88458"
   };
 
-  function maybeAnimateBar(key: BarKey, from: number | undefined, to: number | undefined, max: number | undefined) {
-    if (from !== undefined && to !== undefined && max !== undefined && to < from) {
-      barAnimations[key] = { from, to, max, color: barColors[key] };
-    }
-  }
-
   function updatePlayerData(newData: PlayerData) {
-    const prev = playerData;
     playerData = newData;
-
-    if (!prev) {
-      if (newData.absorption !== undefined && newData.absorption > 0) {
-        maxAbsorption = newData.absorption;
-      }
-      return;
-    }
-
-    maybeAnimateBar("armor", prev.armor, newData.armor, 20);
-    maybeAnimateBar("air", prev.air, newData.air, newData.maxAir);
-    maybeAnimateBar("food", prev.food, newData.food, 20);
-
-    if (newData.absorption !== undefined && newData.absorption > maxAbsorption) {
-      maxAbsorption = newData.absorption;
-    }
-
-    if (prev.selectedSlot !== newData.selectedSlot) {
-      lastSlot = prev.selectedSlot;
-      currentSlot = newData.selectedSlot;
-      if (newData.mainHandStack?.identifier !== "minecraft:air") {
-        showItemStackName = true;
-        timeouts.set('itemName', () => showItemStackName = false, ITEM_NAME_TIMEOUT);
-      }
-    }
   }
 
   listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
