@@ -6,7 +6,7 @@
     import { onMount, onDestroy } from "svelte";
     import ArmorStatus from "./ArmorStatus.svelte";
     import { calcArmorValueFromItems } from "./calcArmorValueFromItems"
-    import { armorValue } from '../../../hud/elements/Island';
+    import { armorValue,  targetId } from '../../../hud/elements/Island';
     import type { TargetChangeEvent } from "../../../../integration/events.js";
     let displayHealth = 0;
     let animationFrameId: number | null = null;
@@ -210,6 +210,7 @@ onDestroy(() => {
   const newTarget = data.target;
   target = newTarget;
   visible = true;
+  targetId.set(t?.username ?? null);
   const newArmor = t
     ? calcArmorValueFromItems(t.armorItems)
     : undefined;

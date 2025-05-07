@@ -1,8 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { get } from 'svelte/store';
-
-    export let fragSrc: string;
+    export let fragSrc: string = ''; 
   
     let canvas: HTMLCanvasElement;
     const vertSrc = `#version 300 es
@@ -71,9 +69,9 @@
       const start = performance.now();
       function render(now: number) {
         const time = (now - start) * 0.001;
-        gl.uniform2f(uResolution, width, height);
-        gl.uniform1f(uTime, time);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        gl!.uniform2f(uResolution, width, height);
+        gl!.uniform1f(uTime, time);
+        gl!.drawArrays(gl!.TRIANGLES, 0, 6);
         requestAnimationFrame(render);
       }
       requestAnimationFrame(render);

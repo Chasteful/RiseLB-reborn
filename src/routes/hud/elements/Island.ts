@@ -6,7 +6,7 @@ export const blockCount = writable<number | undefined>(undefined);
 export let emptySlotCount = writable(36);
 export const isInventoryFull = derived(emptySlotCount, $count => $count === 0);
 export const armorValue = writable<number |undefined>(undefined);
-
+export const targetId = writable<string | null>(null);
 export const armorThreshold = 4 ;
 interface ArmorSlot {
     identifier: string;

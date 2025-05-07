@@ -17,7 +17,7 @@ import type {
 import { tweened } from "svelte/motion";
 import { cubicOut } from "svelte/easing";
 import { blockCount,armorValue, armorThreshold,DURABILITY_RECOVERY,
-  armorDurabilityStore, emptySlotCount,DURABILITY_THRESHOLD } from './Island';
+  armorDurabilityStore, emptySlotCount,DURABILITY_THRESHOLD,targetId } from './Island';
 import { get } from 'svelte/store';
 
 const INVENTORY_FULL_COOLDOWN_MS = 30000; 
@@ -25,7 +25,7 @@ const CLIENT_NAME = "RiseLB";
 const CLIENT_VERSION = "1.6.1";
 const UPDATE_INTERVAL_MS = 50;
 const ALERT_DISPLAY_DURATION_MS = 2500;
-const ARMOR_ALERT_DURABILITY_COOLDOWN_MS = 15000;
+const ARMOR_ALERT_COOLDOWN_MS = 15000;
 const ANIMATION_DURATION_MS = 300;
 const DURABILITY_COOLDOWN_MS = 1000;
 type AlertType =
@@ -65,8 +65,8 @@ let isMounted = true;
 let currentContent: ContentType = 'greeting';
 let nextContent: ContentType | null = null;
 let nextContentWidth = 0;
-let lastArmorAlertTime = 0;
-
+const lastArmorAlertTimes = new Map<string, number>();
+const ARMOR_ALERT_TARGET_COOLDOWN_MS = 60_000;
 let animationPhase: 'idle' | 'contract' | 'expand' = 'idle';
 let wrapper: HTMLDivElement | null = null;
 const contentRefs = {
@@ -80,10 +80,11 @@ $: {
   }
 }
 $: {
-  if ($armorValue !== undefined) {
-    checkArmorAlert($armorValue, playerData?.armor ?? 0);
+  if ($armorValue !== undefined && typeof $targetId === 'string') {
+    checkArmorAlert($targetId, $armorValue, playerData?.armor ?? 0);
   }
 }
+
 $: {
     
     if ($emptySlotCount !== undefined) {
@@ -248,18 +249,25 @@ function checkArmorDurability() {
     }
   }
 }
-function checkArmorAlert(targetArmor: number | undefined, playerArmor: number ): void {
+
+function checkArmorAlert(
+  targetId: string,
+  targetArmor: number | undefined,
+  playerArmor: number
+): void {
   if (targetArmor === undefined) return;
 
   const now = Date.now();
   const threshold = armorThreshold + playerArmor;
 
+  const lastTime = lastArmorAlertTimes.get(targetId) ?? 0;
+
   if (
     targetArmor > threshold &&
-    (now - lastArmorAlertTime > ARMOR_ALERT_DURABILITY_COOLDOWN_MS)
+    now - lastTime > ARMOR_ALERT_TARGET_COOLDOWN_MS
   ) {
     showAlert('armor', 'High Armor Alert', `You're at an equipment disadvantage!`);
-    lastArmorAlertTime = now;
+    lastArmorAlertTimes.set(targetId, now);
   }
 }
 
@@ -267,7 +275,7 @@ function checkBlockAlert(newBlock: number | undefined): void {
   if (newBlock === undefined) return;
   
   if (newBlock < 16 && (lastBlockValue === undefined || lastBlockValue >= 16)) {
-    showAlert('blocks', 'Low Blocks', ` You've only got ${newBlock} blocks left,Take heed!`);
+    showAlert('blocks', 'Low Blocks', `You've only got ${newBlock} usable blocks left!`);
   } 
   lastBlockValue = newBlock;
 }
@@ -283,10 +291,8 @@ async function updateSession() {
   checkHealthAlert(newData.actualHealth);
   checkAirAlert(newData.air);
   checkFoodAlert(newData.food);
-  if ($armorValue !== undefined) {
-
-checkArmorAlert($armorValue, newData.armor);
-
+  if ($armorValue !== undefined && typeof $targetId === 'string') {
+  checkArmorAlert($targetId,$armorValue,newData.armor);
   }
   playerData = newData;
 }
@@ -403,8 +409,8 @@ listen("playerData", (event: ClientPlayerDataEvent) => {
   checkArmorDurability()
   if ($blockCount !== undefined) 
   checkBlockAlert($blockCount);
-  if ($armorValue !== undefined) {
-  checkArmorAlert($armorValue, event.playerData.armor);
+  if ($armorValue !== undefined && typeof $targetId === 'string') {
+  checkArmorAlert($targetId,$armorValue, event.playerData.armor);
   }
   playerData = event.playerData;
 });

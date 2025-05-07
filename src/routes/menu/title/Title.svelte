@@ -19,7 +19,10 @@
   let lastPressedTime = 0;
   const ESC_PRESS_THRESHOLD = 500;
   
-
+  function BackLock() {
+  locked.set(true); 
+  isEscPressed = false;
+}
   function handleEscKey(event: KeyboardEvent) {
     if (event.key === "Escape") {
       const currentTime = Date.now();
@@ -96,7 +99,11 @@
           <MainButton title="Back" icon="back-large" index={2} on:click={toggleButtons} />
         {/if}
       </div>
-      <div class="additional-buttons" transition:fly|global={{duration:300, y:100}}></div>
+      <div class="additional-buttons" transition:fly|global={{duration: 700, y: 100}}>
+        <ButtonContainer>
+            <IconTextButton icon="icon-exit.svg" title="Exit" on:click={BackLock}/>
+
+        </ButtonContainer>
       <div class="social-buttons" transition:fly|global={{duration:300, y:100}}>
         <ButtonContainer>
           <IconButton title="Forum" icon="nodebb" on:click={() => browse("MAINTAINER_FORUM")} />
