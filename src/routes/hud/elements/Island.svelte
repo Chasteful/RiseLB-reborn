@@ -25,9 +25,16 @@ const CLIENT_NAME = "RiseLB";
 const CLIENT_VERSION = "1.6.1";
 const UPDATE_INTERVAL_MS = 50;
 const ALERT_DISPLAY_DURATION_MS = 2500;
-const ARMOR_ALERT_COOLDOWN_MS = 15000;
+const lastArmorAlertTimes = new Map<string, number>();
+const ARMOR_ALERT_TARGET_COOLDOWN_MS = 60_000;
 const ANIMATION_DURATION_MS = 300;
 const DURABILITY_COOLDOWN_MS = 1000;
+const warnedSlots = new Map<string, number>();
+const contentRefs = {
+  alert: null as HTMLDivElement | null,
+  greeting: null as HTMLDivElement | null,
+  status: null as HTMLDivElement | null
+};
 type AlertType =
     'health' | 'air' | 'blocks' | 'hunger' | 
     'saturation' | 'armor' | 'durability' | 'inventory' | null;
@@ -41,7 +48,7 @@ interface Alert {
 
 
 }
-const warnedSlots = new Map<string, number>();
+
 let alertState: AlertState = 'hidden';
 let clientInfo: ClientInfo | null = null;
 let session: Session | null = null;
@@ -50,7 +57,6 @@ let showUsername = false;
 let currentAlert: Alert | null = null;
 let lastEmptySlotCount = 36;
 let lastInventoryFullAlertTime = 0;
-
 let time = "";
 let timeGreeting = "";
 let lastHealthValue = 20;
@@ -65,15 +71,9 @@ let isMounted = true;
 let currentContent: ContentType = 'greeting';
 let nextContent: ContentType | null = null;
 let nextContentWidth = 0;
-const lastArmorAlertTimes = new Map<string, number>();
-const ARMOR_ALERT_TARGET_COOLDOWN_MS = 60_000;
 let animationPhase: 'idle' | 'contract' | 'expand' = 'idle';
 let wrapper: HTMLDivElement | null = null;
-const contentRefs = {
-  alert: null as HTMLDivElement | null,
-  greeting: null as HTMLDivElement | null,
-  status: null as HTMLDivElement | null
-};
+
 $: {
   if ($blockCount !== undefined) {
     checkBlockAlert($blockCount);
@@ -84,7 +84,6 @@ $: {
     checkArmorAlert($targetId, $armorValue, playerData?.armor ?? 0);
   }
 }
-
 $: {
     
     if ($emptySlotCount !== undefined) {
@@ -480,7 +479,11 @@ class:notification-active={currentAlert !== null}
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+  :root {
+  --island-bg: rgba(20, 20, 20, 0.5);
+  --text-primary: rgba(255, 255, 255, 0.9);
+
+}
   .dynamic-island-container {
     position: fixed;
     top: 5px;
@@ -496,9 +499,9 @@ class:notification-active={currentAlert !== null}
   .dynamic-island {
     overflow: hidden;
     border-radius: 20px;
-    background: rgba(20, 20, 20, 0.5);
+    background: var(--island-bg);
+    color: var(--text-primary);
     backdrop-filter: blur(12px) brightness(1.1);
-    color: rgba(var(--text), 0.9);
     padding: 0 16px;
     display: flex;
     align-items: center;

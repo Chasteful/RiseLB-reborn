@@ -4,19 +4,31 @@
   import Notifications from "./Notifications.svelte";
   import { onDestroy } from "svelte";
   import { currentLogo, logoVariants } from './logoStore';
-
+  import { locked } from "../../common/locked_store"; 
   let glitchActive = false;
   let intervalId: ReturnType<typeof setInterval>;
   let timeoutId: ReturnType<typeof setTimeout>;
   let redLayer: HTMLImageElement;
   let blueLayer: HTMLImageElement;
-
+  let isEscPressed = false; 
+  let pressTimer: ReturnType<typeof setTimeout>;
   export let showAccount: boolean;
 
   function switchLogo() {
     currentLogo.update(n => (n % logoVariants) + 1);  
   }
-
+  function BackLock() {
+  locked.set(true);
+  isEscPressed = false;
+}
+function handleMouseDown() {
+  pressTimer = setTimeout(() => {
+    BackLock();
+  }, 1000); 
+}
+function handleMouseUp() {
+  clearTimeout(pressTimer);
+}
   function startGlitch() {
     clearInterval(intervalId);
     clearTimeout(timeoutId);
@@ -60,11 +72,15 @@
 
 <div class="header">
   <button 
-    class="logo-container reset-button" 
-    on:click={handleClick}
-    on:click|preventDefault={switchLogo} 
-    on:contextmenu|preventDefault={switchLogo} 
-  >
+  class="logo-container reset-button" 
+  on:click={handleClick}
+  on:click|preventDefault={switchLogo}
+  on:contextmenu|preventDefault={switchLogo}
+  on:mousedown={handleMouseDown}
+  on:mouseup={handleMouseUp}
+  on:mouseleave={handleMouseUp}
+>
+
     <img class="logo {glitchActive ? 'transparent' : ''}"      
      src="img/lb-logo{$currentLogo}.svg"  alt="logo" 
      draggable="false"/>

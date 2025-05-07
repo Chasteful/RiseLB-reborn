@@ -63,7 +63,7 @@
     }, 2000);
 
     return () => {
-      window.removeEventListener('keydown', handleEscKey); // 清理监听器
+      window.removeEventListener('keydown', handleEscKey); 
     };
   });
 
@@ -99,11 +99,8 @@
           <MainButton title="Back" icon="back-large" index={2} on:click={toggleButtons} />
         {/if}
       </div>
-      <div class="additional-buttons" transition:fly|global={{duration: 700, y: 100}}>
-        <ButtonContainer>
-            <IconTextButton icon="icon-exit.svg" title="Exit" on:click={BackLock}/>
-
-        </ButtonContainer>
+      <div class="additional-buttons" transition:fly|global={{duration: 700, y: 100}}>\
+      </div>
       <div class="social-buttons" transition:fly|global={{duration:300, y:100}}>
         <ButtonContainer>
           <IconButton title="Forum" icon="nodebb" on:click={() => browse("MAINTAINER_FORUM")} />
@@ -115,7 +112,6 @@
           <IconTextButton title="DevLog" icon="icon-liquidbounce.net.svg" on:click={() => browse("CLIENT_WEBSITE")} />
         </ButtonContainer>
       </div>
-    </div>
   </Menu>
 {/if}
 
