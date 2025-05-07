@@ -1,21 +1,60 @@
 <script lang="ts">
-  import {createEventDispatcher} from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
 
   export let title: string;
   export let icon: string;
   export let disabled = false;
 
+
+  const MIN_HOVER_TIME = 50;   
+  let buttonWidth = 60;
+  let titleElement: HTMLDivElement;
+  let buttonElement: HTMLButtonElement;
+
   const dispatch = createEventDispatcher();
+
+  let hoverTimer: number;
+  let isIntent = false; 
+
+  onMount(() => {
+    if (titleElement) {
+      const titleWidth = titleElement.offsetWidth;
+      buttonWidth = 60 + titleWidth + 12;
+    }
+  });
+
+  function handleMouseEnter() {
+
+    clearTimeout(hoverTimer);
+    isIntent = false;
+    hoverTimer = window.setTimeout(() => {
+      isIntent = true;
+    }, MIN_HOVER_TIME);
+  }
+
+  function handleMouseLeave() {
+    clearTimeout(hoverTimer);
+    if (isIntent) {
+      isIntent = false;
+    }
+  }
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<button class="icon-text-button" on:click={() => dispatch("click")} {disabled}>
+<button
+  class="icon-text-button"
+  on:click={() => dispatch("click")}
+  on:mouseenter={handleMouseEnter}
+  on:mouseleave={handleMouseLeave}
+  bind:this={buttonElement}
+  {disabled}
+  style="--button-width: {buttonWidth}px"
+  class:intent={isIntent}
+>
   <div class="icon-container">
     <div class="icon">
-      <img src="img/menu/{icon}" alt={title}>
+      <img src="img/menu/{icon}" alt={title} />
     </div>
-    <div class="title">{title}</div>
+    <div class="title" bind:this={titleElement}>{title}</div>
   </div>
 </button>
 
@@ -40,21 +79,25 @@
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.24);
     font-size: 24px;
     color: var(--button-text);
-    transition: all 0.3s ease;
+    transition: width 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
     height: 60px;
     width: 60px;
     margin: 4px 8px;
 
-    &:not([disabled]):hover {
-      width: 180px;
-      transform: none;
-      box-shadow: 0 10px 10px rgba(0, 0, 0, 0.24);
-    }
-
     &[disabled] {
       opacity: 0.4;
       pointer-events: none;
+    }
+
+    &.intent {
+
+      width: var(--button-width);
+      box-shadow: 0 10px 10px rgba(0, 0, 0, 0.24);
+
+      .title {
+        opacity: 1;
+      }
     }
 
     .icon-container {
@@ -77,26 +120,19 @@
 
       img {
         width: 32px;
-    height: 32px;
-    object-fit: contain;
-    display: block;
+        height: 32px;
+        object-fit: contain;
+        display: block;
       }
     }
 
     .title {
-      flex: 1;
       white-space: nowrap;
       text-shadow: var(--button-text-shadow);
-      padding: 0 20px 0 10px;
+      padding: 0 12px 0 10px;
       opacity: 0;
       font-family: '汉仪文黑-85W';
-      transition: opacity 0.3s ease;
-    }
-
-    &:hover .title {
-      opacity: 1;
+      transition: opacity 0.3s ease 0.1s;
     }
   }
-
-
 </style>

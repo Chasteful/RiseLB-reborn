@@ -13,40 +13,38 @@
 
   let regularButtonsShown = true;
   let clientButtonsShown = false;
-  let isEscPressed = false;  // 用来标记 Esc 键是否按下
+  let isEscPressed = false;  
 
-  // 用来记录 Esc 键按下的次数和时间
   let escPressedCount = 0;
   let lastPressedTime = 0;
-  const ESC_PRESS_THRESHOLD = 500; // 设置最大时间间隔为 500ms (0.5 秒)
+  const ESC_PRESS_THRESHOLD = 500;
   
-  // 按键事件监听
+
   function handleEscKey(event: KeyboardEvent) {
     if (event.key === "Escape") {
       const currentTime = Date.now();
 
-      // 如果是第一次按下 Esc 键，记录时间
+     
       if (escPressedCount === 0) {
         escPressedCount++;
         lastPressedTime = currentTime;
       } else if (escPressedCount === 1 && currentTime - lastPressedTime <= ESC_PRESS_THRESHOLD) {
-        // 如果第二次按下 Esc 键，并且时间间隔在阈值内
-        isEscPressed = true;  // 设置标记为 Esc 按下
-        unlock(); // 解锁
-        escPressedCount = 0; // 重置计数
+ 
+        isEscPressed = true; 
+        unlock(); 
+        escPressedCount = 0; 
       } else {
-        // 如果按键间隔过长，重置计数
         escPressedCount = 1;
         lastPressedTime = currentTime;
       }
     }
   }
 
-  // 监听按键事件
+
   onMount(() => {
     window.addEventListener('keydown', handleEscKey);
 
-    // 标记页面访问
+ 
     localStorage.setItem("title_visited", "true");
 
     setTimeout(async () => {
@@ -81,7 +79,7 @@
   }
 </script>
 
-{#if $locked && !isEscPressed} <!-- 只有当 isEscPressed 为 false 时才显示 LockScreen -->
+{#if $locked && !isEscPressed} 
   <LockScreen on:loginSuccess={handleUnlock} />
 {:else}
   <Menu>

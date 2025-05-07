@@ -556,15 +556,19 @@ class:notification-active={currentAlert !== null}
       font-size: 20px;
       letter-spacing: -0.25px;
       flex-shrink: 0;   
-      color: #bbbbbb;
-      text-shadow: 0 0 3px rgba(170, 170, 170, 0.9);
+      color: hsl(0, 0%, 90%);
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
       font-feature-settings: "tnum";
       font-variant-numeric: tabular-nums;
     }
-  
+    .client{
+    color: $text;
+    text-shadow:0 0 3px rgba($text, 0.9);
+    
+    }
     .separator {
       width: 2px;
-      height: 14px;
+      height: 20px;
       background: linear-gradient(to bottom, transparent, rgba(($text), 0.7), transparent);
       flex-shrink: 0; 
       position: relative;

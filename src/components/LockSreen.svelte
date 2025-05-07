@@ -2,6 +2,9 @@
     import {  tick } from 'svelte';
     import { fade, fly, slide } from 'svelte/transition';
     import { createEventDispatcher } from 'svelte';
+    import { currentLogo } from '../routes/menu/common/header/logoStore'
+    export let fragSrc: string;
+    import ShaderBackground from './ShaderBackground.svelte';
     import type { TransitionConfig } from 'svelte/transition'
     enum UserStatus {
       LoggedOut = "Logged Out",
@@ -10,10 +13,51 @@
       LogInError = "Log In Error",
       LoggedIn = "Logged In"
     }
-    let pinVisible: boolean[] = [false, false, false, false];
-
-    const DEFAULT_PIN = "0721";
     
+    let pinVisible: boolean[] = [false, false, false, false];
+    let canvas: HTMLCanvasElement;
+    const DEFAULT_PIN = "0721";
+
+      const frag = `#version 300 es
+precision highp float;
+
+uniform vec2 u_resolution;
+uniform float u_time;
+
+out vec4 outColor;
+
+mat2 m(float a) {
+    float c = cos(a), s = sin(a);
+    return mat2(c, -s, s, c);
+}
+
+float map(vec3 p) {
+    p.xz *= m(u_time * 0.4);
+    p.xy *= m(u_time * 0.1);
+    vec3 q = p * 2.0 + u_time;
+    return length(p + vec3(sin(u_time * 0.7))) * log(length(p) + 1.0)
+        + sin(q.x + sin(q.z + sin(q.y))) * 0.5 - 1.0;
+}
+
+void main() {
+    vec2 a = gl_FragCoord.xy / u_resolution.y - vec2(0.9, 0.5);
+    vec3 cl = vec3(0.0);
+    float d = 2.5;
+
+    for (int i = 0; i <= 5; i++) {
+        vec3 p = vec3(0, 0, 4.0) + normalize(vec3(a, -1.0)) * d;
+        float rz = map(p);
+        float f = clamp((rz - map(p + 0.1)) * 0.5, -0.1, 1.0);
+        vec3 l = vec3(0.1, 0.3, 0.4) + vec3(5.0, 2.5, 3.0) * f;
+        cl = cl * l + smoothstep(2.5, 0.0, rz) * 0.6 * l;
+        d += min(rz, 1.0);
+    }
+
+    outColor = vec4(cl, 1.0);
+}
+
+  `;
+
   function slideReverse(node: Element, options: any): TransitionConfig {
     return slide(node, { ...options, x: -100 }); 
   }
@@ -112,18 +156,22 @@
       if (userStatus === UserStatus.LoggedOut) {
         startLogin();
       }
-    }
-  </script>
-  
+    }  
+    
+    </script>{#if $currentLogo === 1}
+  <ShaderBackground fragSrc={frag} />
+{/if}
+
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="lock-screen" on:click={handleScreenClick}>
     <!-- svelte-ignore element_invalid_self_closing_tag -->
+    {#if $currentLogo === 2}
     <div
     class="background-image"
     class:zoom-in={userStatus !== UserStatus.LoggedOut}
     style="background-image: url('background.png')" />
-  
+    {/if}
     {#if userStatus === UserStatus.LoggedOut}
       <div class="time" transition:slide>
         {formatTime(new Date())}
@@ -187,7 +235,7 @@
   
     $red: #f38ba8;
     $blue: #89dceb;
-  
+
     .lock-screen {
       position: fixed;
       top: 0;
@@ -198,9 +246,9 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
+      z-index: 1;
       overflow: hidden;
-      background-color: gray(30);
+
     }
     .background-image {
   position: absolute;
