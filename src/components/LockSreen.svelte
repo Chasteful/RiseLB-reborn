@@ -1,11 +1,13 @@
 <script lang="ts">
-    import {  tick } from 'svelte';
+    import {  onDestroy, onMount, tick } from 'svelte';
     import { fade, fly, slide } from 'svelte/transition';
     import { createEventDispatcher } from 'svelte';
     import { currentLogo } from '../routes/menu/common/header/logoStore'
     import fragSrc from '../../../RiseLB-reborn/public/background.frag?raw';
     import ShaderBackground from './ShaderBackground.svelte';
     import type { TransitionConfig } from 'svelte/transition'
+    import { get } from 'svelte/store';
+    import { locked,unlock, isEscPressed } from '../routes/menu/common/locked_store';
     enum UserStatus {
       LoggedOut = "Logged Out",
       LoggingIn = "Logging In",
@@ -18,15 +20,23 @@
 
     const DEFAULT_PIN = "0721";
 
-
+    function handleAnyKey(e: KeyboardEvent) {
+  if (userStatus === UserStatus.LoggedOut && e.key !== "Escape") {
+    startLogin();
+    tick().then(() => {
+      hiddenInput?.focus(); 
+    });
+  }
+}
 
   function slideReverse(node: Element, options: any): TransitionConfig {
     return slide(node, { ...options, x: -100 }); 
   }
-    let userStatus: UserStatus = UserStatus.LoggedOut;
+  let userStatus: UserStatus = get(locked) ? UserStatus.LoggedOut : UserStatus.LoggedIn;
     let pin = "";
     let hiddenInput: HTMLInputElement;
     let showError = false;
+    let loginAlreadyDispatched = false;
     const dispatch = createEventDispatcher();
   
     
@@ -69,6 +79,13 @@
     }
   }
 
+
+$: {
+  if (!loginAlreadyDispatched && userStatus !== UserStatus.LoggedOut && userStatus !== UserStatus.LoggingIn && userStatus !== UserStatus.LogInError) {
+    loginAlreadyDispatched = true;
+    dispatch('loginSuccess');
+  }
+}
   
     async function verifyPin() {
   userStatus = UserStatus.VerifyingLogIn;
@@ -77,9 +94,11 @@
   await new Promise(r => setTimeout(r, Math.random() * 400 + 300));
 
   if (pin === DEFAULT_PIN) {
-    userStatus = UserStatus.LoggedIn;
-    dispatch('loginSuccess');
-  } else {
+  userStatus = UserStatus.LoggedIn;
+  unlock(); 
+  dispatch('loginSuccess');
+}
+ else {
     userStatus = UserStatus.LogInError;
     showError = true;
     await tick();
@@ -97,21 +116,20 @@
   }
 }
 
-    function startLogin() {
-      if (userStatus === UserStatus.LoggedOut) {
-        userStatus = UserStatus.LoggingIn;
-        pin = "";
-        showError = false;
-      }
-    }
-  
+function startLogin() {
+  loginAlreadyDispatched = false;
+  userStatus = UserStatus.LoggingIn;
+  pin = "";
+  showError = false;
+}
+function cancelLogin() {
+  loginAlreadyDispatched = false;
+  userStatus = UserStatus.LoggedOut;
+  pin = "";
+  if (hiddenInput) hiddenInput.value = "";
+  showError = false;
+}
 
-  function cancelLogin() {
-    userStatus = UserStatus.LoggedOut; 
-    pin = ""; 
-    if (hiddenInput) hiddenInput.value = ""; 
-    showError = false; 
-  }
 
   
     function handleScreenClick() {
@@ -119,7 +137,32 @@
         startLogin();
       }
     }  
-    
+    onMount(() => {
+  const observer = new MutationObserver(() => {
+    const lockScreenEl = document.querySelector('.lock-screen');
+    if (!lockScreenEl || getComputedStyle(lockScreenEl).display === 'none') {
+      if (!loginAlreadyDispatched) {
+        loginAlreadyDispatched = true;
+        dispatch('loginSuccess');
+      }
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['style', 'class']
+  });
+
+  return () => observer.disconnect();
+});
+
+
+
+onDestroy(() => {
+  window.removeEventListener('keydown', handleAnyKey);
+});
     </script>{#if $currentLogo === 1}
 <ShaderBackground fragSrc={fragSrc}  />
 {/if}

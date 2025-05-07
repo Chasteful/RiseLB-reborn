@@ -4,25 +4,20 @@
   import IconTextButton from "../common/buttons/IconTextButton.svelte";
   import IconButton from "../common/buttons/IconButton.svelte";
   import { browse, getClientUpdate, openScreen } from "../../../integration/rest";
-  import { locked, unlock } from "../common/locked_store";
+  import { locked, unlock, isEscPressed } from "../common/locked_store";
   import LockScreen from '../../../components/LockSreen.svelte';
   import Menu from "../common/Menu.svelte";
   import { fly } from "svelte/transition";
   import { onMount } from "svelte";
   import { notification } from "../common/header/notification_store";
-
+  import { writable } from "svelte/store";
   let regularButtonsShown = true;
   let clientButtonsShown = false;
-  let isEscPressed = false;  
-
+ 
   let escPressedCount = 0;
   let lastPressedTime = 0;
   const ESC_PRESS_THRESHOLD = 500;
-  
-  function BackLock() {
-  locked.set(true); 
-  isEscPressed = false;
-}
+ 
   function handleEscKey(event: KeyboardEvent) {
     if (event.key === "Escape") {
       const currentTime = Date.now();
@@ -33,7 +28,7 @@
         lastPressedTime = currentTime;
       } else if (escPressedCount === 1 && currentTime - lastPressedTime <= ESC_PRESS_THRESHOLD) {
  
-        isEscPressed = true; 
+        isEscPressed.set(true);
         unlock(); 
         escPressedCount = 0; 
       } else {
@@ -82,7 +77,7 @@
   }
 </script>
 
-{#if $locked && !isEscPressed} 
+{#if $locked && !$isEscPressed}
   <LockScreen on:loginSuccess={handleUnlock} />
 {:else}
   <Menu>
