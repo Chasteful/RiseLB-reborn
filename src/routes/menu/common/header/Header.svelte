@@ -4,28 +4,31 @@
   import Notifications from "./Notifications.svelte";
   import { onDestroy } from "svelte";
   import { currentLogo, logoVariants } from './logoStore';
-  import { locked } from "../../common/locked_store"; 
+  import { lock } from "../../common/locked_store"; 
   let glitchActive = false;
   let intervalId: ReturnType<typeof setInterval>;
   let timeoutId: ReturnType<typeof setTimeout>;
   let redLayer: HTMLImageElement;
   let blueLayer: HTMLImageElement;
   let isEscPressed = false; 
-  let pressTimer: ReturnType<typeof setTimeout>;
+  let pressTimer: NodeJS.Timeout;
   export let showAccount: boolean;
-
+  const LONG_PRESS_DURATION = 1000;
   function switchLogo() {
     currentLogo.update(n => (n % logoVariants) + 1);  
   }
-  function BackLock() {
-  locked.set(true);
-  isEscPressed = false;
-}
-function handleMouseDown() {
-  pressTimer = setTimeout(() => {
-    BackLock();
-  }, 1000); 
-}
+    
+  function handleLogoMouseDown() {
+    pressTimer = setTimeout(() => {
+      lock();
+    }, LONG_PRESS_DURATION);
+  }
+  
+  function handleLogoMouseUp() {
+    clearTimeout(pressTimer);
+  }
+
+
 function handleMouseUp() {
   clearTimeout(pressTimer);
 }
@@ -76,9 +79,11 @@ function handleMouseUp() {
   on:click={handleClick}
   on:click|preventDefault={switchLogo}
   on:contextmenu|preventDefault={switchLogo}
-  on:mousedown={handleMouseDown}
-  on:mouseup={handleMouseUp}
-  on:mouseleave={handleMouseUp}
+  on:mousedown={handleLogoMouseDown}
+  on:mouseup={handleLogoMouseUp}
+  on:mouseleave={handleLogoMouseUp}
+  on:touchstart={handleLogoMouseDown}
+  on:touchend={handleLogoMouseUp}
 >
 
     <img class="logo {glitchActive ? 'transparent' : ''}"      

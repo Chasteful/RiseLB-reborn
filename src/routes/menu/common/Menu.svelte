@@ -3,7 +3,12 @@
   import { fly, fade } from "svelte/transition";
   import { onMount } from "svelte";
   import { location } from "svelte-spa-router";
-  
+  import { locked, unlock } from "../common/locked_store";
+  import LockScreen from '../../../components/LockSreen.svelte';
+  function handleUnlock() {
+    unlock();
+  }
+
   const transitionDuration = 700;
   let ready = false;
   let showShadow = false;
@@ -16,10 +21,12 @@
   });
   $: showAccount = !noAccountPaths.includes($location);
 </script>
-
+{#if $locked}
+<LockScreen on:loginSuccess={handleUnlock} />
+{:else}
 <div class="menu-container">
 
-
+  
   {#if showShadow}
       <div class="edge-shadows" transition:fade|global={{ duration: 500 }}>
           <!-- svelte-ignore element_invalid_self_closing_tag -->
@@ -46,7 +53,7 @@
       {/if}
   </div>
 </div>
-
+{/if}
 <style lang="scss">
   .menu-container {
       position: relative;

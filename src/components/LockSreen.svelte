@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {  onDestroy, onMount, tick } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import { fade, fly, slide } from 'svelte/transition';
     import { createEventDispatcher } from 'svelte';
     import { currentLogo } from '../routes/menu/common/header/logoStore'
@@ -7,7 +7,7 @@
     import ShaderBackground from './ShaderBackground.svelte';
     import type { TransitionConfig } from 'svelte/transition'
     import { get } from 'svelte/store';
-    import { locked,unlock, isEscPressed } from '../routes/menu/common/locked_store';
+    import { locked,unlock } from '../routes/menu/common/locked_store';
     enum UserStatus {
       LoggedOut = "Logged Out",
       LoggingIn = "Logging In",
@@ -19,15 +19,6 @@
     let pinVisible: boolean[] = [false, false, false, false];
 
     const DEFAULT_PIN = "0721";
-
-    function handleAnyKey(e: KeyboardEvent) {
-  if (userStatus === UserStatus.LoggedOut && e.key !== "Escape") {
-    startLogin();
-    tick().then(() => {
-      hiddenInput?.focus(); 
-    });
-  }
-}
 
   function slideReverse(node: Element, options: any): TransitionConfig {
     return slide(node, { ...options, x: -100 }); 
@@ -79,13 +70,13 @@
     }
   }
 
+  $: if ($locked) {
 
-$: {
-  if (!loginAlreadyDispatched && userStatus !== UserStatus.LoggedOut && userStatus !== UserStatus.LoggingIn && userStatus !== UserStatus.LogInError) {
-    loginAlreadyDispatched = true;
-    dispatch('loginSuccess');
+    userStatus = UserStatus.LoggedOut;
+    pin = "";
+    showError = false;
   }
-}
+
   
     async function verifyPin() {
   userStatus = UserStatus.VerifyingLogIn;
@@ -117,14 +108,14 @@ $: {
 }
 
 function startLogin() {
-  loginAlreadyDispatched = false;
   userStatus = UserStatus.LoggingIn;
   pin = "";
   showError = false;
 }
+
 function cancelLogin() {
-  loginAlreadyDispatched = false;
   userStatus = UserStatus.LoggedOut;
+  locked.set(true); 
   pin = "";
   if (hiddenInput) hiddenInput.value = "";
   showError = false;
@@ -158,12 +149,8 @@ function cancelLogin() {
   return () => observer.disconnect();
 });
 
-
-
-onDestroy(() => {
-  window.removeEventListener('keydown', handleAnyKey);
-});
-    </script>{#if $currentLogo === 1}
+    </script>
+{#if $currentLogo === 1}
 <ShaderBackground fragSrc={fragSrc}  />
 {/if}
 

@@ -4,82 +4,44 @@
   import IconTextButton from "../common/buttons/IconTextButton.svelte";
   import IconButton from "../common/buttons/IconButton.svelte";
   import { browse, getClientUpdate, openScreen } from "../../../integration/rest";
-  import { locked, unlock, isEscPressed } from "../common/locked_store";
-  import LockScreen from '../../../components/LockSreen.svelte';
   import Menu from "../common/Menu.svelte";
   import { fly } from "svelte/transition";
   import { onMount } from "svelte";
   import { notification } from "../common/header/notification_store";
-  import { writable } from "svelte/store";
   let regularButtonsShown = true;
   let clientButtonsShown = false;
- 
-  let escPressedCount = 0;
-  let lastPressedTime = 0;
-  const ESC_PRESS_THRESHOLD = 500;
- 
-  function handleEscKey(event: KeyboardEvent) {
-    if (event.key === "Escape") {
-      const currentTime = Date.now();
-
-     
-      if (escPressedCount === 0) {
-        escPressedCount++;
-        lastPressedTime = currentTime;
-      } else if (escPressedCount === 1 && currentTime - lastPressedTime <= ESC_PRESS_THRESHOLD) {
- 
-        isEscPressed.set(true);
-        unlock(); 
-        escPressedCount = 0; 
-      } else {
-        escPressedCount = 1;
-        lastPressedTime = currentTime;
-      }
-    }
-  }
-
-
   onMount(() => {
-    window.addEventListener('keydown', handleEscKey);
+        setTimeout(async () => {
+            const clientUpdate = await getClientUpdate();
 
- 
-    localStorage.setItem("title_visited", "true");
+            if (clientUpdate.update) {
+                notification.set({
+                    title: `LiquidBounce ${clientUpdate.update.clientVersion} has been released!`,
+                    message: `Download it from liquidbounce.net!`,
+                    error: false,
+                    delay: 99999999
+                });
+            }
+        }, 2000);
+    });
 
-    setTimeout(async () => {
-      const clientUpdate = await getClientUpdate();
-      if (clientUpdate.update) {
-        notification.set({
-          title: `LiquidBounce ${clientUpdate.update.clientVersion} has been released!`,
-          message: `Download it from liquidbounce.net!`,
-          error: false,
-          delay: 99999999
-        });
-      }
-    }, 2000);
-
-    return () => {
-      window.removeEventListener('keydown', handleEscKey); 
-    };
-  });
-
-  function toggleButtons() {
-    if (clientButtonsShown) {
-      clientButtonsShown = false;
-      setTimeout(() => regularButtonsShown = true, 750);
-    } else {
-      regularButtonsShown = false;
-      setTimeout(() => clientButtonsShown = true, 750);
+    function toggleButtons() {
+        if (clientButtonsShown) {
+            clientButtonsShown = false;
+            setTimeout(() => {
+                regularButtonsShown = true;
+            }, 750);
+        } else {
+            regularButtonsShown = false;
+            setTimeout(() => {
+                clientButtonsShown = true;
+            }, 750);
+        }
     }
-  }
 
-  function handleUnlock() {
-    unlock();
-  }
 </script>
 
-{#if $locked && !$isEscPressed}
-  <LockScreen on:loginSuccess={handleUnlock} />
-{:else}
+
   <Menu>
     <div class="content">
       <div class="main-buttons">
@@ -108,7 +70,7 @@
         </ButtonContainer>
       </div>
   </Menu>
-{/if}
+
 
   
 <style>
