@@ -3,8 +3,6 @@
     import { fade, fly, slide } from 'svelte/transition';
     import { createEventDispatcher } from 'svelte';
     import { currentLogo } from '../routes/menu/common/header/logoStore'
-    import fragSrc from '../../../RiseLB-reborn/public/background.frag?raw';
-    import ShaderBackground from './ShaderBackground.svelte';
     import type { TransitionConfig } from 'svelte/transition'
     import { get } from 'svelte/store';
     import { locked,unlock } from '../routes/menu/common/locked_store';
@@ -27,7 +25,6 @@
     let pin = "";
     let hiddenInput: HTMLInputElement;
     let showError = false;
-    let loginAlreadyDispatched = false;
     const dispatch = createEventDispatcher();
   
     
@@ -128,31 +125,38 @@ function cancelLogin() {
         startLogin();
       }
     }  
-    onMount(() => {
+ 
+onMount(() => {
   const observer = new MutationObserver(() => {
-    const lockScreenEl = document.querySelector('.lock-screen');
-    if (!lockScreenEl || getComputedStyle(lockScreenEl).display === 'none') {
-      if (!loginAlreadyDispatched) {
-        loginAlreadyDispatched = true;
-        dispatch('loginSuccess');
-      }
+    const shaderCanvas = document.querySelector('canvas.shader-background');
+    const pngDiv = document.querySelector('.background-image');
+
+    if (shaderCanvas) {
+      currentLogo.set(1);
+    } else if (pngDiv) {
+      currentLogo.set(2);
     }
   });
 
   observer.observe(document.body, {
     childList: true,
     subtree: true,
-    attributes: true,
-    attributeFilter: ['style', 'class']
   });
+
+  const shaderCanvas = document.querySelector('canvas.shader-background');
+  const pngDiv = document.querySelector('.background-image');
+  if (shaderCanvas) {
+    currentLogo.set(1);
+  } else if (pngDiv) {
+    currentLogo.set(2);
+  }
 
   return () => observer.disconnect();
 });
 
+
     </script>
-{#if $currentLogo === 1}
-<ShaderBackground fragSrc={fragSrc}  />
-{/if}
+
 
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->

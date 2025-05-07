@@ -585,6 +585,11 @@ export async function toggleBackgroundShaderEnabled() {
         method: "POST",
     });
 }
+export async function getShaderEnabled(): Promise<boolean> {
+    const res = await fetch(`${API_BASE}/client/shader`);
+    const json = await res.json();
+    return json.enabled === true;
+}
 
 export async function getBrowser(): Promise<Browser> {
     const response = await fetch(`${API_BASE}/client/browser`);

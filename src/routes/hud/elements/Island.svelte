@@ -36,8 +36,8 @@ const contentRefs = {
   status: null as HTMLDivElement | null
 };
 type AlertType =
-    'health' | 'air' | 'blocks' | 'hunger' | 
-    'saturation' | 'armor' | 'durability' | 'inventory' | null;
+    'health' | 'air' | 'blocks' | 'hunger' | 'uniform'|
+    'saturation' | 'unbeatable' | 'durability' | 'inventory' | null;
 type AlertState = 'hidden' | 'showing' | 'hiding';
 type ContentType = 'alert' | 'greeting' | 'status';
 
@@ -187,14 +187,14 @@ function hideAlert(): void {
 
 function checkHealthAlert(newHealth: number): void {
   if (newHealth > 0 && newHealth <= 5 && lastHealthValue > 5) {
-    showAlert('health', 'Low Health', 'Your health is severely inadequate !');
+    showAlert('health', 'NearDeath', 'Your health is severely inadequate !');
   }
   lastHealthValue = newHealth;
 }
 
 function checkAirAlert(newAir: number): void {
   if (newAir <= 15 && lastAirValue > 15) {
-    showAlert('air', 'Hypoxia', 'Please emerge as soon as possible !');
+    showAlert('air', 'Suffocating', 'Please emerge as soon as possible !');
   }
   lastAirValue = newAir;
 }
@@ -203,7 +203,7 @@ function checkFoodAlert(newFood: number): void {
   if (newFood < 20 && lastFoodValue === 20) {
     showAlert('hunger', 'Cannot Heal', `Stop combat/food recovery shortly !`);
   } else if (newFood <= 7 && lastFoodValue > 7) {
-    showAlert('saturation', 'Hunger',  `Your saturation is critically low (${newFood}/20)`);
+    showAlert('saturation', 'Famine',  `Your saturation is critically low (${newFood}/20)`);
   }
   lastFoodValue = newFood;
 }
@@ -213,7 +213,7 @@ function checkInventoryFullAlert(emptySlots: number) {
       emptySlots === 0 &&
       now - lastInventoryFullAlertTime > INVENTORY_FULL_COOLDOWN_MS
     ) {
-      showAlert('inventory', 'Inventory Full', 'You cannot bring anything further!');
+      showAlert('inventory', 'Overburdened', 'You cannot bring anything further!');
       lastInventoryFullAlertTime = now;
     }
     lastEmptySlotCount = emptySlots;
@@ -238,7 +238,7 @@ function checkArmorDurability() {
     if (ratio <= DURABILITY_THRESHOLD && now - lastTime > DURABILITY_COOLDOWN_MS) {
       showAlert(
         'durability',
-        `Durability Warn`,
+        `Fragile`,
         `${name} Remaining durability is ${Math.round(ratio * 100)}%`
       );
       warnedSlots.set(slot, now);
@@ -248,7 +248,6 @@ function checkArmorDurability() {
     }
   }
 }
-
 function checkArmorAlert(
   targetId: string,
   targetArmor: number | undefined,
@@ -257,24 +256,28 @@ function checkArmorAlert(
   if (targetArmor === undefined) return;
 
   const now = Date.now();
-  const threshold = armorThreshold + playerArmor;
+  const baseThreshold = armorThreshold + playerArmor;
+  const extraGap = 16; 
 
   const lastTime = lastArmorAlertTimes.get(targetId) ?? 0;
 
-  if (
-    targetArmor > threshold &&
-    now - lastTime > ARMOR_ALERT_TARGET_COOLDOWN_MS
-  ) {
-    showAlert('armor', 'High Armor Alert', `You're at an equipment disadvantage!`);
-    lastArmorAlertTimes.set(targetId, now);
+  if (now - lastTime <= ARMOR_ALERT_TARGET_COOLDOWN_MS) return;
+
+  if (targetArmor > baseThreshold + extraGap) {
+    showAlert('uniform', 'Formidable', `You're at an equipment disadvantage!`);
+  } else if (targetArmor > baseThreshold) {
+    showAlert('unbeatable', 'Overpowered', `You're at an equipment disadvantage!`);
   }
+    lastArmorAlertTimes.set(targetId, now);
+  
 }
+
 
 function checkBlockAlert(newBlock: number | undefined): void {
   if (newBlock === undefined) return;
   
   if (newBlock < 16 && (lastBlockValue === undefined || lastBlockValue >= 16)) {
-    showAlert('blocks', 'Low Blocks', `You've only got ${newBlock} usable blocks left!`);
+    showAlert('blocks', 'OutOfStock', `You've only got ${newBlock} usable blocks left!`);
   } 
   lastBlockValue = newBlock;
 }
@@ -300,7 +303,6 @@ async function updateAllData(): Promise<void> {
   const newData = await getPlayerData();
   if (!newData) return;
 
-  clientInfo = await getClientInfo();
   updateTime();  
   session = await getSession();
   sessionLoaded = true;  
@@ -611,8 +613,9 @@ class:notification-active={currentAlert !== null}
       durability: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
       inventory: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
       blocks: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
-      armor: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
-      saturation: (#ff640a, #ffab5e, 10deg, #ff640a)
+      uniform: (#ff9f0a, #ffd60a, 30deg, #ff9f0a),
+      saturation: (#ff640a, #ffab5e, 10deg, #ff640a),
+      unbeatable: (#ff640a, #ffab5e, 10deg, #ff640a)
     );
   
     // 循环生成不同类型通知的样式

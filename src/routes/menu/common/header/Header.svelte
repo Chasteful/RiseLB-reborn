@@ -1,23 +1,33 @@
 <script lang="ts">
-  import { toggleBackgroundShaderEnabled } from "../../../../integration/rest";
+  import { toggleBackgroundShaderEnabled,getShaderEnabled } from "../../../../integration/rest";
   import Account from "./Account.svelte";
   import Notifications from "./Notifications.svelte";
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { currentLogo, logoVariants } from './logoStore';
   import { lock } from "../../common/locked_store"; 
+  export let showAccount: boolean;
   let glitchActive = false;
   let intervalId: ReturnType<typeof setInterval>;
   let timeoutId: ReturnType<typeof setTimeout>;
   let redLayer: HTMLImageElement;
-  let blueLayer: HTMLImageElement;
-  let isEscPressed = false; 
+  let blueLayer: HTMLImageElement; 
   let pressTimer: NodeJS.Timeout;
-  export let showAccount: boolean;
+  let shaderEnabled: boolean = false;
+ 
   const LONG_PRESS_DURATION = 1000;
+  function updateShaderStatusBasedOnLogo() {
+    currentLogo.subscribe(current => {
+      shaderEnabled = current === 1; // 当 currentLogo 为 1 时启用 shader，否则禁用
+    });
+  }
   function switchLogo() {
-    currentLogo.update(n => (n % logoVariants) + 1);  
+    currentLogo.update(n => {
+      const newLogo = (n % logoVariants) + 1;
+      return newLogo;
+    });
   }
     
+
   function handleLogoMouseDown() {
     pressTimer = setTimeout(() => {
       lock();
@@ -27,11 +37,6 @@
   function handleLogoMouseUp() {
     clearTimeout(pressTimer);
   }
-
-
-function handleMouseUp() {
-  clearTimeout(pressTimer);
-}
   function startGlitch() {
     clearInterval(intervalId);
     clearTimeout(timeoutId);
@@ -60,12 +65,26 @@ function handleMouseUp() {
       glitchActive = false;
     }, 1000);
   }
-
-  function handleClick() {
+  async function handleClick() {
     startGlitch();
-    toggleBackgroundShaderEnabled(); 
+    try {
+      await toggleBackgroundShaderEnabled();
+      shaderEnabled = !shaderEnabled; 
+    } catch (e) {
+      console.error("Failed to toggle shader", e);
+    }
   }
 
+
+
+  onMount(async () => {
+    updateShaderStatusBasedOnLogo(); 
+    try {
+      shaderEnabled = await getShaderEnabled();
+    } catch (e) {
+      console.error("Failed to fetch shader status", e);
+    }
+  });
 
   onDestroy(() => {
     clearInterval(intervalId);
@@ -73,24 +92,22 @@ function handleMouseUp() {
   });
 </script>
 
-<div class="header">
-  <button 
-  class="logo-container reset-button" 
-  on:click={handleClick}
-  on:click|preventDefault={switchLogo}
-  on:contextmenu|preventDefault={switchLogo}
-  on:mousedown={handleLogoMouseDown}
-  on:mouseup={handleLogoMouseUp}
-  on:mouseleave={handleLogoMouseUp}
-  on:touchstart={handleLogoMouseDown}
-  on:touchend={handleLogoMouseUp}
->
 
-    <img class="logo {glitchActive ? 'transparent' : ''}"      
-     src="img/lb-logo{$currentLogo}.svg"  alt="logo" 
-     draggable="false"/>
-    
-
+  <div class="header">
+    <button 
+      class="logo-container reset-button" 
+      on:click={handleClick}
+      on:click|preventDefault={switchLogo}
+      on:contextmenu|preventDefault={switchLogo}
+      on:mousedown={handleLogoMouseDown}
+      on:mouseup={handleLogoMouseUp}
+      on:mouseleave={handleLogoMouseUp}
+      on:touchstart={handleLogoMouseDown}
+      on:touchend={handleLogoMouseUp}
+    >
+      <img class="logo {glitchActive ? 'transparent' : ''}"      
+        src="img/lb-logo{$currentLogo}.svg"  alt="logo" 
+        draggable="false"/>
     <img bind:this={redLayer} 
     class="logo glitch-layer red 
     {glitchActive ? 'visible' : ''}"      
