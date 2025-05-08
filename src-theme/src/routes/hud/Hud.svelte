@@ -49,7 +49,6 @@
   async function updateZoom(): Promise<void> {
     const gameWindow = await getGameWindow();
     const gameScale = gameWindow.scaleFactor * 50;
- 
     hudZoom = gameScale * calcResolutionCoefficient();
   }
   onMount(() => {

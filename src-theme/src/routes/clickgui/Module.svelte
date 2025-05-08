@@ -23,6 +23,7 @@
    let moduleNameElement: HTMLElement;
    const modulesElement = getContext<HTMLElement>("modules-element");
    let expanded: boolean = false;
+   let skipAnimationDelay = false;
    $: expanded = $expandedModuleName === name;
   onMount(async () => {
     configurable = await getModuleSettings(name);
@@ -120,7 +121,7 @@
     <div class="settings-wrapper"  >
       <div class="settings">
         {#each configurable.value as setting (setting.name)}
-          <GenericSetting {path} bind:setting on:change={updateModuleSettings} />
+          <GenericSetting skipAnimationDelay = {true} {path} bind:setting on:change={updateModuleSettings} />
         {/each}
       </div>
     </div>

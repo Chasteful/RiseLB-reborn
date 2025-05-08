@@ -37,7 +37,11 @@
     let categories: GroupedModules = {};
     let modules: Module[] = [];
     let minecraftScaleFactor = 2;
-    let clickGuiScaleFactor = 0.89;
+    let clickGuiScaleFactor = 1;
+    $: {
+        const resScale = resolutionScaler.getScaleFactor();
+        scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resScale);
+    }
 
 
 
@@ -99,7 +103,7 @@
      background-size: {$gridSize}px {$gridSize}px;">
     {#if $showResults}
         <!-- svelte-ignore element_invalid_self_closing_tag -->
-        <div class="elegant-overlay" transition:fade={{ duration: 300 }}/>
+        <div class="elegant-overlay" in:fade={{ duration: 300 }}out:fade+{{duration:300}}/>
     {/if}
     <CtrlFTip showSearch={showSearch} />
 
@@ -136,7 +140,6 @@
   .elegant-overlay {
     position: fixed;
     inset: 0;
-    z-index: 998;
     pointer-events: auto;
 
     background: radial-gradient(
@@ -148,8 +151,6 @@
     box-shadow: inset 0 0 60px 20px rgba(255, 255, 255, 0.03);
 
 
-    backdrop-filter: blur(12px) brightness(0.95);
-    -webkit-backdrop-filter: blur(12px) brightness(0.95);
 
 
     &::before {

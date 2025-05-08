@@ -84,14 +84,17 @@
       --border-color: {mixedBorderColor};
   "
 >
-  <div class="head" class:expanded on:contextmenu|preventDefault={toggleExpanded}>
+  <div class="head"
+       class:expanded on:contextmenu|preventDefault={toggleExpanded}>
       <div class="title">{$spaceSeperatedNames ? convertToSpacedString(cSetting.name) : cSetting.name}</div>
       <div class="amount">{cSetting.value.length}/{cSetting.choices.length}</div>
       <ExpandArrow bind:expanded />
   </div>
 
   {#if expanded}
-      <div class="choices" transition:slide|global={{duration: 200, axis: "y"}}>
+      <div class="choices"
+           in:slide|global={{duration: 200, axis: "y"}}
+           out:slide|global={{duration: 200, axis: "y"}}>
           {#each cSetting.choices as choice}
               <div
                   class="choice"
@@ -111,14 +114,14 @@
 
 .setting {
   position: relative;
-  padding: 12px;
+  padding: 8px;
   border-radius: 8px;
   will-change: transform, opacity;
-  background: rgba($mantle, 0.4);
+  background: rgba($base, 0.3);
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   box-sizing: border-box;
   overflow: hidden;
-  margin-bottom: 12px;
+  margin: 12px;
   --border-opacity: 0.1;
 
   &:hover {

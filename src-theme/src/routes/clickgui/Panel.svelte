@@ -785,7 +785,7 @@ out:fly|global={{y: -30, duration: 200, easing: quintOut}}
 }
 
 .modules {
-  max-height: 555px;
+  max-height: 562px;
   overflow-y: auto;
   overflow-x: hidden;
 }
