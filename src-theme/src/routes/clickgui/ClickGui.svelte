@@ -6,11 +6,9 @@
     import Description from "./Description.svelte";
     import { fade } from "svelte/transition";
     import { listen } from "../../integration/ws";
-    import { writable } from 'svelte/store';
     import Search from './Search.svelte';
     import {ResolutionScaler} from "./ResolutionScaler"
     import { debounce } from "lodash";
-    import { highlightModuleName, filteredModules } from "./clickgui_store";
     import {
         showResults,showSearch
     } from "./clickgui_store";
@@ -39,9 +37,6 @@
     });
     let categories: GroupedModules = {};
     let modules: Module[] = [];
-
-
-
     let minecraftScaleFactor = 2;
     let clickGuiScaleFactor = 1;
     $: {
@@ -112,13 +107,12 @@
         <div class="elegant-overlay" transition:fade={{ duration: 300 }}/>
     {/if}
     <CtrlFTip showSearch={showSearch} />
-    <Description />
 
+    <Description />
 
     {#if $showSearch}
             <Search modules={structuredClone(modules)} />
     {/if}
-
 
     {#each Object.entries(categories) as [category, modules], panelIndex}
         <Panel {category} {modules} {panelIndex} />
@@ -156,7 +150,6 @@
                     rgba(0, 0, 0, 0) 0%,
                     rgba(0, 0, 0, 0.5) 100%
     );
-
 
     box-shadow: inset 0 0 60px 20px rgba(255, 255, 255, 0.03);
 
@@ -199,34 +192,4 @@
     }
   }
 
-
-
-  .ctrl-f-tip {
-    position: absolute;
-    bottom: 150px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 32px;
-    color: rgba($text, 0.3);
-    text-shadow: 0 0 16px rgba($text,0.5);
-    font-weight: bold;
-    padding: 8px 16px;
-    border-radius: 20px;
-    background: rgba($base, 0);
-    backdrop-filter: blur(5px);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    pointer-events: auto;
-
-
-    &.visible {
-      &:hover {
-        color: rgba($text, 0.5);
-        transform: translateX(-50%) scale(1.05);
-        text-shadow:
-                4 8 12px rgba($base,0.52),
-                4 8 16px rgba($text,0.8);
-      }
-    }
-  }
 </style>
