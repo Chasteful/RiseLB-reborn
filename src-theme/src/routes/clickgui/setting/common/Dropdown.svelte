@@ -214,7 +214,6 @@ function FadeOut(node: Element, { delay = 0, duration = 200, blurAmount = 4 } = 
       rgba(darken($base, 8%), 0.78) 100%
     );
     mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
   mask-size: 100% 100%;
   mask-repeat: no-repeat;
     border-radius: 14px;

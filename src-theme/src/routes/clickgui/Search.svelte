@@ -5,14 +5,14 @@
   import type { KeyboardKeyEvent, ModuleToggleEvent } from "../../integration/events";
   import { highlightModuleName, filteredModules } from "./clickgui_store";
   import { convertToSpacedString, spaceSeperatedNames } from "../../theme/theme_config";
-  import { fly } from 'svelte/transition';
-  import { quintOut } from 'svelte/easing';
+  import { fly ,fade} from 'svelte/transition';
+  import {cubicOut, quintOut} from 'svelte/easing';
   import { onMount, onDestroy } from "svelte";
   import { showResults } from "./clickgui_store";
+  import type { Writable } from "svelte/store";
   import { get } from "svelte/store";
   import { writable } from 'svelte/store';
   export let modules: Module[];
-  
   let isSearchFocused = false;
   let resultElements: HTMLElement[] = [];
   let searchContainerElement: HTMLElement;
@@ -389,6 +389,8 @@ function getWeightedRandomPlaceholder(): string {
   on:mouseenter={() => isSearchFocused = true}
   on:mouseleave={() => isSearchFocused = false}
   bind:this={searchContainerElement}
+  in:fade={{ duration: 300, easing: cubicOut }}
+  out:fade={{duration: 300,  easing: cubicOut}}
   
 >
   <div class="input-wrapper"  draggable="false"
@@ -487,11 +489,11 @@ function getWeightedRandomPlaceholder(): string {
 <style lang="scss">
 @use "../../colors.scss" as *;
 @keyframes flowBorder {
-  0%   { background-position: 0% 50%; }
-  25%  { background-position: 50% 0%; }
+  0%   { background-position: 0 50%; }
+  25%  { background-position: 50% 0; }
   50%  { background-position: 100% 50%; }
   75%  { background-position: 50% 100%; }
-  100% { background-position: 0% 50%; }
+  100% { background-position: 0 50%; }
 }
 .search {
   position: fixed;
@@ -549,7 +551,7 @@ function getWeightedRandomPlaceholder(): string {
       transition: 
         transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1),
         opacity 0.2s linear;
-      will-change: transform opacity;   
+
 
  
   }
@@ -576,7 +578,6 @@ function getWeightedRandomPlaceholder(): string {
   border: none;
   cursor: pointer;
   margin-right: 10px;
-  transition: all 0.3s ease;
   position: relative;
   padding: 8px;
 
@@ -638,15 +639,14 @@ function getWeightedRandomPlaceholder(): string {
 
 .results, .history-results {
   border-top: 2px solid rgba($accent, 0.2);
-  padding: 0;
   max-height: 300px;
   backdrop-filter: blur(10px);
   margin-top: 8px;
-  overflow: overlay; 
-  padding-right: 8px; 
+  overflow: hidden;
+  will-change: transform ;
+  padding: 0 8px 0 0;
   border-radius: 24px; 
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba($accent, 0.2);
   background: linear-gradient(
     to bottom,
     rgba(#1a1a1a, 0.95) 0%,

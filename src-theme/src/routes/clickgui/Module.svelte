@@ -91,7 +91,7 @@
 </script>
 
 <div
-  class="module"data-module-name={name}
+  class="module" data-module-name={name}
   class:expanded
   class:has-settings={configurable?.value.length > 2}
   in:slide={{ duration: 300, easing: quintOut }}
@@ -117,7 +117,7 @@
   </div>
 
   {#if expanded && configurable}
-    <div class="settings-wrapper" transition:slide={{ duration: 400, easing: quintOut }}>
+    <div class="settings-wrapper"  >
       <div class="settings">
         {#each configurable.value as setting (setting.name)}
           <GenericSetting skipAnimationDelay={true} {path} bind:setting on:change={updateModuleSettings} />
@@ -210,7 +210,6 @@
               0 0 8px rgba($accent-color, 0.1),
               inset 0 0 4px rgba($accent-color-2, 0.05);
   transition: box-shadow 0.3s ease;
-  will-change: opacity;
   &:hover {
     box-shadow: 0 0 0 1px rgba($accent-color, 0.4),
                 0 0 12px rgba($accent-color, 0.3),
@@ -222,7 +221,6 @@
 
     &.expanded {
         overflow: visible;
-        z-index: 2;
         transition: all 0.3s ease-out;
     }
 
@@ -240,7 +238,6 @@
     border-radius: 10px;
     width: 10px;
     height: 10px;
-    background-image: url("");
     background-size: contain;
     background-repeat: no-repeat;
     transform: translateY(-50%) rotate(-90deg);

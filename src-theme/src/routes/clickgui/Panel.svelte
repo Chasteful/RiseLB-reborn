@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { tweened } from 'svelte/motion';
-  import { cubicOut } from 'svelte/easing';
+  import {cubicOut, quintOut} from 'svelte/easing';
   import { writable } from 'svelte/store';
   import { setContext } from "svelte";
   import type { Module as TModule } from "../../integration/types";
   import type { ModuleToggleEvent } from "../../integration/events";
   import { listen } from "../../integration/ws";
   import { setItem } from "../../integration/persistent_storage";
-
+  import { fly } from 'svelte/transition';
   import Module from "./Module.svelte";
   import {
       gridSize,
@@ -449,16 +449,19 @@ const debouncedMouseMove = debounce((e: MouseEvent) => {
 
 <!-- Panel Wrapper -->
 <div 
-class="panel-wrapper {moving ? 'no-transition' : ''}" 
+class="panel-wrapper {moving ? 'no-transition' : ''}"
+class:expanded={panelConfig.expanded}
+style="left: {panelConfig.left}px; top: {panelConfig.top}px; z-index: {panelConfig.zIndex};"
 bind:this={panelElement}
-  class:expanded={panelConfig.expanded}
-  style="left: {panelConfig.left}px; top: {panelConfig.top}px; z-index: {panelConfig.zIndex};"
+in:fly|global={{y: -30, duration: 200, easing: quintOut}}
+out:fly|global={{y: -30, duration: 200, easing: quintOut}}
 >
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
       class="panel"
       class:locked={$locked}
       class:glowing={$glowState}
+
   >
       <!-- Panel Title -->
       <div 
@@ -741,16 +744,15 @@ bind:this={panelElement}
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
   background: rgba($accent-color, 0.5);
   cursor: grab;
   text-align: center;
   text-shadow: 0 0 10px rgba($accent-color, 0.3);
-  backdrop-filter: blur(2px);  
   border-radius: 8px 8px 0 0;
   transition: all 0.3s ease;
-  position: relative; 
-  padding-right: 80px;
+  position: relative;
+  padding: 10px 80px 10px 10px;
+
   .panel:not(.expanded) & {
     background: rgba($mantle, 0.6);
     box-shadow: inset 0 0 10px rgba($accent-color, 0.2);

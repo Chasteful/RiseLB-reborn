@@ -47,14 +47,13 @@ export interface ResolutionScalerOptions {
     public getScaleFactor(): number {
       return this.scaleFactor;
     }
-  
-    
+
+
     public listenResize(callback: () => void): void {
       window.addEventListener("resize", callback);
     }
-  
+
     public removeResizeListener(callback: () => void): void {
       window.removeEventListener("resize", callback);
     }
   }
-  

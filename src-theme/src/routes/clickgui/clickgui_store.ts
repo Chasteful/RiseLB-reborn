@@ -35,4 +35,4 @@ export const showResults = writable<boolean>(false);
  
 export const filteredModules = writable<Module[]>([]);
 
-  
+export const showSearch = writable(false);
