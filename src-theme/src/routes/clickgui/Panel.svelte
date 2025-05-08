@@ -65,9 +65,9 @@
       zIndex: number;
   }
   export let panelId: string; // 唯一标识
-const storageKey = `clickgui.panel.${panelId}.expandedModule`;
-const expandedModuleName = writable<string | null>(null);
-setContext("expandedModuleName", expandedModuleName);
+  const storageKey = `clickgui.panel.${panelId}.expandedModule`;
+  const expandedModuleName = writable<string | null>(null);
+  setContext("expandedModuleName", expandedModuleName);
   const panelConfig = loadPanelConfig();
 
   
@@ -97,9 +97,11 @@ setContext("expandedModuleName", expandedModuleName);
           : Math.round(value / $gridSize) * $gridSize;
   }
 
-  
+
   function loadPanelConfig(): PanelConfig {
-      const localStorageItem = localStorage.getItem(`clickgui.panel.${category}`);
+      const localStorageItem = localStorage.getItem(
+          `clickgui.panel.${category}`,
+      );
 
       if (!localStorageItem) {
           return {
@@ -109,25 +111,31 @@ setContext("expandedModuleName", expandedModuleName);
               scrollTop: 0,
               zIndex: 0
           };
+      } else {
+          const config: PanelConfig = JSON.parse(localStorageItem);
+
+          // Migration
+          if (!config.zIndex) {
+              config.zIndex = 0;
+          }
+
+          if (config.zIndex > $maxPanelZIndex) {
+              $maxPanelZIndex = config.zIndex;
+          }
+
+          if (config.expanded) {
+              renderedModules = modules;
+          }
+
+          return config;
       }
-
-      const config: PanelConfig = JSON.parse(localStorageItem);
-      config.zIndex = config.zIndex || 0;
-
-      if (config.zIndex > $maxPanelZIndex) {
-          $maxPanelZIndex = config.zIndex;
-      }
-
-      if (config.expanded) {
-          renderedModules = modules;
-      }
-
-      return config;
   }
 
   async function savePanelConfig() {
-      const cloned = clonePanelConfig(panelConfig);
-      await setItem(`clickgui.panel.${category}`, JSON.stringify(cloned));
+      await setItem(
+          `clickgui.panel.${category}`,
+          JSON.stringify(panelConfig),
+      );
   }
 
   function fixPosition() {
@@ -147,15 +155,15 @@ setContext("expandedModuleName", expandedModuleName);
       if (saveHistory) {
           pushUndoState();
       }
-      
+
       Object.assign(panelConfig, {
           ...config,
           zIndex: config.zIndex === 0 ? 0 : ++$maxPanelZIndex
       });
-      
+
       fixPosition();
       savePanelConfig();
-      
+
       tick().then(() => {
           if (modulesElement) {
               modulesElement.scrollTop = panelConfig.scrollTop;
@@ -357,7 +365,7 @@ function onMouseMove(e: MouseEvent) {
       }, true);
   }
 
-  
+
   onMount(() => {
       setupGlobalShortcuts();
       fixPosition();
@@ -399,8 +407,8 @@ function onMouseMove(e: MouseEvent) {
 
     panelConfig.zIndex = ++$maxPanelZIndex;
     panelConfig.expanded = true;
-    
-   
+
+
     setTimeout(() => {
       const targetEl = modulesElement.children[index] as HTMLElement;
       if (targetEl) {
@@ -414,7 +422,7 @@ function onMouseMove(e: MouseEvent) {
 });
 const debouncedMouseMove = debounce((e: MouseEvent) => {
   if ($locked || !moving) return;
-  
+
   panelConfig.left = snapToGrid(e.clientX * (2 / $scaleFactor) - offsetX);
   panelConfig.top = snapToGrid(e.clientY * (2 / $scaleFactor) - offsetY);
   fixPosition();
@@ -428,7 +436,7 @@ const debouncedMouseMove = debounce((e: MouseEvent) => {
       pushUndoState();
       mod.enabled = e.enabled;
       modules = modules;
-      
+
       if (panelConfig.expanded) {
           renderedModules = modules;
       }
@@ -513,7 +521,7 @@ out:fly|global={{y: -30, duration: 200, easing: quintOut}}
       </div>
 
       <!-- Modules List -->
-      <div 
+      <div
           class="modules"
           on:scroll={handleModulesScroll}
           bind:this={modulesElement}
@@ -777,7 +785,7 @@ out:fly|global={{y: -30, duration: 200, easing: quintOut}}
 }
 
 .modules {
-  max-height: 545px;
+  max-height: 555px;
   overflow-y: auto;
   overflow-x: hidden;
 }

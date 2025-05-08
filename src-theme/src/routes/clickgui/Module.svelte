@@ -120,7 +120,7 @@
     <div class="settings-wrapper"  >
       <div class="settings">
         {#each configurable.value as setting (setting.name)}
-          <GenericSetting skipAnimationDelay={true} {path} bind:setting on:change={updateModuleSettings} />
+          <GenericSetting {path} bind:setting on:change={updateModuleSettings} />
         {/each}
       </div>
     </div>

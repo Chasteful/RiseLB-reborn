@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { writable, type Writable } from 'svelte/store';
+    import { type Writable } from "svelte/store";
     import { onDestroy, onMount } from "svelte";
+    import {quintOut} from "svelte/easing";
+    import {fly} from "svelte/transition";
 
     export let showSearch: Writable<boolean>;
-
     let isHoveringTip = false;
     let tipCooldown = false;
     let tipCooldownTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -52,6 +53,8 @@
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="ctrl-f-tip"
+         in:fly|global={{y: -30, duration: 200, easing: quintOut}}
+         out:fly|global={{y: -30, duration: 200, easing: quintOut}}
          class:visible={showTip}
          on:mouseenter={() => isHoveringTip = true}
          on:mouseleave={() => isHoveringTip = false}

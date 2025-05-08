@@ -62,7 +62,7 @@
   }
 
   .setting {
-    padding: 7px 0px;
+    padding: 7px 0;
   }
 
   .inputs {
@@ -83,7 +83,7 @@
 
     font-size: 12px;
     color: $text;
-    background-color: $accent-color;
+    background-color: rgba($accent-color,0.5);
     border: none;
     padding: 6px 10px;
     border-radius: 3px;
@@ -101,12 +101,9 @@
     background: rgba($base, 0.3);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    border: 1px solid rgba($accent-color, 0.05);
-    border: 4px solid rgba($text, 0.1);
     border-left: 2px solid $accent-color;
     font-size: 12px;
     color: $text;
-    border: none;
     padding: 6px;
     border-radius: 3px;
     transition: ease border-color .2s;

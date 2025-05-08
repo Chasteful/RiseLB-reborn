@@ -118,6 +118,7 @@
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   box-sizing: border-box;
   overflow: hidden;
+  margin-bottom: 12px;
   --border-opacity: 0.1;
 
   &:hover {

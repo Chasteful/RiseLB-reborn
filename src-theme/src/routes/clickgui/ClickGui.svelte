@@ -8,7 +8,6 @@
     import { listen } from "../../integration/ws";
     import Search from './Search.svelte';
     import {ResolutionScaler} from "./ResolutionScaler"
-    import { debounce } from "lodash";
     import {
         showResults,showSearch
     } from "./clickgui_store";
@@ -38,11 +37,7 @@
     let categories: GroupedModules = {};
     let modules: Module[] = [];
     let minecraftScaleFactor = 2;
-    let clickGuiScaleFactor = 1;
-    $: {
-        const resScale = resolutionScaler.getScaleFactor();
-        scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resScale);
-    }
+    let clickGuiScaleFactor = 0.89;
 
 
 
@@ -81,12 +76,12 @@
     });
 
 
-    const handleResize = debounce(() => {
+    const handleResize = () => {
         requestAnimationFrame(() => {
             resolutionScaler.updateScaleFactor();
             scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resolutionScaler.getScaleFactor());
         });
-    }, 100, { leading: false, trailing: true });
+    };
 
     listen("scaleFactorChange", async (e: ScaleFactorChangeEvent) => {
         minecraftScaleFactor = e.scaleFactor;
@@ -111,7 +106,7 @@
     <Description />
 
     {#if $showSearch}
-            <Search modules={structuredClone(modules)} />
+        <Search modules={structuredClone(modules)} />
     {/if}
 
     {#each Object.entries(categories) as [category, modules], panelIndex}
@@ -136,7 +131,6 @@
               linear-gradient(to right, rgba($clickgui-grid-color, 0.3) 1px, transparent 1px),
               linear-gradient(to bottom, rgba($clickgui-grid-color, 0.3) 1px, transparent 1px);
       background-size: #{$GRID_SIZE}px #{$GRID_SIZE}px;
-      will-change: transform;
     }
   }
   .elegant-overlay {

@@ -22,18 +22,10 @@
 
     export let setting: ModuleSetting;
     export let path: string;
-    export let skipAnimationDelay = false;
 
-    let ready = skipAnimationDelay;
-
-    onMount(() => {
-        setTimeout(() => {
-            ready = true;
-        }, 200)
-    });
 </script>
 
-{#if ready}
+
     <div in:slide|global={{duration: 200, axis: "y"}} out:slide|global={{duration: 200, axis: "y"}}>
         {#if setting.valueType === "BOOLEAN"}
             <BooleanSetting bind:setting={setting} on:change/>
@@ -73,4 +65,4 @@
             <div style="color: white">Unsupported setting {setting.valueType}</div>
         {/if}
     </div>
-{/if}
+

@@ -389,8 +389,8 @@ function getWeightedRandomPlaceholder(): string {
   on:mouseenter={() => isSearchFocused = true}
   on:mouseleave={() => isSearchFocused = false}
   bind:this={searchContainerElement}
-  in:fade={{ duration: 300, easing: cubicOut }}
-  out:fade={{duration: 300,  easing: cubicOut}}
+  in:fly|global={{y: -30, duration: 200, easing: quintOut}}
+  out:fly|global={{y: -30, duration: 200, easing: quintOut}}
   
 >
   <div class="input-wrapper"  draggable="false"
