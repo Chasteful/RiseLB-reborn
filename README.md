@@ -1,69 +1,41 @@
-<div align="center">
-<p>
-    <img width="200" src="https://raw.githubusercontent.com/CCBlueX/LiquidCloud/master/LiquidBounce/liquidbounceLogo.svg">
-</p>
+# GenshinBounce NextGen | _0x16z定制客户端
 
-[liquidbounce.net](https://liquidbounce.net) |
-[Forum](https://forums.ccbluex.net) |
-[YouTube](https://youtube.com/CCBlueX) |
-[Twitter](https://twitter.com/CCBlueX)
-</div>
+> 「Prosless 血统 + 水影灵魂 + 开源精神」  
 
-LiquidBounce is a free and open-source mixin-based injection hacked client using the Fabric API for Minecraft.
+---
 
-## Issues
+## 📦 安装指南
 
-If you notice any bugs or missing features, you can let us know by opening an
-issue [here](https://github.com/CCBlueX/LiquidBounce/issues).
+1. 拷贝整个客户端目录至 `.minecraft/versions/` 下。
+2. 启动器中添加自定义版本 GenshinBounce。
+3. 启动游戏，进入支持测试服（如 mc.loyisa.cn）。
 
-## License
+---
 
-This project is subject to the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). This
-does only apply for source code located directly in this clean repository. During the development and compilation
-process, additional source code may be used to which we have obtained no rights. Such code is not covered by the GPL
-license.
+## 📌 注意事项
 
-For those who are unfamiliar with the license, here is a summary of its main points. This is by no means legal advice
-nor legally binding.
+- 建议搭配 **Java 8** 使用，避免兼容性报错。
+- 此客户端仅供个人研究与学习，禁止用于商业用途或任何违反游戏规则的场景。
 
-*Actions that you are allowed to do:*
 
-- Use
-- Share
-- Modify
+如需交流或提供建议，可通过以下方式联系我：
 
-*If you do decide to use ANY code from the source:*
+- ✉️ 邮箱：`chasteful1337@outlook.com`
+- 💬 QQ群：`579612615`
+- 🛠️ GitHub：`[https://github.com/](https://github.com/Chasteful/RiseLB-reborn/)`
 
-- **You must disclose the source code of your modified work and the source code you took from this project. This means
-  you are not allowed to use code from this project (even partially) in a closed-source (or even obfuscated)
-  application.**
-- **Your modified application must also be licensed under the GPL**
+---
+## How to install manually
+Clone the repository `git clone https://github.com/Chasteful/RiseLB-reborn`
 
-## Setting up a Workspace
+CD into the repository
 
-LiquidBounce uses Gradle, to make sure that it is installed properly you can
-check [Gradle's website](https://gradle.org/install/). It also requires Node.js and Python to be installed for
-our [theme](https://github.com/CCBlueX/LiquidBounce/tree/nextgen/src-theme).
+Install dependencies `npm install`
 
-1. Clone the repository using `git clone --recurse-submodules https://github.com/CCBlueX/LiquidBounce`.
-2. CD into the local repository.
-3. Run `./gradlew genSources`.
-4. Open the folder as a Gradle project in your preferred IDE.
-5. Run the client.
-
-## Additional libraries
-
-### Mixins
-
-Mixins can be used to modify classes at runtime before they are loaded. LiquidBounce uses it to inject its code into the
-Minecraft client. This way, none of Mojang's copyrighted code is shipped. If you want to learn more about it, check out
-its [Documentation](https://docs.spongepowered.org/5.1.0/en/plugin/internals/mixins.html).
-
-## Contributing
-
-We appreciate contributions. So if you want to support us, feel free to make changes to LiquidBounce's source code and
-submit a pull request.
+Compile the theme `npm run build`
 
 ## Stats
+<p align="center"> 
+    <img src="https://repobeats.axiom.co/api/embed/481a818b61e6429e0a48969e51066586943b16a3.svg" alt="stats">
+</p>
 
-![Alt](https://repobeats.axiom.co/api/embed/ad3a9161793c4dfe50934cd4442d25dc3ca93128.svg "Repobeats analytics image")
