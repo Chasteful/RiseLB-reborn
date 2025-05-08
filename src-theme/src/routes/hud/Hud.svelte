@@ -31,21 +31,23 @@
   let components: Component[] = [];
   const MIN_COEFF = 0.1337;
   const gameScale = 50 * 2;
-  function calcAdjustedResolution() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const aspect = 16 / 9;
-    if (w / h > aspect) {
-      return { width: h * aspect, height: h };
-    } else {
-      return { width: w, height: w / aspect };
-    }
-  }
-  function calcResolutionCoefficient(): number {
-    const { width, height } = calcAdjustedResolution();
-    const wRatio = width / baseResolution.width;
-    const hRatio = height / baseResolution.height;
-    return Math.min(1, Math.max(MIN_COEFF, Math.min(wRatio, hRatio)));
+  const MIN_ASPECT_RATIO = 2 / 1;
+
+  function calcResolutionCoefficient() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const currentAspect = w / h;
+
+      const wRatio = w / baseResolution.width;
+      const hRatio = h / baseResolution.height;
+
+      let coeff = Math.min(wRatio, hRatio);
+
+      if (currentAspect < MIN_ASPECT_RATIO) {
+          coeff = Math.max(coeff, 0.5);
+      }
+
+      return Math.min(1, Math.max(MIN_COEFF, coeff));
   }
   async function updateZoom(): Promise<void> {
     hudZoom = gameScale * calcResolutionCoefficient();

@@ -87,10 +87,7 @@
         });
     };
 
-    listen("scaleFactorChange", async (e: ScaleFactorChangeEvent) => {
-        minecraftScaleFactor = e.scaleFactor;
 
-    });
 
     listen("clickGuiValueChange", (e: ClickGuiValueChangeEvent) => {
         applyValues(e.configurable);
