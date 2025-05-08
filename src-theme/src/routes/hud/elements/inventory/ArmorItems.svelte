@@ -1,0 +1,150 @@
+<script lang="ts">
+  import { listen } from "../../../../integration/ws";
+  import type { ClientPlayerDataEvent, PlayerInventory, PlayerInventoryEvent } from "../../../../integration/events";
+  import type { PlayerData, ItemStack } from "../../../../integration/types";
+  import ItemStackView from "./ItemStackView.svelte";
+  import { onMount } from "svelte";
+  import { getPlayerInventory, getPlayerData } from "../../../../integration/rest";
+  import { fly } from "svelte/transition";
+  import { expoInOut } from "svelte/easing";
+  import { armorDurabilityStore } from '../../elements/Island';
+  import { get } from 'svelte/store';
+  function createEmptySlot(): ItemStack {
+  return {
+    identifier: "minecraft:air",
+    count: 0,
+    damage: 0,
+    maxDamage: 0,
+    displayName: "Air",
+    hasEnchantment: false
+  };
+}
+
+export let armorSlots: ItemStack[] = Array(4).fill(0).map(() => createEmptySlot());
+
+let offHand: ItemStack = createEmptySlot();
+  let selectedSlot = 0;
+
+  function getDurabilityObj(item?: ItemStack | null) {
+    return item && item.identifier !== 'minecraft:air' ? {
+      identifier: item.identifier,
+      displayName: item.displayName,
+      durability: item.maxDamage - item.damage,
+      maxDurability: item.maxDamage
+    } : null;
+  }
+
+  function updateArmorDurability() {
+    const next = {
+      helmet: getDurabilityObj(armorSlots[0]),
+      chestplate: getDurabilityObj(armorSlots[1]),
+      leggings: getDurabilityObj(armorSlots[2]),
+      boots: getDurabilityObj(armorSlots[3])
+    };
+    const current = get(armorDurabilityStore);
+
+    if (JSON.stringify(current) !== JSON.stringify(next)) {
+      armorDurabilityStore.set(next);
+    }
+  }
+
+  function updatePlayerData(newData: PlayerData) {
+    selectedSlot = newData.selectedSlot;
+    offHand = newData.offHandStack ? { ...newData.offHandStack } : createEmptySlot();
+    ;
+  }
+
+function updateInventory(inventory: PlayerInventory) {
+  const newArmor = inventory.armor.map(slot => slot ? { ...slot } : createEmptySlot());
+
+  if (JSON.stringify(armorSlots) !== JSON.stringify(newArmor)) {
+    armorSlots = newArmor;
+    updateArmorDurability();
+  }
+}
+
+  listen("clientPlayerInventory", (event: PlayerInventoryEvent) => {
+    updateInventory(event.inventory);
+  });
+
+  listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
+    updatePlayerData(event.playerData);
+  });
+
+  onMount(async () => {
+    const [inventory, playerData] = await Promise.all([
+      getPlayerInventory(),
+      getPlayerData()
+    ]);
+    updateInventory(inventory);
+    updatePlayerData(playerData);
+  });
+
+  function shouldShowSlot(stack: ItemStack): boolean {
+    return stack.identifier !== "minecraft:air" && stack.count > 0;
+  }
+
+</script>
+<div class="armoritems-hud" id="armoritemshud" transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
+  <div class="inventory-hud"></div>
+  <div class="title">
+    <span class="bar"></span>
+    <span>ARMOR HUD</span>
+  </div>
+  <div class="armor-items">
+    {#each [...armorSlots].reverse() as stack (stack.identifier + stack.count)}
+      {#if shouldShowSlot(stack)}
+        <ItemStackView {stack} />
+      {/if}
+    {/each}
+    {#if shouldShowSlot(offHand)}
+      <ItemStackView stack={offHand} />
+    {/if}
+  </div>
+</div>
+
+  <style lang="scss">
+      @import "../../../../colors";
+      .armoritems-hud   {
+      position: relative;
+      min-width: 120px;
+      background-color: rgba($base ,0.5);
+      border-radius: 6px;
+      padding: 6px 10px;
+      width: fit-content;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: white;         
+      box-shadow: 
+  0 4px 16px rgba($base, 0.6),
+  inset 0 0 10px rgba(255, 255, 255, 0.05);
+      user-select: none;
+      white-space: nowrap;
+      flex-direction: column;  
+    }
+      .armor-items {
+  display: flex;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.title {
+      display: flex;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+
+
+    }
+    .bar {
+  width: 5px;
+  height: 1.2em;
+  background: linear-gradient(135deg, $Items-bar, $blue);
+  box-shadow: 2x 2px 4x $text;
+  margin-right: 6px;
+  border-radius: 6px;
+}
+
+  </style>
+  
