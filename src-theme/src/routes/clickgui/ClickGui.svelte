@@ -103,7 +103,7 @@
      background-size: {$gridSize}px {$gridSize}px;">
     {#if $showResults}
         <!-- svelte-ignore element_invalid_self_closing_tag -->
-        <div class="elegant-overlay" in:fade={{ duration: 300 }}out:fade+{{duration:300}}/>
+        <div class="elegant-overlay" in:fade={{ duration: 300 }} out:fade={{duration:300}}/>
     {/if}
     <CtrlFTip showSearch={showSearch} />
 

@@ -4,7 +4,7 @@ export interface ResolutionScalerOptions {
     baseResolution: { width: number; height: number };
     minCoeff?: number;
   }
-  
+
   export class ResolutionScaler {
     static subscribe(arg0: (v: any) => void) {
         throw new Error("Method not implemented.");
@@ -12,13 +12,13 @@ export interface ResolutionScalerOptions {
     private baseResolution: { width: number; height: number };
     private minCoeff: number;
     private scaleFactor: number = 1;
-  
+
     constructor(options: ResolutionScalerOptions) {
       this.baseResolution = options.baseResolution;
       this.minCoeff = options.minCoeff ?? 0.1337;
     }
-  
-    
+
+
     private calcAdjustedResolution(): { width: number; height: number } {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -29,21 +29,21 @@ export interface ResolutionScalerOptions {
         return { width: w, height: w / aspect };
       }
     }
-  
-    
+
+
     private calcResolutionCoefficient(): number {
       const { width, height } = this.calcAdjustedResolution();
       const wRatio = width / this.baseResolution.width;
       const hRatio = height / this.baseResolution.height;
       return Math.min(1, Math.max(this.minCoeff, Math.min(wRatio, hRatio)));
     }
-  
-    
+
+
     public updateScaleFactor(): void {
       this.scaleFactor = this.calcResolutionCoefficient();
     }
-  
-    
+
+
     public getScaleFactor(): number {
       return this.scaleFactor;
     }

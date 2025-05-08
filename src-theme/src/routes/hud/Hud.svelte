@@ -30,6 +30,7 @@
   let hudZoom = 100;
   let components: Component[] = [];
   const MIN_COEFF = 0.1337;
+  const gameScale = 50 * 2;
   function calcAdjustedResolution() {
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -47,8 +48,6 @@
     return Math.min(1, Math.max(MIN_COEFF, Math.min(wRatio, hRatio)));
   }
   async function updateZoom(): Promise<void> {
-    const gameWindow = await getGameWindow();
-    const gameScale = gameWindow.scaleFactor * 50;
     hudZoom = gameScale * calcResolutionCoefficient();
   }
   onMount(() => {
@@ -57,11 +56,7 @@
     window.addEventListener("resize", updateZoom);
     return () => window.removeEventListener("resize", updateZoom);
   });
-  listen("scaleFactorChange", (e: ScaleFactorChangeEvent) => {
-    const gameScale = e.scaleFactor * 50;
-    hudZoom = gameScale * calcResolutionCoefficient();
 
-  });
   listen("componentsUpdate", (e: ComponentsUpdateEvent) => {
     components = [];2
     components = e.components;
