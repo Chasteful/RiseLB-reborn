@@ -68,7 +68,7 @@
       font-size: 12px;
       color: $text;
       border: none;
-      border-bottom: solid 2px $accent;
+      border-bottom: solid 2px $text;
       padding: 5px;
       border-radius: 3px;
       transition: ease border-color .2s;

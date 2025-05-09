@@ -475,7 +475,23 @@ class:notification-active={currentAlert !== null}
 </div>
 <style lang="scss">
   @import "../../../colors.scss";
-  
+  @property --＠color-1 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: hsl(98 100% 62%);
+  }
+
+  @property --＠color-2 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: hsl(204 100% 59%);
+  }
+  @keyframes gradient-change {
+    to {
+      --＠color-1: hsl(210 100% 59%);
+      --＠color-2: hsl(310 100% 59%);
+    }
+  }
   @mixin text-ellipsis {
     white-space: nowrap;
     overflow: hidden;
@@ -573,10 +589,23 @@ class:notification-active={currentAlert !== null}
       font-variant-numeric: tabular-nums;
     }
     .client{
-    color: $text;
-    text-shadow:0 0 3px rgba($text, 0.9);
-    
+      animation: gradient-change 2s linear infinite alternate;
+      background: linear-gradient(
+                      to right in oklch,
+                      var(--＠color-1),
+                      var(--＠color-2)
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
     }
+
+
+
+
+
+
     .separator {
       width: 2px;
       height: 20px;

@@ -4,7 +4,7 @@
     import { currentLogo, logoVariants } from "./logoStore";
     import { lock } from "../locked_store";
     import Notifications from "./Notifications.svelte";
-    import Account from "./Account.svelte";
+    import Account from "./account/Account.svelte";
 
     export let showAccount: boolean;
 

@@ -50,6 +50,7 @@
 </div>
 
 <style lang="scss">
+  @use "sass:color";
   @use "../../../../../colors.scss" as *;
 
   .select {
@@ -66,8 +67,7 @@
  
   .header {
     background: rgba($base, 0.5);
-    box-shadow: 0px 0px 8px rgba($base, 0.6);
-
+    box-shadow: 0 0 8px rgba($base, 0.6);
     padding: 20px;
     display: flex;
     column-gap: 20px;

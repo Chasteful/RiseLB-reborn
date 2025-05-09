@@ -5,11 +5,10 @@
   import type { KeyboardKeyEvent, ModuleToggleEvent } from "../../integration/events";
   import { highlightModuleName, filteredModules } from "./clickgui_store";
   import { convertToSpacedString, spaceSeperatedNames } from "../../theme/theme_config";
-  import { fly ,fade} from 'svelte/transition';
-  import {cubicOut, quintOut} from 'svelte/easing';
+  import { fly } from 'svelte/transition';
+  import { quintOut} from 'svelte/easing';
   import { onMount, onDestroy } from "svelte";
   import { showResults } from "./clickgui_store";
-  import type { Writable } from "svelte/store";
   import { get } from "svelte/store";
   import { writable } from 'svelte/store';
   export let modules: Module[];
@@ -708,8 +707,8 @@ function getWeightedRandomPlaceholder(): string {
     &::before {
       content: '';
       display: inline-block;
-      width: 16px;
-      height: 16px;
+      width: 32px;
+      height: 32px;
       margin-right: 10px;
       background-color: rgba($accent-color, 0.7);
       mask-image: url("/img/clickgui/icon-history.svg");
@@ -791,17 +790,6 @@ function getWeightedRandomPlaceholder(): string {
       border-bottom-right-radius: 0;
     }
 
-    &::before {
-      content: '';
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      margin-right: 12px;
-      background-color: rgba($subtext0, 0.5);
-      mask-image: url("/img/clickgui/icon-clock.svg");
-      mask-size: contain;
-      transition: all 0.2s ease;
-    }
 
     &:hover {
       background: rgba($accent, 0.08);

@@ -82,7 +82,8 @@ enum class ComponentType(
     CRAFTING_INVENTORY("CraftingInventory"),
     KEYSTROKES("Keystrokes"),
     ISLAND("Island"),
-    NOTIFICATIONS("Notifications");
+    NOTIFICATIONS("Notifications"),
+    RAT("rat");
 
 
     companion object {

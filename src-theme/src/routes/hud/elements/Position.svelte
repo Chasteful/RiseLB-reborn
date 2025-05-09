@@ -102,7 +102,8 @@
     font-size: 20px;
     font-weight: bold;
     text-align: right;
-    color: #bbbbbb;
+    color: #ffffff;
+    opacity: 0.85;
     text-shadow: 0 0 3px rgba(170, 170, 170, 0.9);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
