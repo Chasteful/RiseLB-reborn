@@ -60,13 +60,10 @@ object ThemeManager : Configurable("theme") {
 
     var shaderEnabled by boolean("Shader", false)
         .onChange { enabled ->
-            if (enabled) {
-                RenderSystem.recordRenderCall {
-                    activeTheme.compileShader()
-                    defaultTheme.compileShader()
-                }
+            RenderSystem.recordRenderCall {
+                activeTheme.compileShader(enabled)
+                defaultTheme.compileShader(enabled)
             }
-
             return@onChange enabled
         }
 
@@ -139,41 +136,17 @@ object ThemeManager : Configurable("theme") {
     }
 
     fun initialiseBackground() {
-        // Load background image of active theme and fallback to default theme if not available
-        if (!activeTheme.loadBackgroundImage()) {
-            defaultTheme.loadBackgroundImage()
-        }
-
-        // Compile shader of active theme and fallback to default theme if not available
-        if (shaderEnabled && !activeTheme.compileShader()) {
-            defaultTheme.compileShader()
+        // Compile shader of active theme and fallback to default theme if needed
+        if (!activeTheme.compileShader(shaderEnabled)) {
+            defaultTheme.compileShader(shaderEnabled)
         }
     }
 
     fun drawBackground(context: DrawContext, width: Int, height: Int, mousePos: Vec2i, delta: Float): Boolean {
-        if (shaderEnabled) {
-            val shader = activeTheme.compiledShaderBackground ?: defaultTheme.compiledShaderBackground
+        val shader = activeTheme.compiledShaderBackground ?: defaultTheme.compiledShaderBackground
 
-            if (shader != null) {
-                shader.draw(mousePos.x, mousePos.y, delta)
-                return true
-            }
-        }
-
-        val image = activeTheme.loadedBackgroundImage ?: defaultTheme.loadedBackgroundImage
-        if (image != null) {
-            context.drawTexture(
-                RenderLayer::getGuiTextured,
-                image,
-                0,
-                0,
-                0f,
-                0f,
-                width,
-                height,
-                width,
-                height
-            )
+        if (shader != null) {
+            shader.draw(mousePos.x, mousePos.y, delta)
             return true
         }
 
@@ -215,42 +188,30 @@ class Theme(val name: String) : Closeable {
     private val url: String
         get() = "${ClientInteropServer.url}/$name/#/"
 
-    private val backgroundShader: File
-        get() = File(folder, "background.frag")
-    private val backgroundImage: File
-        get() = File(folder, "background.png")
     var compiledShaderBackground: CanvasShader? = null
         private set
-    var loadedBackgroundImage: Identifier? = null
-        private set
-
-    fun compileShader(): Boolean {
-        if (compiledShaderBackground != null) {
+    private val shaderCache = mutableMapOf<Boolean, CanvasShader?>()
+    fun compileShader(shaderEnabled: Boolean): Boolean {
+        shaderCache[shaderEnabled]?.let {
+            compiledShaderBackground = it
             return true
         }
+        val shaderFile = if (shaderEnabled) File(folder, "background2.frag") else File(folder, "background1.frag")
 
-        readShaderBackground()?.let { shaderBackground ->
-            compiledShaderBackground = CanvasShader(resourceToString("/resources/liquidbounce/shaders/vertex.vert"),
-                shaderBackground)
-            logger.info("Compiled background shader for theme $name")
-            return true
-        }
-        return false
-    }
-
-    private fun readShaderBackground() = backgroundShader.takeIf { it.exists() }?.readText()
-    private fun readBackgroundImage() = backgroundImage.takeIf { it.exists() }
-        ?.inputStream()?.use { NativeImage.read(it) }
-
-    fun loadBackgroundImage(): Boolean {
-        if (loadedBackgroundImage != null) {
-            return true
+        if (!shaderFile.exists()) {
+            shaderCache[shaderEnabled] = null
+            compiledShaderBackground = null
+            return false
         }
 
-        val image = NativeImageBackedTexture(readBackgroundImage() ?: return false)
-        loadedBackgroundImage = Identifier.of("liquidbounce", "theme-bg-${name.lowercase()}")
-        mc.textureManager.registerTexture(loadedBackgroundImage, image)
-        logger.info("Loaded background image for theme $name")
+        val code = shaderFile.readText()
+        val shader = CanvasShader(
+            resourceToString("/resources/liquidbounce/shaders/vertex.vert"),
+            code
+        )
+        shaderCache[shaderEnabled] = shader
+        compiledShaderBackground = shader
+        logger.info("Compiled ${if (shaderEnabled) "secondary" else "primary"} shader for theme $name")
         return true
     }
 
@@ -299,7 +260,7 @@ class Theme(val name: String) : Closeable {
     }
 
     override fun close() {
-        mc.textureManager.destroyTexture(loadedBackgroundImage)
+        // No texture cleanup needed anymore
     }
 
     companion object {

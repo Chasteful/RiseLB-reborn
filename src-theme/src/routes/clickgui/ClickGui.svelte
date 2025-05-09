@@ -20,7 +20,6 @@
 
     import type {
         ClickGuiValueChangeEvent,
-        ScaleFactorChangeEvent
     } from "../../integration/events";
     import type {
 
@@ -46,7 +45,6 @@
 
 
     const applyValues = (configurable: ConfigurableSetting) => {
-        clickGuiScaleFactor = configurable.value.find(v => v.name === "Scale")?.value as number ?? 1;
         const snappingValue = configurable.value.find(v => v.name === "Snapping") as TogglableSetting;
         $snappingEnabled = snappingValue?.value.find(v => v.name === "Enabled")?.value as boolean ?? true;
         $gridSize = snappingValue?.value.find(v => v.name === "GridSize")?.value as number ?? 10;
@@ -55,9 +53,6 @@
 
 
     onMount(async () => {
-        const gameWindow = await getGameWindow();
-        minecraftScaleFactor = gameWindow.scaleFactor;
-
         resolutionScaler.updateScaleFactor();
         scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resolutionScaler.getScaleFactor());
 
@@ -73,7 +68,6 @@
         window.addEventListener("resize", handleResize);
 
     });
-
 
     onDestroy(() => {
         window.removeEventListener("resize", handleResize);

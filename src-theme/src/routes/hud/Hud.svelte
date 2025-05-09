@@ -44,7 +44,7 @@
       let coeff = Math.min(wRatio, hRatio);
 
       if (currentAspect < MIN_ASPECT_RATIO) {
-          coeff = Math.max(coeff, 0.5);
+          coeff = Math.max(coeff, 0.45);
       }
 
       return Math.min(1, Math.max(MIN_COEFF, coeff));
