@@ -18,7 +18,15 @@
     let pinVisible: boolean[] = [false, false, false, false];
 
     const DEFAULT_PIN = "0721";
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key !== "Escape" && userStatus === UserStatus.LoggedOut) {
 
+            startLogin();
+        } else if (event.key === "Escape" && userStatus === UserStatus.LoggingIn) {
+
+            cancelLogin();
+        }
+    }
   function slideReverse(node: Element, options: any): TransitionConfig {
     return slide(node, { ...options, x: -100 }); 
   }
@@ -76,12 +84,19 @@
     showError = false;
   }
 
-  
-    async function verifyPin() {
-  userStatus = UserStatus.VerifyingLogIn;
-  showError = false;
 
-  await new Promise(r => setTimeout(r, Math.random() * 400 + 300));
+    async function verifyPin() {
+
+        pinVisible = [false, false, false, false];
+        await tick();
+
+        userStatus = UserStatus.VerifyingLogIn;
+        showError = false;
+
+        const minDisplayTime = 800;
+        const verificationDelay = Math.max(minDisplayTime, Math.random() * 400 + 300);
+
+        await new Promise(r => setTimeout(r, verificationDelay));
 
   if (pin === DEFAULT_PIN) {
   userStatus = UserStatus.LoggedIn;
@@ -106,20 +121,19 @@
   }
 }
 
-function startLogin() {
-  userStatus = UserStatus.LoggingIn;
-  pin = "";
-  showError = false;
-}
+    function startLogin() {
+        userStatus = UserStatus.LoggingIn;
+        pin = "";
+        showError = false;
+    }
 
-function cancelLogin() {
-  userStatus = UserStatus.LoggedOut;
-  locked.set(true); 
-  pin = "";
-  if (hiddenInput) hiddenInput.value = "";
-  showError = false;
-}
-
+    function cancelLogin() {
+        userStatus = UserStatus.LoggedOut;
+        locked.set(true);
+        pin = "";
+        if (hiddenInput) hiddenInput.value = "";
+        showError = false;
+    }
 
 
 
@@ -129,6 +143,7 @@ function cancelLogin() {
       }
     }
     onMount(async () => {
+        window.addEventListener('keydown', handleKeydown);
         unsubscribe?.();
         try {
 
@@ -142,7 +157,7 @@ function cancelLogin() {
     onDestroy(() => {
 
         unsubscribe?.();
-
+        window.removeEventListener('keydown', handleKeydown);
     });
     </script>
 
@@ -204,15 +219,16 @@ function cancelLogin() {
 
         </div>
       </div>
-    
+
     {:else if userStatus === UserStatus.VerifyingLogIn}
-      <div class="loading-icon" transition:fade>
-        <!-- svelte-ignore element_invalid_self_closing_tag -->
-        <i class="fas fa-spinner-third fa-spin" />
-      </div>
+        <div class="verifying-log-in">
+            <div class="loading-icon" in:fade={{ duration: 300 }}>
+                <div class="spinner"></div>
+            </div>
+        </div>
     {/if}
   </div>
-  
+
   <style lang="scss">
     @function gray($color) {
       @return rgb($color, $color, $color);
@@ -375,15 +391,31 @@ function cancelLogin() {
       color: $red;
       margin-left: 5px;
     }
-  
+
     .pin-cancel {
+      position: relative;
       cursor: pointer;
       margin-left: 5px;
-      
-      &:hover {
-        text-decoration: underline;
+      color: inherit;
+
+      &::after {
+        content: "";
+        position: absolute;
+        transform-origin: center;
+        transform: scaleX(0);
+        bottom: 0;
+        width: 0;
+        height: 2px;
+        background-color: currentColor;
+        transition: width 0.3s ease;
+      }
+
+      &:hover::after {
+        width: 100%;
+        transform: scaleX(1);
       }
     }
+
   
     .hidden-input {
       position: absolute;
@@ -391,26 +423,34 @@ function cancelLogin() {
       width: 0;
       height: 0;
     }
-  
-    .loading-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    
-    i {
-      color: white;
-      font-size: 2em;
-      animation: spin 1s linear infinite;
-    }
-  }
 
-  // 添加状态类控制显示
-  :global(.verifying-log-in) .loading-icon {
-    opacity: 1;
-  }
+    .verifying-log-in {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+    }
+
+    .loading-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #fff;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        animation: spin 1s linear infinite;
+      }
+    }
+
+
+
 
   :global(.log-in-error) .pin-digit {
     background-color: rgba($red, 0.05);
@@ -428,12 +468,7 @@ function cancelLogin() {
       from, 25%, to { opacity: 1; }
       50% { opacity: 0; }
     }
-  
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-  
+
     @keyframes bounce {
       from, 6.66%, 17.66%, 33.33% {
         animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);

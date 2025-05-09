@@ -68,7 +68,7 @@
 
   .ctrl-f-tip {
     position: absolute;
-    bottom: 150px;
+    bottom: 100px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 32px;

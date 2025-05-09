@@ -67,7 +67,7 @@
   .header {
     background: rgba($base, 0.5);
     box-shadow: 0px 0px 8px rgba($base, 0.6);
-    border-bottom: 1px solid rgba(white, 0.1);
+
     padding: 20px;
     display: flex;
     column-gap: 20px;
@@ -75,6 +75,7 @@
     justify-content: space-between;
     border-radius: 12px;
     transition: ease border-radius .2s;
+
 
     .title {
       color: $text;
@@ -99,6 +100,7 @@
     width: 100%;
     border-radius: 0 0 12px 12px;
     max-height: 250px;
+    border-top: 1px solid rgba(white, 0.1);
     overflow: auto;
     color: $text;
     background-color: rgba($base, 0.5);

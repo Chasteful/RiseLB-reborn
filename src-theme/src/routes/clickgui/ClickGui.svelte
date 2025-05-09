@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
-    import { getGameWindow, getModules, getModuleSettings,  setTyping } from "../../integration/rest";
+    import {  getModules, getModuleSettings,  setTyping } from "../../integration/rest";
     import { groupByCategory } from "../../integration/util";
     import Panel from "./Panel.svelte";
     import Description from "./Description.svelte";
@@ -20,6 +20,7 @@
 
     import type {
         ClickGuiValueChangeEvent,
+        ScaleFactorChangeEvent
     } from "../../integration/events";
     import type {
 
@@ -45,10 +46,18 @@
 
 
     const applyValues = (configurable: ConfigurableSetting) => {
+
+        clickGuiScaleFactor = configurable.value.find(v => v.name === "Scale")?.value as number ?? 1;
         const snappingValue = configurable.value.find(v => v.name === "Snapping") as TogglableSetting;
         $snappingEnabled = snappingValue?.value.find(v => v.name === "Enabled")?.value as boolean ?? true;
         $gridSize = snappingValue?.value.find(v => v.name === "GridSize")?.value as number ?? 10;
 
+    };
+    const handleResize = () => {
+        requestAnimationFrame(() => {
+            resolutionScaler.updateScaleFactor();
+            scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resolutionScaler.getScaleFactor());
+        });
     };
 
 
@@ -74,13 +83,10 @@
     });
 
 
-    const handleResize = () => {
-        requestAnimationFrame(() => {
-            resolutionScaler.updateScaleFactor();
-            scaleFactor.set(minecraftScaleFactor * clickGuiScaleFactor * resolutionScaler.getScaleFactor());
-        });
-    };
 
+    listen("scaleFactorChange", (e: ScaleFactorChangeEvent) => {
+        minecraftScaleFactor = e.scaleFactor;
+    });
 
 
     listen("clickGuiValueChange", (e: ClickGuiValueChangeEvent) => {
