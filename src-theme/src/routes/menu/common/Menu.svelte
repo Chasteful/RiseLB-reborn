@@ -129,7 +129,39 @@
       will-change: transform;
   }
 
-  
 
+  @media screen and (max-width: 1366px) {
+    .menu {
+      padding: 30px;
+      font-size: 0.9rem;
+    }
+  }
 
+  @media screen and (max-width: 1200px) {
+      .menu {
+          zoom: 0.5;
+          height: 200vh;
+      }
+  }
+
+  @media screen and (max-height: 1100px) {
+      .menu {
+          zoom: 0.8;
+          height: 125vh;
+      }
+  }
+
+  @media screen and (max-height: 700px) {
+      .menu {
+          zoom: 0.5;
+          height: 200vh;
+      }
+  }
+
+  @media screen and (max-height: 540px) {
+      .menu {
+          zoom: 0.4;
+          height: 250vh;
+      }
+  }
 </style>

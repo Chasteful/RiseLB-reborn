@@ -35,7 +35,15 @@ enum class ComponentType(
     ARRAY_LIST("ArrayList"),
     LOGO("Logo"),
 
-    HOTBAR("ItemColumn", componentTweaks = arrayOf(
+    ITEMCOLUMN_HUD("ItemColumnHUD", componentTweaks = arrayOf(
+        FeatureTweak.TWEAK_HOTBAR,
+        FeatureTweak.DISABLE_EXP_BAR,
+        FeatureTweak.DISABLE_HELD_ITEM_TOOL_TIP,
+        FeatureTweak.DISABLE_OVERLAY_MESSAGE,
+        FeatureTweak.DISABLE_ITEM_ICONS
+
+    )),
+    ITEMCOLUMN("ItemColumn", componentTweaks = arrayOf(
         FeatureTweak.TWEAK_HOTBAR,
         FeatureTweak.DISABLE_EXP_BAR,
         FeatureTweak.DISABLE_HELD_ITEM_TOOL_TIP,
@@ -82,8 +90,7 @@ enum class ComponentType(
     CRAFTING_INVENTORY("CraftingInventory"),
     KEYSTROKES("Keystrokes"),
     ISLAND("Island"),
-    NOTIFICATIONS("Notifications"),
-    RAT("rat");
+    NOTIFICATIONS("Notifications");
 
 
     companion object {

@@ -1,220 +1,143 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import type { ClientPlayerDataEvent, PlayerInventory, PlayerInventoryEvent } from "../../../../integration/events";
-  import type { ItemStack, PlayerData } from "../../../../integration/types";
-  import { listen } from "../../../../integration/ws";
-  import { getPlayerData, getPlayerInventory } from "../../../../integration/rest";
-  import ItemStackView from "../inventory/ItemStackView.svelte";
-  import { elasticOut } from 'svelte/easing';
-  import { tweened } from 'svelte/motion';
-  let lastSlot = 0;
-  let currentSlot = 0;
-  let playerData: PlayerData | null = null;
-  let hotbar: ItemStack[] = [];
-  const glowIntensity = tweened(0, {
-  duration: 300,
-  easing: elasticOut
-});
+    import { onMount } from "svelte";
+    import type { ClientPlayerDataEvent, PlayerInventory, PlayerInventoryEvent } from "../../../../integration/events";
+    import type { ItemStack, PlayerData } from "../../../../integration/types";
+    import { listen } from "../../../../integration/ws";
+    import { getPlayerData, getPlayerInventory } from "../../../../integration/rest";
+    import ItemIndexView from "../inventory/ItemIndexView.svelte";
 
-$: if (currentSlot !== lastSlot) {
-  glowIntensity.set(1);
-  setTimeout(() => glowIntensity.set(0), 300);
-}
-function updateStacks(inventory: PlayerInventory) {
-hotbar = [...inventory.main.slice(0, 9)]; 
-}
+    let lastSlot = 0;
+    let currentSlot = 0;
+    let playerData: PlayerData | null = null;
+    let hotbar: ItemStack[] = [];
 
-function updatePlayerData(s: PlayerData) {
-    playerData = s;
+    // 每个元素是 { index: number, stack: ItemStack }
+    let displayedStacks: { index: number, stack: ItemStack }[] = [];
 
-    currentSlot = playerData.selectedSlot;
-    if (currentSlot !== lastSlot) {
-        lastSlot = currentSlot;
-   
-        
+    function updateDisplayedStacks() {
+        const stacks = [];
+        for (let i = -4; i <= 4; i++) {
+            const index = (currentSlot + i + 9) % 9;
+            const stack = hotbar[index] ?? null;
+            stacks.push({ index, stack });
+        }
+        displayedStacks = stacks;
     }
-}
 
-listen("clientPlayerInventory", (data: PlayerInventoryEvent) => {
-  updateStacks(data.inventory);
-});
-listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
-  updatePlayerData(event.playerData);
-});
-onMount(async () => {
-const inventory = await getPlayerInventory();;
-updateStacks(inventory);
-updatePlayerData(await getPlayerData());
-});
-  let currentTheme = {
-      primary: "#74c7ec", 
-      secondary: "#74c7ec",
-      accent: "#67285E", 
-      bg: "rgba(10,5,20,0.91)"
-  };
- 
+    function getOpacity(index: number) {
+        const diff = Math.abs(index - currentSlot);
+        const distance = Math.min(diff, 9 - diff);
+        return Math.max(0.3, 0.9 - distance * 0.15);
+    }
 
+    function getScale(index: number) {
+        return index === currentSlot ? 1.15 : 1.0;
+    }
+
+    function updateStacks(inventory: PlayerInventory) {
+        hotbar = [...inventory.main.slice(0, 9)];
+        updateDisplayedStacks(); // 热栏更新后必须调用
+    }
+
+    function updatePlayerData(s: PlayerData) {
+        playerData = s;
+        currentSlot = playerData.selectedSlot;
+        if (currentSlot !== lastSlot) {
+            lastSlot = currentSlot;
+        }
+        updateDisplayedStacks(); // 槽位更新后也得调用
+    }
+
+    listen("clientPlayerInventory", (data: PlayerInventoryEvent) => {
+        updateStacks(data.inventory);
+    });
+
+    listen("clientPlayerData", (event: ClientPlayerDataEvent) => {
+        updatePlayerData(event.playerData);
+    });
+
+    onMount(async () => {
+        const inventory = await getPlayerInventory();
+        updateStacks(inventory);
+        const data = await getPlayerData();
+        updatePlayerData(data);
+    });
 </script>
 
-
-
-  <div class="hotbar-container" style="--primary: {currentTheme.primary}; --secondary: {currentTheme.secondary}; --accent: {currentTheme.accent}">    
-    <div class="hotbar-track" >
-      {#each hotbar as stack, i (stack)}
-        <div class="slot-wrapper" class:active={i === currentSlot}>
-     
-          <div class="hud-slot">
-            <div class="slot-bg">
-        
-              <div class="slot" class:active={i === currentSlot}>
-
-  <div class="item-icon" >
-<ItemStackView {stack} />
-</div>
-
-                
-                {#if i === currentSlot}
-                  <!-- svelte-ignore element_invalid_self_closing_tag -->
-                  <div class="selection-overlay" />
-                {/if}
-              </div>
+<div class="hotbar-container">
+    <div class="hotbar-track">
+        {#each displayedStacks as { index, stack },i (stack)}
+            <div
+                    class="slot-wrapper"
+                    class:active={index === currentSlot}
+                    style="
+          opacity: {getOpacity(index)};
+          --offset: {(i - 4) * 50}px;
+          --scale: {getScale(index)};
+          transform: translateX(calc(-50% + var(--offset))) scale(var(--scale));
+          z-index: {index === currentSlot ? 2 : 1};
+        "
+            >
+                <div class="hud-slot">
+                    <div class="slot" class:active={index === currentSlot}>
+                        <div class="item-icon">
+                            {#if stack}
+                                <ItemIndexView stack={stack} />
+                            {/if}
+                        </div>
+                        {#if index === currentSlot}
+                            <div class="selection-overlay" />
+                        {/if}
+                    </div>
+                </div>
             </div>
-          </div>
-          
-          <div class="slot-number"
-         >
-       {i + 1}
-     </div>
-        </div>
-      {/each}
-      
-
-      </div>
+        {/each}
     </div>
-
+</div>
 
 
 <style lang="scss">
-    @import "../../../../colors.scss";
-  .selection-overlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      135deg,
-      rgba(116, 199, 236, 0.15) 0%,
-      rgba(103, 40, 94, 0.1) 100%
-    );
-  }
-
-
+  @import "../../../../colors.scss";
   .hotbar-container {
-      --slot-size: 50px;
-      --spacing: 8px;
-      position: relative;
-      padding: 12px;
-      box-shadow: 
-  0 4px 16px rgba($base, 0.6),
-  inset 0 0 10px rgba(255, 255, 255, 0.05);
-    background: rgba($base, 0.5);
-      border-radius: 16px;
-      overflow: hidden;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
   }
-  
 
   .hotbar-track {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    gap: 8px;
-    width: 100%;
-  }
-  .slot-bg {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      145deg,
-      rgba(30, 25, 40, 0.2) 0%,
-      rgba(20, 15, 30, 0.3) 100%
-    );
-    border-radius: 12px;
-    padding: 2px;
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.05),
-      0 2px 4px rgba(0, 0, 0, 0.3);
-    
-    .active & {
-      background: linear-gradient(
-        145deg,
-        rgba(50, 40, 60, 0.2) 0%,
-        rgba(30, 20, 40, 0.3) 100%
-      );
-    }
-  }
-  
-  .slot-wrapper {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    
-    &.active {
-      color: var(--accent);
-      font-weight: 800;
-      text-shadow: 0 0 8px rgba(103, 40, 94, 0.5);
-    
-          .slot-number {
-              color: var(--primary);
-              text-shadow: 0 0 10px var(--primary);
-              transform: scale(1.2);
-          }
-      }
+    width: 100%;
+    height: 40px;
   }
-  
+
+  .slot-wrapper {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transition: all 0.2s ease-out;
+    will-change: transform, opacity;
+  }
+
+  .slot-wrapper.active {
+    filter: drop-shadow(0 0 4px rgba($base , 0.5));
+  }
+
   .hud-slot {
     position: relative;
-    width: var(--slot-size);
-    height: var(--slot-size);
   }
-  
-
-
-
-
 
   .slot {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.03) 0%,
-      rgba(40, 35, 50, 0.2) 100%
-    );
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    position: relative;
-    overflow: hidden;
-  
-  &.active .item-icon {
-      transform: scale(1.15);
-      transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
-  .item-icon {
-  z-index: 2;
-  position: relative;
-  background: none;
-  transition: transform 0.15s ease;
-}
 
-.slot-number {
-    margin-top: 8px;
-    text-align: center;
-    font-size: 18px;
-    color: #dddddd;
-    text-shadow: 0 0 5px currentColor;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  .item-icon {
+    width: 32px;
+    height: 32px;
   }
+
 </style>

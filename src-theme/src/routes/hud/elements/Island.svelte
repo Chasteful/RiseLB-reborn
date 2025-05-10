@@ -1,11 +1,10 @@
 <script lang="ts">
 import { onMount, tick } from "svelte";
 import { fade } from "svelte/transition";
-import { 
-  getClientInfo, 
-  getSession, 
-  getModules, 
-  getPlayerData 
+import {
+    getSession,
+    getModules,
+    getPlayerData, getClientInfo
 } from "../../../integration/rest";
 import type { ClientPlayerDataEvent } from "../../../integration/events";
 import { listen } from "../../../integration/ws";
@@ -19,7 +18,6 @@ import { cubicOut } from "svelte/easing";
 import { blockCount,armorValue, armorThreshold,DURABILITY_RECOVERY,
   armorDurabilityStore, emptySlotCount,DURABILITY_THRESHOLD,targetId } from './Island';
 import { get } from 'svelte/store';
-
 const INVENTORY_FULL_COOLDOWN_MS = 30000; 
 const CLIENT_NAME = "RiseLB";
 const CLIENT_VERSION = "1.6.1";
@@ -375,15 +373,21 @@ $: {
     h.set(currentContent === 'alert' ? 50 : 40);
   }
 }
+async function updateClientInfo() {
+    clientInfo = await getClientInfo();
+}
+
 
 onMount(() => {
   isMounted = true;
-
+    updateClientInfo();
+    updateTime();
+    updateSession();
   (async () => {
     await tick();
 
-    initialWidth.set((wrapper?.scrollWidth || 312) + 64);
-    initialOpacity.set(1);
+        initialWidth.set((wrapper?.scrollWidth || 312) + 64);
+        initialOpacity.set(1);
 
     await updateAllData().catch(console.error);
     await handleInitialAnimationEnd();
@@ -394,14 +398,18 @@ onMount(() => {
       updateAllData().catch(console.error);
     }
   }, UPDATE_INTERVAL_MS);
-
+    updateClientInfo();
+    updateTime();
+    updateSession();
   return () => {
     isMounted = false;
     clearInterval(interval);
   };
 });
 
-listen("session", updateSession);
+listen("session", async () => {
+    await updateSession();
+});
 listen("playerData", (event: ClientPlayerDataEvent) => {
   checkHealthAlert(event.playerData.actualHealth);
   checkAirAlert(event.playerData.air);
@@ -475,23 +483,6 @@ class:notification-active={currentAlert !== null}
 </div>
 <style lang="scss">
   @import "../../../colors.scss";
-  @property --＠color-1 {
-    syntax: "<color>";
-    inherits: false;
-    initial-value: hsl(98 100% 62%);
-  }
-
-  @property --＠color-2 {
-    syntax: "<color>";
-    inherits: false;
-    initial-value: hsl(204 100% 59%);
-  }
-  @keyframes gradient-change {
-    to {
-      --＠color-1: hsl(210 100% 59%);
-      --＠color-2: hsl(310 100% 59%);
-    }
-  }
   @mixin text-ellipsis {
     white-space: nowrap;
     overflow: hidden;
@@ -589,16 +580,8 @@ class:notification-active={currentAlert !== null}
       font-variant-numeric: tabular-nums;
     }
     .client{
-      animation: gradient-change 2s linear infinite alternate;
-      background: linear-gradient(
-                      to right in oklch,
-                      var(--＠color-1),
-                      var(--＠color-2)
-      );
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      color: transparent;
+      color: $text;
+      text-shadow: 0 0 3px rgba($text, 0.9);
     }
 
 

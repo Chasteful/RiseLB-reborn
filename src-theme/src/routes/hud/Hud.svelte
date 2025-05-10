@@ -9,6 +9,7 @@
   import Watermark from "./elements/Watermark.svelte";
   import Logo from "./elements/Logo.svelte";
   import Position from "./elements/Position.svelte";
+  import ItemColumnHUD from "./elements/hotbar/ItemColumnHUD.svelte"
   import ItemColumn from "./elements/hotbar/ItemColumn.svelte"
   import Keystrokes from "./elements/keystrokes/Keystrokes.svelte";
   import Effects from "./elements/Effects.svelte";
@@ -92,6 +93,7 @@
           {:else if c.name === "Message"}     <Message/>
           {:else if c.name === "Status"}        <StatusBar/>
           {:else if c.name === "ItemColumn"}  <ItemColumn/>
+          {:else if c.name === "ItemColumnHUD"}  <ItemColumnHUD/>
           {:else if c.name === "Text"}        <Text settings={c.settings}/>
           {:else if c.name === "Image"}       <img alt="" src="{c.settings.src}" style="scale: {c.settings.scale};"/>
           {/if}

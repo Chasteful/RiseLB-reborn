@@ -90,8 +90,8 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: rgba(255, 255, 255, 0.02);
     z-index: 99999;
     backdrop-filter: blur(8px);
@@ -109,7 +109,7 @@
     position: fixed;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(1);
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -173,19 +173,5 @@
     row-gap: 40px;
   }
 
-  @media screen and (max-width: 1366px) {
-    .modal {
-      zoom: 0.85;
-    }
-  }
-  @media screen and (max-width: 1200px) {
-    .modal {
-      zoom: 0.7;
-    }
-  }
-  @media screen and (max-height: 800px) {
-    .modal {
-      zoom: 0.6;
-    }
-  }
+
 </style>

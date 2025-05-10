@@ -290,7 +290,7 @@
       ]
     },
     {
-      "name": "ItemColumn",
+      "name": "ItemColumnHUD",
       "value": [
         {
           "name": "Enabled",
@@ -310,6 +310,36 @@
             {
               "name": "Vertical",
               "value": "Top"
+            },
+            {
+              "name": "VerticalOffset",
+              "value": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ItemColumn",
+      "value": [
+        {
+          "name": "Enabled",
+          "value": true
+        },
+        {
+          "name": "Alignment",
+          "value": [
+            {
+              "name": "Horizontal",
+              "value": "CenterTranslated"
+            },
+            {
+              "name": "HorizontalOffset",
+              "value": 0
+            },
+            {
+              "name": "Vertical",
+              "value": "Bottom"
             },
             {
               "name": "VerticalOffset",

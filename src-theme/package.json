@@ -37,6 +37,7 @@
     "node-fetch": "^3.3.2",
     "nouislider": "^15.7.1",
     "svelte-spa-router": "^4.0.1",
+    "three": "^0.176.0",
     "ws": "^8.18.1"
   }
 }

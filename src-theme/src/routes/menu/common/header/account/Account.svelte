@@ -281,7 +281,7 @@
 
   .account-type {
     margin-top: 2px;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .premium-badge {
