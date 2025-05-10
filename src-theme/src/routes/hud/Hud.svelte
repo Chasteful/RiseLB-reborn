@@ -19,10 +19,10 @@
   import CraftingInput from "./elements/inventory/CraftingInput.svelte";
   import Text from "./elements/Text.svelte";
   import Island from "./elements/Island.svelte";
-  import { getComponents, getGameWindow } from "../../integration/rest";
+  import { getComponents} from "../../integration/rest";
   import { listen } from "../../integration/ws";
   import type { Component } from "../../integration/types";
-  import type { ComponentsUpdateEvent, ScaleFactorChangeEvent } from "../../integration/events";
+  import type { ComponentsUpdateEvent } from "../../integration/events";
   import StatusBar from "./elements/hotbar/StatusBar.svelte";
   import Message from "./elements/hotbar/Message.svelte";
   import SplashScreen from '../menu/splash/SplashScreen.svelte';

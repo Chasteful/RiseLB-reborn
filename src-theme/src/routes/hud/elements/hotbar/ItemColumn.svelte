@@ -10,8 +10,6 @@
     let currentSlot = 0;
     let playerData: PlayerData | null = null;
     let hotbar: ItemStack[] = [];
-
-    // 每个元素是 { index: number, stack: ItemStack }
     let displayedStacks: { index: number, stack: ItemStack }[] = [];
 
     function updateDisplayedStacks() {
@@ -82,7 +80,7 @@
                     <div class="slot" class:active={index === currentSlot}>
                         <div class="item-icon">
                             {#if stack}
-                                <ItemIndexView stack={stack} />
+                                <ItemIndexView index ={stack} />
                             {/if}
                         </div>
                         {#if index === currentSlot}

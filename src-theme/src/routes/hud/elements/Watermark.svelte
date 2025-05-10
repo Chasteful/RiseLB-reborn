@@ -8,7 +8,7 @@
 
 
 .watermark {
-  font-family: 'Greycliff CF Bold';
+  font-family: 'Greycliff CF Bold',serif;
   font-weight: bold;
   font-size: 60px;
   color: transparent;
@@ -27,7 +27,7 @@
 
 .watermark-small {
   position: absolute;
-  font-family: 'Greycliff CF Bold';
+  font-family: 'Greycliff CF Bold',serif;
   right: 0;
   top: 0;
   font-size: 20px; 

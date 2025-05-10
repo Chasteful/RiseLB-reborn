@@ -379,15 +379,12 @@ async function updateClientInfo() {
 
 
 onMount(() => {
-  isMounted = true;
-    updateClientInfo();
-    updateTime();
-    updateSession();
+  isMounted = true;;
   (async () => {
     await tick();
 
-        initialWidth.set((wrapper?.scrollWidth || 312) + 64);
-        initialOpacity.set(1);
+      await  initialWidth.set((wrapper?.scrollWidth || 312) + 64);
+      await  initialOpacity.set(1);
 
     await updateAllData().catch(console.error);
     await handleInitialAnimationEnd();
@@ -398,9 +395,6 @@ onMount(() => {
       updateAllData().catch(console.error);
     }
   }, UPDATE_INTERVAL_MS);
-    updateClientInfo();
-    updateTime();
-    updateSession();
   return () => {
     isMounted = false;
     clearInterval(interval);
@@ -583,10 +577,6 @@ class:notification-active={currentAlert !== null}
       color: $text;
       text-shadow: 0 0 3px rgba($text, 0.9);
     }
-
-
-
-
 
 
     .separator {

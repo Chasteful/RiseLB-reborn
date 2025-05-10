@@ -62,7 +62,7 @@
 </script>
 <div class="combined-container">
   {#if enabledModules.length > 0}
-      <div class="arraylist-section"id="arraylist"transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
+      <div class="arraylist-section" id="arraylist" transition:fly|global={{duration: 500, y: -50, easing: expoInOut}}>
           {#each enabledModules as { formattedName, prefix, name } (name)}
               <div class="module" id="module-name" animate:flip={{ duration: 200 }} in:fly={{ x: 50, duration: 200 }}>
                 {formattedName}{#if prefix}&nbsp;<span class="prefix">{prefix}</span>{/if}
@@ -72,7 +72,7 @@
       </div>
   {/if}
   {#if scoreboard}
-      <div class="scoreboard-section"transition:fly|global={{duration: 500, x: 50, easing: expoInOut}}>
+      <div class="scoreboard-section" transition:fly|global={{duration: 500, x: 50, easing: expoInOut}}>
           {#if scoreboard.header}
               <div class="header">
                   <TextComponent fontSize={16} allowPreformatting={true} textComponent={scoreboard.header}/>
@@ -115,7 +115,7 @@
       position: relative;
       display: flex;
       align-items: center;
-      padding-right: 24px;
+
       background-color: rgba(0, 0, 0, 0.2);
       color: var(--accent-color);
       text-shadow: var(--accent-color);
@@ -127,7 +127,6 @@
       margin-left: auto;
       text-transform: capitalize;
       border-radius: 0;
-      position: relative;
       &::before {
           content: '';
           position: absolute;
@@ -156,7 +155,7 @@
     position: relative;
     overflow: hidden;
 
-    box-shadow: 0px 0px 4px 4px rgba($scoreboard-base-color,0.5);
+    box-shadow: 0 0 4px 4px rgba($scoreboard-base-color,0.5);
     display: inline-block; 
     right: 0;
     transition: width 0.2s ease;

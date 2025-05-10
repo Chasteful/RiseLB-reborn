@@ -260,8 +260,9 @@ class Theme(val name: String) : Closeable {
     }
 
     override fun close() {
-        // No texture cleanup needed anymore
+        compiledShaderBackground = null
     }
+
 
     companion object {
 

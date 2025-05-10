@@ -2,6 +2,8 @@
     import type {ItemStack} from "../../../../integration/types";
     import {REST_BASE} from "../../../../integration/host";
     import {mapToColor} from "../../../../util/color_utils";
+    import  {fade} from "svelte/transition";
+
     export let stack: ItemStack;
 
     const {count, damage, identifier, maxDamage, hasEnchantment } = stack;
@@ -10,7 +12,7 @@
     const itemIconUrl = `${REST_BASE}/api/v1/client/resource/itemTexture?id=${identifier}`;
 
 </script>
-<div class="item-stack">
+<div class="item-stack" >
     {#if hasEnchantment}
         <div class="mask" style="mask-image: url({itemIconUrl})"></div>
     {/if}
@@ -67,7 +69,7 @@
     bottom: 0;
     right: 0;
     font-size: 12px;
-  
-    text-shadow: 1px 1px black; 
+
+    text-shadow: 1px 1px black;
   }
 </style>

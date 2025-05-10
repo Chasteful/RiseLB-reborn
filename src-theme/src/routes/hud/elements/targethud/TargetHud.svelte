@@ -6,12 +6,12 @@
     import { onMount, onDestroy } from "svelte";
     import ArmorStatus from "./ArmorStatus.svelte";
     import { calcArmorValueFromItems } from "./calcArmorValueFromItems"
-    import { armorValue,  targetId } from '../../../hud/elements/Island';
+    import { armorValue,  targetId } from '../Island';
     import type { TargetChangeEvent } from "../../../../integration/events.js";
     let displayHealth = 0;
     let animationFrameId: number | null = null;
     let target: PlayerData | null = null;
-    
+    let shrink = false;
     let lastNotifiedArmor: number | undefined;
     let clearArmorTimer: ReturnType<typeof setTimeout>;
       
@@ -21,7 +21,6 @@
     let hideTimeout: ReturnType<typeof setTimeout>;
     let attacked = false;
     let particleId = 0;
-    let lastArmor: number | null = null;
     let particles: Particle[] = [];
     let animationFrame: number;
     let simulatedHurtTime = 0;
@@ -118,6 +117,8 @@ function getRandomThemeColor() {
 const themeColor1 = { r: 173, g: 83, b: 137 };   const themeColor2 = { r: 60, g: 16, b: 83 };     const startColor = { r: 173, g: 83, b: 137 };   const endColor = { r: 60, g: 16, b: 83 };      
 function spawnParticles(hurtTimeTick = 1) {
     const now = Date.now();
+    shrink = true;
+    setTimeout(() => { shrink = false }, 450);
     if (now - lastParticleSpawnTime < PARTICLE_SPAWN_COOLDOWN) return;
     lastParticleSpawnTime = now;
 
@@ -252,7 +253,6 @@ onDestroy(() => {
   }
 
   lastHealth = newTarget?.actualHealth ?? null;
-  lastArmor = newTarget?.armor ?? null;
   startHideTimeout();
 });
 
@@ -268,7 +268,7 @@ onDestroy(() => {
   >
     <div class="main-wrapper">
       <!-- Avatar -->
-      <div class="avatar {attacked || simulatedHurtTime > 0 ? 'attacked' : ''}">
+        <div class="avatar {shrink ? 'shrink' : ''} {attacked || simulatedHurtTime > 0 ? 'attacked' : ''}">
         <img
           src="{REST_BASE}/api/v1/client/resource/skin?uuid={target.uuid}"
           alt="avatar"
@@ -344,7 +344,7 @@ onDestroy(() => {
 .targethud {
   will-change: auto;
   position: relative;
-  width: 260px;
+  width: 270px;
   border-radius: 20px;
   padding: 10px 0 20px;
   box-shadow:
@@ -363,10 +363,6 @@ onDestroy(() => {
   transform: rotate(30deg);
   animation: shine 6s infinite;
   z-index: 1;
-}
-@keyframes shine {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 0.8; }
 }
 .targethud::before {
   content: "";
@@ -405,51 +401,51 @@ onDestroy(() => {
   overflow: hidden;
   position: relative;
   transition: all 0.2s ease;
-  &.attacked {
-    animation: hitScale 0.4s ease-out;
-  }
-  &.attacked {
+  &.shrink.attacked{
     &::after {
       content: "";
       position: absolute;
       inset: 0;
       background: linear-gradient(
-        rgba(255, 0, 0, 0.6),
-        rgba(200, 0, 0, 0.4)
+                      rgba(255, 0, 0, 0.6),
+                      rgba(200, 0, 0, 0.4)
       );
       border-radius: 6px;
-      animation: fadeRed 0.5s linear forwards;
+      animation: fadeRed 0.45s linear forwards;
       z-index: 2;
-      box-shadow: 
-        inset 0 0 20px rgba(255, 50, 50, 0.7),
-        0 0 15px rgba(255, 0, 0, 0.4);
+      box-shadow:
+              inset 0 0 20px rgba(255, 50, 50, 0.7),
+              0 0 15px rgba(255, 0, 0, 0.4);
     }
     &::before {
       content: "";
       position: absolute;
       inset: 0;
       background: radial-gradient(
-        circle at center,
-        rgba(255, 0, 0, 0.4) 0%,
-        rgba(200, 0, 0, 0.2) 70%,
-        transparent 100%
+                      circle at center,
+                      rgba(255, 0, 0, 0.4) 0%,
+                      rgba(200, 0, 0, 0.2) 70%,
+                      transparent 100%
       );
       z-index: 3;
-      animation: pulseGlow 0.2s ease-out infinite;
     }
+  }
+  &.shrink {
+    animation: hitScale 0.4s ease-out;
   }
   img {
     position: absolute;
+    image-rendering: pixelated;
     scale: 6.25;
     left: 118px;
-    top: 118px;
+    top: 120px;
     transition: transform 0.2s ease;
     z-index: 1;    }
 }
 .name {
   grid-area: name;
   padding-left: 0;
-  font-size: 16px;
+  font-size: 14px;
   color: white;
   text-shadow: 0 0 4px rgba(white,0.8);
   align-self: start;
@@ -461,7 +457,6 @@ onDestroy(() => {
   display: flex;
   align-items: center;
   position: absolute;
-  display: flex;
   bottom: 0.6px;
   margin: 0;
   gap:1px;
@@ -490,7 +485,6 @@ onDestroy(() => {
       0 0 24px rgba(black, 0.2);
 }
 .health-fill {
-  transition: width 100ms ease-out;
   position: relative;
   height: 100%;
   background: linear-gradient(
@@ -499,7 +493,7 @@ onDestroy(() => {
     rgba($accent-color-2, 0.8) 90%   
   );
   border-radius: 4px;  
-  transition: width 0.3s ease;
+  transition: width 0.1s ease;
   max-width: 95%;  
   min-width: 50px;
 }
@@ -586,5 +580,9 @@ onDestroy(() => {
     background: rgba(255, 0, 0, 0.1);
     box-shadow: inset 0 0 10px rgba(255, 50, 50, 0.2);
   }
+}
+@keyframes shine {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.8; }
 }
 </style>
